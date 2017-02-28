@@ -8,7 +8,6 @@ addons:
   apt:
     packages:
       - python-pip
-      - libhdf5-serial-dev
 cache:
   directories:
     - "$HOME/.cache"
