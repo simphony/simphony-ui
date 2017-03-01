@@ -175,9 +175,8 @@ num_particles_wall = sum(1 for _ in pc_wall.iter_particles())
 
 print ("Number of atoms in group {}: {}".format(pc_flow.name, num_particles))
 print ("Number of atoms in group {}: {}".format(
-    pc_wall.name, 
+    pc_wall.name,
     num_particles_wall))
-
 
 # shift boxorigin to 0,0,0 and update particles accordingly
 boxorigin = pc_flow.data_extension[CUBAExtension.BOX_ORIGIN]
