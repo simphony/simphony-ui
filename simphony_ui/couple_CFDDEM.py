@@ -125,7 +125,7 @@ if mode_OF != "none":
         else:
             openfoam_file_io. \
                 create_block_mesh(".", mesh_name, wrapper_OF,
-                                  blockMeshDict_CylObst.blockMeshDict)
+                                  OpenFoam_input.blockMeshDict)
     else:
         corner_points = [(0.0, 0.0, 0.0),
                          (chansize[0], 0.0, 0.0),
