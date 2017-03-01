@@ -7,14 +7,11 @@ import os
 import time
 import math
 import numpy as np
-import subprocess
 import OpenFoam_input
 import tempfile
-import simliggghts
 
 # Imports simphony general
 from simphony.core.cuba import CUBA
-from simphony.io.h5_cuds import H5CUDS
 
 # Imports simphony-openfoam
 from simphony.engine import openfoam_file_io
@@ -22,7 +19,6 @@ from simphony.engine import openfoam_internal
 
 # Imports simphony-liggghts
 from simphony.engine import liggghts
-from simliggghts.io.file_utility import read_data_file
 from simliggghts import CUBAExtension
 
 
@@ -41,7 +37,6 @@ elif mode_OF == "io":
     CUBAExt_OF = openfoam_file_io.CUBAExt
 else:
     print "Wrong mode_OF!"
-    stop
 
 
 # define the wrapper for LIGGGHTS
@@ -200,7 +195,6 @@ run_readLM_end = time.time()
 time_read_LM = run_readLM_end - run_readLM_start
 
 
-
 # Add particle (containers) to wrapper
 dem_wrapper.add_dataset(pc_flow)
 dem_wrapper.add_dataset(pc_wall)
@@ -212,9 +206,11 @@ dem_wrapper.CM[CUBA.NUMBER_OF_TIME_STEPS] = num_timesteps_DEM
 dem_wrapper.CM[CUBA.TIME_STEP] = timestep_DEM
 
 # Define the BC component of the SimPhoNy application model:
-dem_wrapper.BC_extension[liggghts.CUBAExtension.BOX_FACES] = ["periodic",
-                                                      "fixed",
-                                                      "periodic"]
+dem_wrapper.BC_extension[liggghts.CUBAExtension.BOX_FACES] = [
+    "periodic",
+    "fixed",
+    "periodic"
+]
 
 # Information about fixed walls: 0: No fixation, 1: Particles are fixed
 dem_wrapper.BC_extension[liggghts.CUBAExtension.FIXED_GROUP] = [0, 1]
@@ -335,7 +331,6 @@ for numrun in range(0, number_iterations):
                         0.293*Rnumber**(0.06))**(3.45)
             else:
                 print "Error: Unknown force_type! Must be Stokes,Coul or Dala."
-                stop
 
         par.data[CUBA.EXTERNAL_APPLIED_FORCE] = tuple(dragforce)
         pc_wflow.update_particles([par])
@@ -350,10 +345,8 @@ for numrun in range(0, number_iterations):
 
     # Perform LIGGGHTS calculations
     dem_wrapper.run()
-    
-    
+
     # ******* Missing: Visualisation of particle trajectories*******
-    
 
     run_LGT_end = time.time()
     time_LGT = time_LGT + run_LGT_end - run_LGT_start
