@@ -4,6 +4,7 @@
 
 # Imports general
 import os
+import sys
 import time
 import math
 import numpy as np
@@ -37,6 +38,7 @@ elif mode_OF == "io":
     CUBAExt_OF = openfoam_file_io.CUBAExt
 else:
     print "Wrong mode_OF!"
+    sys.exit(1)
 
 
 # define the wrapper for LIGGGHTS
@@ -172,8 +174,9 @@ num_particles = sum(1 for _ in pc_flow.iter_particles())
 num_particles_wall = sum(1 for _ in pc_wall.iter_particles())
 
 print ("Number of atoms in group {}: {}".format(pc_flow.name, num_particles))
-print ("Number of atoms in group {}: {}".
-       format(pc_wall.name, num_particles_wall))
+print ("Number of atoms in group {}: {}".format(
+    pc_wall.name, 
+    num_particles_wall))
 
 
 # shift boxorigin to 0,0,0 and update particles accordingly
@@ -331,6 +334,7 @@ for numrun in range(0, number_iterations):
                         0.293*Rnumber**(0.06))**(3.45)
             else:
                 print "Error: Unknown force_type! Must be Stokes,Coul or Dala."
+                sys.exit(1)
 
         par.data[CUBA.EXTERNAL_APPLIED_FORCE] = tuple(dragforce)
         pc_wflow.update_particles([par])
