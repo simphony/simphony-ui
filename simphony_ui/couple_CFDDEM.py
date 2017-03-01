@@ -145,7 +145,7 @@ if mode_OF != "none":
 
     print "Working directory", mesh_wOF.path
 
-    print (("Number of points in mesh: {}").
+    print ("Number of points in mesh: {}".
            format(sum(1 for _ in mesh_wOF.iter_points())))
 
     run_readOF_end = time.time()
@@ -171,8 +171,8 @@ pc_wall.name = "wall"
 num_particles = sum(1 for _ in pc_flow.iter_particles())
 num_particles_wall = sum(1 for _ in pc_wall.iter_particles())
 
-print (("Number of atoms in group {}: {}").format(pc_flow.name, num_particles))
-print (("Number of atoms in group {}: {}").
+print ("Number of atoms in group {}: {}".format(pc_flow.name, num_particles))
+print ("Number of atoms in group {}: {}".
        format(pc_wall.name, num_particles_wall))
 
 
@@ -230,7 +230,7 @@ time_OF = 0.0
 time_LGT = 0.0
 time_drag = 0.0
 
-if (mode_OF is not "none"):
+if mode_OF is not "none":
     # Generate cell list
     cellmat = {}
     index = {}
@@ -258,7 +258,7 @@ if (mode_OF is not "none"):
 # result from previous iteration as input for new iteration
 for numrun in range(0, number_iterations):
 
-    print (("\n Performing iteration {} of {}").
+    print ("\n Performing iteration {} of {}".
            format(numrun, number_iterations-1))
 
     if mode_OF != "none":
@@ -268,7 +268,7 @@ for numrun in range(0, number_iterations):
         run_OF_start = time.time()
 
         # running OpenFoam
-        print (("RUNNING OPENFOAM for {} timesteps").format(num_timesteps_OF))
+        print ("RUNNING OPENFOAM for {} timesteps".format(num_timesteps_OF))
         wrapper_OF.run()
 
         run_OF_end = time.time()
@@ -340,7 +340,7 @@ for numrun in range(0, number_iterations):
 
     run_LGT_start = time.time()
 
-    print (("RUNNNING LIGGGHTS for {} timesteps with size {}").format(
+    print ("RUNNNING LIGGGHTS for {} timesteps with size {}".format(
         num_timesteps_DEM, dem_wrapper.CM[CUBA.TIME_STEP]))
 
     # Perform LIGGGHTS calculations
@@ -358,8 +358,8 @@ runend = time.time()
 print "\ntotal time needed", runend - runstart
 
 print "Fractions"
-print (("Reading OpenFoam mesh: {}").format(time_read_OF/(runend - runstart)))
-print (("Running OpenFoam: {}").format(time_OF/(runend - runstart)))
-print (("Reading liggghts atoms: {}").format(time_read_LM/(runend - runstart)))
-print (("Running liggghts: {}").format(time_LGT/(runend - runstart)))
-print (("Computing drag forces: {}").format(time_drag/(runend - runstart)))
+print ("Reading OpenFoam mesh: {}".format(time_read_OF/(runend - runstart)))
+print ("Running OpenFoam: {}".format(time_OF/(runend - runstart)))
+print ("Reading liggghts atoms: {}".format(time_read_LM/(runend - runstart)))
+print ("Running liggghts: {}".format(time_LGT/(runend - runstart)))
+print ("Computing drag forces: {}".format(time_drag/(runend - runstart)))
