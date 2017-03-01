@@ -32,6 +32,7 @@ before_install:
   - export PATH=/usr/lib/ccache:${PATH}
   - sudo make deps $DEPS
   - sudo ln -s ccache /usr/local/bin/mpic++
+  - git clone --branch=0.3.1 https://github.com/simphony/simphony-openfoam.git src/simphony-openfoam
 
 install:
   - make venv-prepare
