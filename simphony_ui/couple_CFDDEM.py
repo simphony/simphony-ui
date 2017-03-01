@@ -4,17 +4,15 @@
 
 # Imports general
 import os
+import sys
 import time
 import math
 import numpy as np
-import subprocess
 import OpenFoam_input
 import tempfile
-import simliggghts
 
 # Imports simphony general
 from simphony.core.cuba import CUBA
-from simphony.io.h5_cuds import H5CUDS
 
 # Imports simphony-openfoam
 from simphony.engine import openfoam_file_io
@@ -22,7 +20,6 @@ from simphony.engine import openfoam_internal
 
 # Imports simphony-liggghts
 from simphony.engine import liggghts
-from simliggghts.io.file_utility import read_data_file
 from simliggghts import CUBAExtension
 
 
@@ -41,7 +38,7 @@ elif mode_OF == "io":
     CUBAExt_OF = openfoam_file_io.CUBAExt
 else:
     print "Wrong mode_OF!"
-    stop
+    sys.exit(1)
 
 
 # define the wrapper for LIGGGHTS
@@ -130,7 +127,7 @@ if mode_OF != "none":
         else:
             openfoam_file_io. \
                 create_block_mesh(".", mesh_name, wrapper_OF,
-                                  blockMeshDict_CylObst.blockMeshDict)
+                                  OpenFoam_input.blockMeshDict)
     else:
         corner_points = [(0.0, 0.0, 0.0),
                          (chansize[0], 0.0, 0.0),
@@ -150,7 +147,7 @@ if mode_OF != "none":
 
     print "Working directory", mesh_wOF.path
 
-    print (("Number of points in mesh: {}").
+    print ("Number of points in mesh: {}".
            format(sum(1 for _ in mesh_wOF.iter_points())))
 
     run_readOF_end = time.time()
@@ -176,10 +173,10 @@ pc_wall.name = "wall"
 num_particles = sum(1 for _ in pc_flow.iter_particles())
 num_particles_wall = sum(1 for _ in pc_wall.iter_particles())
 
-print (("Number of atoms in group {}: {}").format(pc_flow.name, num_particles))
-print (("Number of atoms in group {}: {}").
-       format(pc_wall.name, num_particles_wall))
-
+print ("Number of atoms in group {}: {}".format(pc_flow.name, num_particles))
+print ("Number of atoms in group {}: {}".format(
+    pc_wall.name,
+    num_particles_wall))
 
 # shift boxorigin to 0,0,0 and update particles accordingly
 boxorigin = pc_flow.data_extension[CUBAExtension.BOX_ORIGIN]
@@ -200,7 +197,6 @@ run_readLM_end = time.time()
 time_read_LM = run_readLM_end - run_readLM_start
 
 
-
 # Add particle (containers) to wrapper
 dem_wrapper.add_dataset(pc_flow)
 dem_wrapper.add_dataset(pc_wall)
@@ -212,9 +208,11 @@ dem_wrapper.CM[CUBA.NUMBER_OF_TIME_STEPS] = num_timesteps_DEM
 dem_wrapper.CM[CUBA.TIME_STEP] = timestep_DEM
 
 # Define the BC component of the SimPhoNy application model:
-dem_wrapper.BC_extension[liggghts.CUBAExtension.BOX_FACES] = ["periodic",
-                                                      "fixed",
-                                                      "periodic"]
+dem_wrapper.BC_extension[liggghts.CUBAExtension.BOX_FACES] = [
+    "periodic",
+    "fixed",
+    "periodic"
+]
 
 # Information about fixed walls: 0: No fixation, 1: Particles are fixed
 dem_wrapper.BC_extension[liggghts.CUBAExtension.FIXED_GROUP] = [0, 1]
@@ -234,7 +232,7 @@ time_OF = 0.0
 time_LGT = 0.0
 time_drag = 0.0
 
-if (mode_OF is not "none"):
+if mode_OF is not "none":
     # Generate cell list
     cellmat = {}
     index = {}
@@ -262,7 +260,7 @@ if (mode_OF is not "none"):
 # result from previous iteration as input for new iteration
 for numrun in range(0, number_iterations):
 
-    print (("\n Performing iteration {} of {}").
+    print ("\n Performing iteration {} of {}".
            format(numrun, number_iterations-1))
 
     if mode_OF != "none":
@@ -272,7 +270,7 @@ for numrun in range(0, number_iterations):
         run_OF_start = time.time()
 
         # running OpenFoam
-        print (("RUNNING OPENFOAM for {} timesteps").format(num_timesteps_OF))
+        print ("RUNNING OPENFOAM for {} timesteps".format(num_timesteps_OF))
         wrapper_OF.run()
 
         run_OF_end = time.time()
@@ -335,7 +333,7 @@ for numrun in range(0, number_iterations):
                         0.293*Rnumber**(0.06))**(3.45)
             else:
                 print "Error: Unknown force_type! Must be Stokes,Coul or Dala."
-                stop
+                sys.exit(1)
 
         par.data[CUBA.EXTERNAL_APPLIED_FORCE] = tuple(dragforce)
         pc_wflow.update_particles([par])
@@ -345,15 +343,13 @@ for numrun in range(0, number_iterations):
 
     run_LGT_start = time.time()
 
-    print (("RUNNNING LIGGGHTS for {} timesteps with size {}").format(
+    print ("RUNNNING LIGGGHTS for {} timesteps with size {}".format(
         num_timesteps_DEM, dem_wrapper.CM[CUBA.TIME_STEP]))
 
     # Perform LIGGGHTS calculations
     dem_wrapper.run()
-    
-    
+
     # ******* Missing: Visualisation of particle trajectories*******
-    
 
     run_LGT_end = time.time()
     time_LGT = time_LGT + run_LGT_end - run_LGT_start
@@ -365,8 +361,8 @@ runend = time.time()
 print "\ntotal time needed", runend - runstart
 
 print "Fractions"
-print (("Reading OpenFoam mesh: {}").format(time_read_OF/(runend - runstart)))
-print (("Running OpenFoam: {}").format(time_OF/(runend - runstart)))
-print (("Reading liggghts atoms: {}").format(time_read_LM/(runend - runstart)))
-print (("Running liggghts: {}").format(time_LGT/(runend - runstart)))
-print (("Computing drag forces: {}").format(time_drag/(runend - runstart)))
+print ("Reading OpenFoam mesh: {}".format(time_read_OF/(runend - runstart)))
+print ("Running OpenFoam: {}".format(time_OF/(runend - runstart)))
+print ("Reading liggghts atoms: {}".format(time_read_LM/(runend - runstart)))
+print ("Running liggghts: {}".format(time_LGT/(runend - runstart)))
+print ("Computing drag forces: {}".format(time_drag/(runend - runstart)))
