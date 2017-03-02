@@ -35,7 +35,7 @@ before_install:
 install:
   - make venv-prepare
   - source ~/simphony/bin/activate
-  - travis_wait 30 make simphony
+  - make simphony-common
   - make simphony-mayavi
   - pip install -r dev_requirements.txt
   - python -c "import simphony"
