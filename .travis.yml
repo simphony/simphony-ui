@@ -38,7 +38,8 @@ install:
   #- source ~/simphony/bin/activate
   #- make simphony-common
   #- make simphony-mayavi
-  - pip install -r dev_requirements.txt
+  - pip install flake8
+  # -r dev_requirements.txt
   #- python -c "import simphony"
 
 script:
