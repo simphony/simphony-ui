@@ -1,12 +1,10 @@
+dist: trusty
+sudo: required
+
 language: python
 
 virtualenv:
   system_site_packages: false
-
-matrix:
-  include:
-    - env: SIMPHONYENV=~/simphony DEPS=apt-mayavi-deps PLUGINS=simphony-mayavi
-      python: 2.7
 
 addons:
   apt:
@@ -30,16 +28,18 @@ before_install:
   - sudo apt-get install ccache
   - ccache -s
   - export PATH=/usr/lib/ccache:${PATH}
-  - sudo make deps $DEPS
+  - git clone --branch=0.3.1 https://github.com/simphony/simphony-framework.git $HOME/simphony-framework
+  - cd $HOME/simphony-framework
+  - sudo make deps apt-mayavi-deps
   - sudo ln -s ccache /usr/local/bin/mpic++
-  - git clone --branch=0.3.1 https://github.com/simphony/simphony-openfoam.git src/simphony-openfoam
 
 install:
   - make venv-prepare
   - source ~/simphony/bin/activate
   - make simphony
-  - make $PLUGINS
+  - make simphony-mayavi
   - pip install -r dev_requirements.txt
+  - python -c "import simphony"
 
 script:
   - flake8 .
