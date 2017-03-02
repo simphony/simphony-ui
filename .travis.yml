@@ -28,17 +28,17 @@ before_install:
   - ccache -s
   - export PATH=/usr/lib/ccache:${PATH}
   - git clone --branch=0.3.1 https://github.com/simphony/simphony-framework.git $HOME/simphony-framework
-  - cd $HOME/simphony-framework
+  - pushd $HOME/simphony-framework
   - sudo make base apt-openfoam-deps apt-simphony-deps
   #- sudo make deps apt-mayavi-deps
   - sudo ln -s ccache /usr/local/bin/mpic++
+  - popd
 
 install:
   #- make venv-prepare
   #- source ~/simphony/bin/activate
   #- make simphony-common
   #- make simphony-mayavi
-  - cd $HOME/simphony/simphony-ui
   - pip install -r dev_requirements.txt
   #- python -c "import simphony"
 
