@@ -42,4 +42,4 @@ install:
   #- python -c "import simphony"
 
 script:
-  - flake8 .
+  #- flake8 .
