@@ -34,6 +34,7 @@ before_install:
   - sudo make apt-simphony-deps 
   - sudo make apt-lammps-deps 
   - sudo make fix-pip
+  - sudo make apt-mayavi-deps
   - sudo ln -s ccache /usr/local/bin/mpic++
   - make simphony-env
   - make lammps
