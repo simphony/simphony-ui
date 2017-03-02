@@ -37,14 +37,14 @@ before_install:
   - sudo ln -s ccache /usr/local/bin/mpic++
   - make simphony-env
   - make lammps
-  # - source ~/simphony/bin/activate
-  #- make simphony-common
-  #- make simphony-mayavi
+  - source ~/simphony/bin/activate
+  - make simphony-common
+  - make simphony-mayavi
   - popd
 
 install:
   - pip install -r dev_requirements.txt
-  #- python -c "import simphony"
+  - python -c "import simphony"
 
 script:
   - flake8 .
