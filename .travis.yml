@@ -35,14 +35,14 @@ before_install:
   - sudo make apt-lammps-deps 
   - sudo make fix-pip
   - sudo ln -s ccache /usr/local/bin/mpic++
-  - popd
-
-install:
   - make simphony-env
   - make lammps
   #- source ~/simphony/bin/activate
   #- make simphony-common
   #- make simphony-mayavi
+  - popd
+
+install:
   - pip install -r dev_requirements.txt
   #- python -c "import simphony"
 
