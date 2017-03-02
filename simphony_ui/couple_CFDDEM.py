@@ -8,7 +8,7 @@ import sys
 import time
 import math
 import numpy as np
-import OpenFoam_input
+from . import OpenFoam_input
 import tempfile
 
 # Imports simphony general
