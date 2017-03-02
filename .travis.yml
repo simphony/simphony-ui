@@ -30,7 +30,7 @@ before_install:
   - git clone --branch=0.3.1 https://github.com/simphony/simphony-framework.git $HOME/simphony-framework
   - pushd $HOME/simphony-framework
   - sudo make base apt-openfoam-deps apt-simphony-deps
-  # - sudo make deps apt-mayavi-deps
+  #- sudo make deps apt-mayavi-deps
   - sudo ln -s ccache /usr/local/bin/mpic++
   - popd
 
