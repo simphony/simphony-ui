@@ -85,7 +85,7 @@ timestep_DEM = 1e-6
 # number of bins for velo profile generation
 Nbins_lmp = Nbins_OF
 
-restart_file = os.path.abspath(os.path.join("simphony_ui", "DEM_input.dat"))
+restart_file = os.path.join(os.path.dirname(__file__), "DEM_input.dat")
 
 
 if mode_OF != "none":
