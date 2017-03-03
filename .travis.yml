@@ -42,9 +42,9 @@ before_install:
   - make simphony-env
   - make lammps
   - source ~/simphony/bin/activate
-#  - make simphony-common
-#  - make simphony-mayavi
-#  - make simphony-openfoam
+  - make simphony-common
+  - make simphony-mayavi
+  - make simphony-openfoam
 #  - make simphony-liggghts
 #  - make simphony-lammps
   - popd
