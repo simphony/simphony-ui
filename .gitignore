@@ -1,6 +1,4 @@
 .idea
 simphony_ui.egg-info/
-simphony_ui/OpenFoam_input.pyc
-simphony_ui/__init__.pyc
-simphony_ui/couple_CFDDEM.pyc
+*.pyc
 travis.log
