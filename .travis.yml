@@ -49,4 +49,5 @@ install:
   - pip install -r dev_requirements.txt
   - python -c "import simphony"
 script:
+  - python -m unittest discover
   - flake8 .
