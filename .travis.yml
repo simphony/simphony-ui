@@ -47,7 +47,8 @@ before_install:
 #  - make simphony-lammps
 #  - popd
 install:
-#  - pip install -r dev_requirements.txt
+  - pip install -r dev_requirements.txt
 #  - python -c "import simphony"
 script:
-#  - flake8 .
+  - flake8 .
+
