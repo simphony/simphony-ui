@@ -45,7 +45,7 @@ before_install:
 #  - make simphony-openfoam
 #  - make simphony-liggghts
 #  - make simphony-lammps
-#  - popd
+  - popd
 install:
   - pip install -r dev_requirements.txt
 #  - python -c "import simphony"
