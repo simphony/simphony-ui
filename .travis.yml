@@ -42,10 +42,8 @@ before_install:
   - make simphony-common
   - make simphony-mayavi
   - popd
-
 install:
   - pip install -r dev_requirements.txt
   - python -c "import simphony"
-
 script:
   - flake8 .
