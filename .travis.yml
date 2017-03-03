@@ -29,10 +29,10 @@ before_install:
   - export PATH=/usr/lib/ccache:${PATH}
   - git clone --branch=0.3.1 https://github.com/simphony/simphony-framework.git $HOME/simphony-framework
   - pushd $HOME/simphony-framework
-  - sudo make base 
-  - sudo make apt-openfoam-deps 
-  - sudo make apt-simphony-deps 
-  - sudo make apt-lammps-deps 
+  - sudo make base
+  - sudo make apt-openfoam-deps
+  - sudo make apt-simphony-deps
+  - sudo make apt-lammps-deps
   - sudo make fix-pip
   - sudo make apt-mayavi-deps
   - sudo ln -s ccache /usr/local/bin/mpic++
@@ -41,6 +41,9 @@ before_install:
   - source ~/simphony/bin/activate
   - make simphony-common
   - make simphony-mayavi
+  - make simphony-openfoam
+  - make simphony-liggghts
+  - make simphony-lammps
   - popd
 install:
   - pip install -r dev_requirements.txt
