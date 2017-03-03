@@ -45,8 +45,8 @@ before_install:
   - make simphony-common
   - make simphony-mayavi
   - make simphony-openfoam
-#  - make simphony-liggghts
-#  - make simphony-lammps
+  - make simphony-liggghts
+  - make simphony-lammps
   - popd
 install:
   - pip install -r dev_requirements.txt
