@@ -33,12 +33,12 @@ before_install:
   - sudo make base
   - sudo make apt-openfoam-deps
   - sudo make apt-simphony-deps
-#  - sudo make apt-lammps-deps
-#  - sudo make fix-pip
-#  - sudo make apt-mayavi-deps
-#  - sudo ln -s ccache /usr/local/bin/mpic++
-#  - make simphony-env
-#  - make lammps
+  - sudo make apt-lammps-deps
+  - sudo make fix-pip
+  - sudo make apt-mayavi-deps
+  - sudo ln -s ccache /usr/local/bin/mpic++
+  - make simphony-env
+  - make lammps
 #  - source ~/simphony/bin/activate
 #  - make simphony-common
 #  - make simphony-mayavi
