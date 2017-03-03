@@ -17,7 +17,7 @@ cache:
   directories:
     - "$HOME/.ccache"
     - "$HOME/simphony"
-    - "/var/cache/apt/archives"
+    - "$HOME/debcache"
 
 before_install:
   - ccache -s
@@ -31,6 +31,8 @@ before_install:
   - git clone --branch=0.3.1 https://github.com/simphony/simphony-framework.git $HOME/simphony-framework
   - pushd $HOME/simphony-framework
   - sudo make base
+  - if [! -e $HOME/debcache/openfoam231_0-1_amd64.deb ]; then wget http://dl.openfoam.org/ubuntu/dists/trusty/main/binary-amd64/openfoam231_0-1_amd64.deb -O $HOME/debcache/openfoam231_0-1_amd64.deb; fi
+  - cp $HOME/debcache/openfoam231_0-1_amd64.deb /var/cache/apt/archives/
   - sudo make apt-openfoam-deps
   - sudo make apt-simphony-deps
   - sudo make apt-lammps-deps
