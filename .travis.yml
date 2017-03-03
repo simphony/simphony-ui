@@ -17,6 +17,7 @@ cache:
   directories:
     - "$HOME/.ccache"
     - "$HOME/simphony"
+    - "/var/cache/apt/archives"
 
 before_install:
   - ccache -s
@@ -49,4 +50,4 @@ install:
 #  - pip install -r dev_requirements.txt
 #  - python -c "import simphony"
 script:
-  - flake8 .
+#  - flake8 .
