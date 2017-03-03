@@ -22,12 +22,12 @@ from simphony.engine import openfoam_internal
 from simphony.engine import liggghts
 from simliggghts import CUBAExtension
 
+
 def main():
     runstart = time.time()
 
     mode_OF = "internal"
     mesh_type = "block"
-
 
     # Defining the wrapper for OpenFoam
     if mode_OF == "internal":
@@ -39,7 +39,6 @@ def main():
     else:
         print "Wrong mode_OF!"
         sys.exit(1)
-
 
     # define the wrapper for LIGGGHTS
     dem_wrapper = liggghts.LiggghtsWrapper(use_internal_interface=True)
@@ -53,10 +52,8 @@ def main():
 
     force_type = "Stokes"
 
-
     # OF settings
     mesh_name = 'test_mesh'
-    mesh_path = '.'
     num_timesteps_OF = 10
     timestep_OF = 2.0e-4
     visco_OF = 1.0e-3
@@ -69,10 +66,6 @@ def main():
     # number of elements in all channel-directions
     numgrid = [400, 40, 1]
 
-    # number of bins for velo profile generation
-    Nbins_OF = 30
-
-
     # **** Liggghts settings *****************
 
     # The number of DEM steps in each cycle, this is the number of
@@ -82,11 +75,7 @@ def main():
     # Time step for MD simulation
     timestep_DEM = 1e-6
 
-    # number of bins for velo profile generation
-    Nbins_lmp = Nbins_OF
-
     restart_file = os.path.join(os.path.dirname(__file__), "DEM_input.dat")
-
 
     if mode_OF != "none":
 
@@ -154,7 +143,6 @@ def main():
 
         time_read_OF = run_readOF_end - run_readOF_start
 
-
     # ********* Settings for liggghts wrapper **********
 
     # Reading existing particle file
@@ -173,7 +161,9 @@ def main():
     num_particles = sum(1 for _ in pc_flow.iter_particles())
     num_particles_wall = sum(1 for _ in pc_wall.iter_particles())
 
-    print ("Number of atoms in group {}: {}".format(pc_flow.name, num_particles))
+    print ("Number of atoms in group {}: {}".format(
+        pc_flow.name,
+        num_particles))
     print ("Number of atoms in group {}: {}".format(
         pc_wall.name,
         num_particles_wall))
@@ -189,19 +179,16 @@ def main():
 
     pc_flow.data_extension[CUBAExtension.BOX_ORIGIN] = (0.0, 0.0, 0.0)
 
-
     print "\nReading input files: done"
 
     run_readLM_end = time.time()
 
     time_read_LM = run_readLM_end - run_readLM_start
 
-
     # Add particle (containers) to wrapper
     dem_wrapper.add_dataset(pc_flow)
     dem_wrapper.add_dataset(pc_wall)
     pc_wflow = dem_wrapper.get_dataset(pc_flow.name)
-
 
     # define the CM component of the SimPhoNy application model:
     dem_wrapper.CM[CUBA.NUMBER_OF_TIME_STEPS] = num_timesteps_DEM
@@ -225,8 +212,7 @@ def main():
     dem_wrapper.SP[CUBA.COHESION_ENERGY_DENSITY] = [0.0, 0.0, 0.0, 0.0]
 
     dem_wrapper.SP_extension[liggghts.CUBAExtension.PAIR_POTENTIALS] = \
-                                                    ['repulsion', 'cohesion']
-
+        ['repulsion', 'cohesion']
 
     time_OF = 0.0
     time_LGT = 0.0
@@ -244,17 +230,17 @@ def main():
             LLN = [chansize[0]*2, chansize[1]*2, chansize[2]*2]
             for k in range(0, 8):
                 for i in range(0, 3):
-                    if mesh_wOF.get_point(cell.points[k]).coordinates[i] < LLN[i]:
-                        LLN[i] = mesh_wOF.get_point(cell.points[k]).coordinates[i]
+                    if mesh_wOF.get_point(cell.points[k]).coordinates[i] < \
+                            LLN[i]:
+                        LLN[i] = \
+                            mesh_wOF.get_point(cell.points[k]).coordinates[i]
 
             for i in range(0, 3):
                 index[i] = round(LLN[i]/gridsize[i])
 
             cellmat[index[0], index[1], index[2]] = cell.uid
 
-
     # ****************** MAIN LOOP *******************************
-
 
     # Repeating OF calculation several times with modified pressure drop last
     # result from previous iteration as input for new iteration
@@ -270,7 +256,8 @@ def main():
             run_OF_start = time.time()
 
             # running OpenFoam
-            print ("RUNNING OPENFOAM for {} timesteps".format(num_timesteps_OF))
+            print ("RUNNING OPENFOAM for {} timesteps".format(
+                num_timesteps_OF))
             wrapper_OF.run()
 
             run_OF_end = time.time()
@@ -305,8 +292,7 @@ def main():
                 rel_velo = {}
                 for i in range(0, 3):
                     rel_velo[i] = cell.data[CUBA.VELOCITY][i] - \
-                                    list(par.data[CUBA.VELOCITY])[i]
-                mag_rel_velo = math.sqrt(sum(rel_velo[i]**2 for i in range(0, 3)))
+                        list(par.data[CUBA.VELOCITY])[i]
 
             else:
                 rel_velo = [1.0e-8, 0.0, 0.0]
@@ -315,16 +301,17 @@ def main():
             for i in range(0, 3):
                 if force_type == "Stokes":
                     dragforce[i] = 3.0 * math.pi * visco_OF * \
-                                    par.data[CUBA.RADIUS] * 2.0 * rel_velo[i]
+                        par.data[CUBA.RADIUS] * 2.0 * rel_velo[i]
                 elif force_type == "Dala":
                     Rnumber = dens_liquid*abs(rel_velo) * \
-                                    par.data[CUBA.RADIUS] * 2.0/visco_OF
+                        par.data[CUBA.RADIUS] * 2.0/visco_OF
                     Cd = (0.63+4.8/math.sqrt(Rnumber))**2
-                    dragforce[i] = 0.5*Cd*math.pi * par.data[CUBA.RADIUS]**2 * \
-                        dens_liquid * abs(rel_velo)*rel_velo[i]
+                    dragforce[i] = 0.5*Cd*math.pi * \
+                        par.data[CUBA.RADIUS]**2 * dens_liquid * \
+                        abs(rel_velo)*rel_velo[i]
                 elif force_type == "Coul":
                     Rnumber = dens_liquid * abs(rel_velo) * \
-                                    par.data[CUBA.RADIUS] * 2.0 / visco_OF
+                        par.data[CUBA.RADIUS] * 2.0 / visco_OF
                     force[m] = math.pi * \
                         par.data[CUBA.RADIUS]**2 * \
                         dens_liquid * \
@@ -332,7 +319,8 @@ def main():
                         (1.84 * Rnumber**(-0.31) +
                             0.293*Rnumber**(0.06))**(3.45)
                 else:
-                    print "Error: Unknown force_type! Must be Stokes,Coul or Dala."
+                    print "Error: Unknown force_type! Must be " \
+                          "Stokes,Coul or Dala."
                     sys.exit(1)
 
             par.data[CUBA.EXTERNAL_APPLIED_FORCE] = tuple(dragforce)
@@ -354,16 +342,17 @@ def main():
         run_LGT_end = time.time()
         time_LGT = time_LGT + run_LGT_end - run_LGT_start
 
-
     # Compute total run time
     runend = time.time()
 
     print "\ntotal time needed", runend - runstart
 
     print "Fractions"
-    print ("Reading OpenFoam mesh: {}".format(time_read_OF/(runend - runstart)))
+    print ("Reading OpenFoam mesh: {}"
+           .format(time_read_OF/(runend - runstart)))
     print ("Running OpenFoam: {}".format(time_OF/(runend - runstart)))
-    print ("Reading liggghts atoms: {}".format(time_read_LM/(runend - runstart)))
+    print ("Reading liggghts atoms: {}"
+           .format(time_read_LM/(runend - runstart)))
     print ("Running liggghts: {}".format(time_LGT/(runend - runstart)))
     print ("Computing drag forces: {}".format(time_drag/(runend - runstart)))
 
