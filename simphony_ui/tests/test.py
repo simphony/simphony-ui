@@ -3,14 +3,13 @@ Tests
 """
 
 import unittest
+import simphony_ui.couple_CFDDEM as cfd_dem
 
 
-class DummyTest(unittest.TestCase):
+class CFD_DEM(unittest.TestCase):
 
-    def setUp(self):
-        """ Test initialization """
-        self.a = 3
-
-    def test_a(self):
-        self.assertEqual(self.a, 3)
-        self.assertNotEqual(self.a, 56)
+    def test_run(self):
+        try:
+            cfd_dem.main()
+        except:
+            self.fail('Error when running the main script')
