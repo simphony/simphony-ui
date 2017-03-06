@@ -23,7 +23,7 @@ from simphony.engine import liggghts
 from simliggghts import CUBAExtension
 
 
-def main():
+def main(output_path, mesh_name):
     runstart = time.time()
 
     mode_OF = "internal"
@@ -44,7 +44,7 @@ def main():
     dem_wrapper = liggghts.LiggghtsWrapper(use_internal_interface=True)
 
     if mode_OF == "internal":
-        path = os.path.abspath(os.curdir)
+        path = output_path
         print path
 
     # General settings
@@ -53,7 +53,6 @@ def main():
     force_type = "Stokes"
 
     # OF settings
-    mesh_name = 'test_mesh'
     num_timesteps_OF = 10
     timestep_OF = 2.0e-4
     visco_OF = 1.0e-3
