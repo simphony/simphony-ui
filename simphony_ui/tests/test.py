@@ -11,7 +11,7 @@ import os
 output_dir = 'test_mesh'
 
 
-class CFD_DEM(unittest.TestCase):
+class CfeDem(unittest.TestCase):
 
     def test_run(self):
         try:
