@@ -356,4 +356,4 @@ def main():
     print ("Running liggghts: {}".format(time_LGT/(runend - runstart)))
     print ("Computing drag forces: {}".format(time_drag/(runend - runstart)))
 
-    return dem_wrapper
+    return dem_wrapper, wrapper_OF
