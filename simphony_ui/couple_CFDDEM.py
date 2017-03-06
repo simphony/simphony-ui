@@ -12,6 +12,7 @@ from . import OpenFoam_input
 
 # Imports simphony general
 from simphony.core.cuba import CUBA
+from simphony.core.cuds_item import CUDSItem
 
 # Imports simphony-openfoam
 from simphony.engine import openfoam_file_io
@@ -150,15 +151,7 @@ def main(output_path, mesh_name):
     pc_flow.name = "flow_chain"
     pc_wall.name = "wall"
 
-    num_particles = sum(1 for _ in pc_flow.iter_particles())
-    num_particles_wall = sum(1 for _ in pc_wall.iter_particles())
-
-    print ("Number of atoms in group {}: {}".format(
-        pc_flow.name,
-        num_particles))
-    print ("Number of atoms in group {}: {}".format(
-        pc_wall.name,
-        num_particles_wall))
+    num_particles = pc_flow.count_of(CUDSItem.PARTICLE)
 
     # shift boxorigin to 0,0,0 and update particles accordingly
     boxorigin = pc_flow.data_extension[CUBAExtension.BOX_ORIGIN]
