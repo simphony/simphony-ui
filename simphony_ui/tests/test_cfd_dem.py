@@ -38,7 +38,7 @@ class TestCFEDem(unittest.TestCase):
         self.assertEqual(dataset2.count_of(CUDSItem.EDGE), 0)
         self.assertEqual(dataset2.count_of(CUDSItem.POINT), 32432)
 
-    def test_velovity(self):
+    def test_velocity(self):
         dataset = self.cfd_wrapper.get_dataset(
             self.cfd_wrapper.get_dataset_names()[0])
         avg_velo = 0.0
