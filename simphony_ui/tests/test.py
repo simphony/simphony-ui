@@ -11,7 +11,7 @@ import os
 output_dir = 'test_mesh'
 
 
-class CfeDem(unittest.TestCase):
+class TestCfeDem(unittest.TestCase):
 
     def test_output(self):
         cfd_dem.main()
