@@ -8,12 +8,12 @@ import shutil
 import os
 
 
-output_dir = 'test_mesh'
-
-
 class TestCfeDem(unittest.TestCase):
+
+    def setUp(self):
+        self.output_dir = 'test_mesh'
 
     def test_output(self):
         cfd_dem.main()
-        self.assertTrue(os.path.exists(output_dir))
-        shutil.rmtree(output_dir, ignore_errors=True)
+        self.assertTrue(os.path.exists(self.output_dir))
+        shutil.rmtree(self.output_dir, ignore_errors=True)
