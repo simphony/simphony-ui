@@ -5,6 +5,7 @@ Tests
 import unittest
 import simphony_ui.couple_CFDDEM as cfd_dem
 from simphony.core.cuds_item import CUDSItem
+from simphony.core.cuba import CUBA
 import shutil
 import os
 import tempfile
@@ -36,6 +37,15 @@ class TestCfeDem(unittest.TestCase):
         self.assertEqual(dataset2.count_of(CUDSItem.FACE), 63448)
         self.assertEqual(dataset2.count_of(CUDSItem.EDGE), 0)
         self.assertEqual(dataset2.count_of(CUDSItem.POINT), 32432)
+
+    def test_velovity(self):
+        dataset = self.cfd_wrapper.get_dataset(
+            self.cfd_wrapper.get_dataset_names()[0])
+        avg_velo = 0.0
+        for cell in dataset.iter_cells():
+            avg_velo += cell.data[CUBA.VELOCITY][0]
+        avg_velo = avg_velo/dataset.count_of(CUDSItem.CELL)
+        self.assertAlmostEqual(avg_velo, 0.00151286)
 
     @classmethod
     def tearDownClass(cls):
