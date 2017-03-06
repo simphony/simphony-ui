@@ -8,7 +8,7 @@ import sys
 import time
 import math
 import numpy as np
-import OpenFoam_input
+from . import OpenFoam_input
 import tempfile
 
 # Imports simphony general
@@ -85,7 +85,7 @@ timestep_DEM = 1e-6
 # number of bins for velo profile generation
 Nbins_lmp = Nbins_OF
 
-restart_file = "DEM_input.dat"
+restart_file = os.path.join(os.path.dirname(__file__), "DEM_input.dat")
 
 
 if mode_OF != "none":
