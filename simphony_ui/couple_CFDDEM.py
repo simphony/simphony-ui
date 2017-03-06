@@ -29,10 +29,10 @@ def main(output_path, mesh_name):
     # Defining the wrapper for OpenFoam
     if mode_cfd == "internal":
         cfd_wrapper = openfoam_internal.Wrapper()
-        CUBAExt_cfd = openfoam_internal.CUBAExt
+        cuba_ext_cfd = openfoam_internal.CUBAExt
     elif mode_cfd == "io":
         cfd_wrapper = openfoam_file_io.Wrapper()
-        CUBAExt_cfd = openfoam_file_io.CUBAExt
+        cuba_ext_cfd = openfoam_file_io.CUBAExt
     else:
         print "Wrong mode_cfd!"
         sys.exit(1)
@@ -75,11 +75,11 @@ def main(output_path, mesh_name):
 
         cfd_wrapper.CM[CUBA.NAME] = mesh_name
 
-        cfd_wrapper.CM_extensions[CUBAExt_cfd.GE] = \
-            (CUBAExt_cfd.INCOMPRESSIBLE, CUBAExt_cfd.LAMINAR_MODEL)
+        cfd_wrapper.CM_extensions[cuba_ext_cfd.GE] = \
+            (cuba_ext_cfd.INCOMPRESSIBLE, cuba_ext_cfd.LAMINAR_MODEL)
         # defines solver = simpleFoam
-        # other options CUBAExt_cfd.VOF -> interFoam
-        #               CUBAExt_cfd.NUMBER_OF_CORES = N -> parallel
+        # other options cuba_ext_cfd.VOF -> interFoam
+        #               cuba_ext_cfd.NUMBER_OF_CORES = N -> parallel
 
         cfd_wrapper.SP[CUBA.TIME_STEP] = timestep_cfd
         cfd_wrapper.SP[CUBA.NUMBER_OF_TIME_STEPS] = num_timesteps_cfd
@@ -187,16 +187,16 @@ def main(output_path, mesh_name):
                     chansize[2]/numgrid[2]]
 
         for cell in mesh_cfd.iter_cells():
-            LLN = [chansize[0]*2, chansize[1]*2, chansize[2]*2]
+            lln = [chansize[0]*2, chansize[1]*2, chansize[2]*2]
             for k in range(0, 8):
                 for i in range(0, 3):
                     if mesh_cfd.get_point(cell.points[k]).coordinates[i] < \
-                            LLN[i]:
-                        LLN[i] = \
+                            lln[i]:
+                        lln[i] = \
                             mesh_cfd.get_point(cell.points[k]).coordinates[i]
 
             for i in range(0, 3):
-                index[i] = round(LLN[i]/gridsize[i])
+                index[i] = round(lln[i]/gridsize[i])
 
             cellmat[index[0], index[1], index[2]] = cell.uid
 
@@ -248,21 +248,21 @@ def main(output_path, mesh_name):
                     dragforce[i] = 3.0 * math.pi * visco_cfd * \
                         par.data[CUBA.RADIUS] * 2.0 * rel_velo[i]
                 elif force_type == "Dala":
-                    Rnumber = dens_liquid*abs(rel_velo) * \
+                    r_number = dens_liquid*abs(rel_velo) * \
                         par.data[CUBA.RADIUS] * 2.0/visco_cfd
-                    Cd = (0.63+4.8/math.sqrt(Rnumber))**2
-                    dragforce[i] = 0.5*Cd*math.pi * \
+                    coeff = (0.63+4.8/math.sqrt(r_number))**2
+                    dragforce[i] = 0.5*coeff*math.pi * \
                         par.data[CUBA.RADIUS]**2 * dens_liquid * \
                         abs(rel_velo)*rel_velo[i]
                 elif force_type == "Coul":
-                    Rnumber = dens_liquid * abs(rel_velo) * \
+                    r_number = dens_liquid * abs(rel_velo) * \
                         par.data[CUBA.RADIUS] * 2.0 / visco_cfd
                     force[m] = math.pi * \
                         par.data[CUBA.RADIUS]**2 * \
                         dens_liquid * \
                         abs(rel_velo) * \
-                        (1.84 * Rnumber**(-0.31) +
-                            0.293*Rnumber**0.06)**3.45
+                        (1.84 * r_number**(-0.31) +
+                            0.293*r_number**0.06)**3.45
                 else:
                     print "Error: Unknown force_type! Must be " \
                           "Stokes,Coul or Dala."
