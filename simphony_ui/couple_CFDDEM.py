@@ -5,7 +5,6 @@
 # Imports general
 import os
 import sys
-import time
 import math
 import numpy as np
 from . import OpenFoam_input
@@ -24,8 +23,6 @@ from simliggghts import CUBAExtension
 
 
 def main(output_path, mesh_name):
-    runstart = time.time()
-
     mode_OF = "internal"
     mesh_type = "block"
 
@@ -99,8 +96,6 @@ def main(output_path, mesh_name):
                                         'walls': 'zeroGradient',
                                         'frontAndBack': 'empty'}
 
-        run_readOF_start = time.time()
-
         # Reading mesh and conversion to CUDS file
 
         if mesh_type == "block":
@@ -127,14 +122,7 @@ def main(output_path, mesh_name):
 
         mesh_wOF = wrapper_OF.get_dataset(mesh_name)
 
-        run_readOF_end = time.time()
-
-        time_read_OF = run_readOF_end - run_readOF_start
-
     # ********* Settings for liggghts wrapper **********
-
-    # Reading existing particle file
-    run_readLM_start = time.time()
 
     # Reading particle file
     particles_list = liggghts.read_data_file(restart_file)
@@ -157,12 +145,7 @@ def main(output_path, mesh_name):
         pc_flow.update_particles([par])
 
     pc_flow.data_extension[CUBAExtension.BOX_ORIGIN] = (0.0, 0.0, 0.0)
-
     # Reading input files: done
-
-    run_readLM_end = time.time()
-
-    time_read_LM = run_readLM_end - run_readLM_start
 
     # Add particle (containers) to wrapper
     dem_wrapper.add_dataset(pc_flow)
@@ -193,10 +176,6 @@ def main(output_path, mesh_name):
     dem_wrapper.SP_extension[liggghts.CUBAExtension.PAIR_POTENTIALS] = \
         ['repulsion', 'cohesion']
 
-    time_OF = 0.0
-    time_LGT = 0.0
-    time_drag = 0.0
-
     if mode_OF is not "none":
         # Generate cell list
         cellmat = {}
@@ -226,18 +205,8 @@ def main(output_path, mesh_name):
     for numrun in range(0, number_iterations):
 
         if mode_OF != "none":
-
-            # Open Foam calculation
-
-            run_OF_start = time.time()
-
             # running OpenFoam
             wrapper_OF.run()
-
-            run_OF_end = time.time()
-            time_OF = time_OF + run_OF_end - run_OF_start
-
-        run_drag_start = time.time()
 
         m = 0
         force = np.zeros(num_particles)
@@ -300,20 +269,9 @@ def main(output_path, mesh_name):
             par.data[CUBA.EXTERNAL_APPLIED_FORCE] = tuple(dragforce)
             pc_wflow.update_particles([par])
 
-        run_drag_end = time.time()
-        time_drag = time_drag + run_drag_end - run_drag_start
-
-        run_LGT_start = time.time()
-
         # Perform LIGGGHTS calculations
         dem_wrapper.run()
 
         # ******* Missing: Visualisation of particle trajectories*******
-
-        run_LGT_end = time.time()
-        time_LGT = time_LGT + run_LGT_end - run_LGT_start
-
-    # Compute total run time
-    runend = time.time()
 
     return dem_wrapper, wrapper_OF
