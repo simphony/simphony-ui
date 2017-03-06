@@ -23,18 +23,18 @@ from simliggghts import CUBAExtension
 
 
 def main(output_path, mesh_name):
-    mode_OF = "internal"
+    mode_cfd = "internal"
     mesh_type = "block"
 
     # Defining the wrapper for OpenFoam
-    if mode_OF == "internal":
-        wrapper_OF = openfoam_internal.Wrapper()
-        CUBAExt_OF = openfoam_internal.CUBAExt
-    elif mode_OF == "io":
-        wrapper_OF = openfoam_file_io.Wrapper()
-        CUBAExt_OF = openfoam_file_io.CUBAExt
+    if mode_cfd == "internal":
+        cfd_wrapper = openfoam_internal.Wrapper()
+        CUBAExt_cfd = openfoam_internal.CUBAExt
+    elif mode_cfd == "io":
+        cfd_wrapper = openfoam_file_io.Wrapper()
+        CUBAExt_cfd = openfoam_file_io.CUBAExt
     else:
-        print "Wrong mode_OF!"
+        print "Wrong mode_cfd!"
         sys.exit(1)
 
     # define the wrapper for LIGGGHTS
@@ -46,9 +46,9 @@ def main(output_path, mesh_name):
     force_type = "Stokes"
 
     # OF settings
-    num_timesteps_OF = 10
-    timestep_OF = 2.0e-4
-    visco_OF = 1.0e-3
+    num_timesteps_cfd = 10
+    timestep_cfd = 2.0e-4
+    visco_cfd = 1.0e-3
     dens_liquid = 1000.0
     delta_p = 0.008
 
@@ -62,47 +62,49 @@ def main(output_path, mesh_name):
 
     # The number of DEM steps in each cycle, this is the number of
     # steps that are run at each call of wrapper.run().
-    num_timesteps_DEM = 10
+    num_timesteps_dem = 10
 
     # Time step for MD simulation
-    timestep_DEM = 1e-6
+    timestep_dem = 1e-6
 
     restart_file = os.path.join(os.path.dirname(__file__), "DEM_input.dat")
 
-    if mode_OF != "none":
+    if mode_cfd != "none":
 
         # **********  Settings for OpenFoam wrapper  **********
 
-        wrapper_OF.CM[CUBA.NAME] = mesh_name
+        cfd_wrapper.CM[CUBA.NAME] = mesh_name
 
-        wrapper_OF.CM_extensions[CUBAExt_OF.GE] = (CUBAExt_OF.INCOMPRESSIBLE,
-                                                   CUBAExt_OF.LAMINAR_MODEL)
+        cfd_wrapper.CM_extensions[CUBAExt_cfd.GE] = \
+            (CUBAExt_cfd.INCOMPRESSIBLE, CUBAExt_cfd.LAMINAR_MODEL)
         # defines solver = simpleFoam
-        # other options CUBAExt_OF.VOF -> interFoam
-        #               CUBAExt_OF.NUMBER_OF_CORES = N -> parallel
+        # other options CUBAExt_cfd.VOF -> interFoam
+        #               CUBAExt_cfd.NUMBER_OF_CORES = N -> parallel
 
-        wrapper_OF.SP[CUBA.TIME_STEP] = timestep_OF
-        wrapper_OF.SP[CUBA.NUMBER_OF_TIME_STEPS] = num_timesteps_OF
-        wrapper_OF.SP[CUBA.DENSITY] = dens_liquid
-        wrapper_OF.SP[CUBA.DYNAMIC_VISCOSITY] = visco_OF
+        cfd_wrapper.SP[CUBA.TIME_STEP] = timestep_cfd
+        cfd_wrapper.SP[CUBA.NUMBER_OF_TIME_STEPS] = num_timesteps_cfd
+        cfd_wrapper.SP[CUBA.DENSITY] = dens_liquid
+        cfd_wrapper.SP[CUBA.DYNAMIC_VISCOSITY] = visco_cfd
 
         # setting BCs
-        wrapper_OF.BC[CUBA.VELOCITY] = {'inlet': 'zeroGradient',
-                                        'outlet': 'zeroGradient',
-                                        'walls': ('fixedValue', (0, 0, 0)),
-                                        'frontAndBack': 'empty'}
-        wrapper_OF.BC[CUBA.PRESSURE] = {'inlet': ('fixedValue', delta_p),
-                                        'outlet': ('fixedValue', 0.0),
-                                        'walls': 'zeroGradient',
-                                        'frontAndBack': 'empty'}
+        cfd_wrapper.BC[CUBA.VELOCITY] = {
+            'inlet': 'zeroGradient',
+            'outlet': 'zeroGradient',
+            'walls': ('fixedValue', (0, 0, 0)),
+            'frontAndBack': 'empty'}
+        cfd_wrapper.BC[CUBA.PRESSURE] = {
+            'inlet': ('fixedValue', delta_p),
+            'outlet': ('fixedValue', 0.0),
+            'walls': 'zeroGradient',
+            'frontAndBack': 'empty'}
 
         # Reading mesh and conversion to CUDS file
 
         if mesh_type == "block":
-            path = output_path if mode_OF == "internal" else "."
+            path = output_path if mode_cfd == "internal" else "."
 
             openfoam_file_io.create_block_mesh(
-                path, mesh_name, wrapper_OF,
+                path, mesh_name, cfd_wrapper,
                 OpenFoam_input.blockMeshDict
             )
         else:
@@ -116,11 +118,11 @@ def main(output_path, mesh_name):
                              (0.0, chansize[1], chansize[2])]
 
             openfoam_file_io.create_quad_mesh(output_path, mesh_name,
-                                              wrapper_OF, corner_points,
+                                              cfd_wrapper, corner_points,
                                               numgrid[0], numgrid[1],
                                               numgrid[2])
 
-        mesh_wOF = wrapper_OF.get_dataset(mesh_name)
+        mesh_cfd = cfd_wrapper.get_dataset(mesh_name)
 
     # ********* Settings for liggghts wrapper **********
 
@@ -153,8 +155,8 @@ def main(output_path, mesh_name):
     pc_wflow = dem_wrapper.get_dataset(pc_flow.name)
 
     # define the CM component of the SimPhoNy application model:
-    dem_wrapper.CM[CUBA.NUMBER_OF_TIME_STEPS] = num_timesteps_DEM
-    dem_wrapper.CM[CUBA.TIME_STEP] = timestep_DEM
+    dem_wrapper.CM[CUBA.NUMBER_OF_TIME_STEPS] = num_timesteps_dem
+    dem_wrapper.CM[CUBA.TIME_STEP] = timestep_dem
 
     # Define the BC component of the SimPhoNy application model:
     dem_wrapper.BC_extension[liggghts.CUBAExtension.BOX_FACES] = [
@@ -176,7 +178,7 @@ def main(output_path, mesh_name):
     dem_wrapper.SP_extension[liggghts.CUBAExtension.PAIR_POTENTIALS] = \
         ['repulsion', 'cohesion']
 
-    if mode_OF is not "none":
+    if mode_cfd is not "none":
         # Generate cell list
         cellmat = {}
         index = {}
@@ -184,14 +186,14 @@ def main(output_path, mesh_name):
                     chansize[1]/numgrid[1],
                     chansize[2]/numgrid[2]]
 
-        for cell in mesh_wOF.iter_cells():
+        for cell in mesh_cfd.iter_cells():
             LLN = [chansize[0]*2, chansize[1]*2, chansize[2]*2]
             for k in range(0, 8):
                 for i in range(0, 3):
-                    if mesh_wOF.get_point(cell.points[k]).coordinates[i] < \
+                    if mesh_cfd.get_point(cell.points[k]).coordinates[i] < \
                             LLN[i]:
                         LLN[i] = \
-                            mesh_wOF.get_point(cell.points[k]).coordinates[i]
+                            mesh_cfd.get_point(cell.points[k]).coordinates[i]
 
             for i in range(0, 3):
                 index[i] = round(LLN[i]/gridsize[i])
@@ -204,9 +206,9 @@ def main(output_path, mesh_name):
     # result from previous iteration as input for new iteration
     for numrun in range(0, number_iterations):
 
-        if mode_OF != "none":
+        if mode_cfd != "none":
             # running OpenFoam
-            wrapper_OF.run()
+            cfd_wrapper.run()
 
         m = 0
         force = np.zeros(num_particles)
@@ -216,7 +218,7 @@ def main(output_path, mesh_name):
 
             testpoint = par.coordinates
 
-            if mode_OF is not "none":
+            if mode_cfd is not "none":
 
                 index = {}
                 for i in range(0, 3):
@@ -230,7 +232,7 @@ def main(output_path, mesh_name):
                         index[i] = numgrid[i]-1
 
                 cell_id = cellmat[index[0], index[1], index[2]]
-                cell = mesh_wOF.get_cell(cell_id)
+                cell = mesh_cfd.get_cell(cell_id)
 
                 rel_velo = {}
                 for i in range(0, 3):
@@ -243,18 +245,18 @@ def main(output_path, mesh_name):
             dragforce = np.zeros(3)
             for i in range(0, 3):
                 if force_type == "Stokes":
-                    dragforce[i] = 3.0 * math.pi * visco_OF * \
+                    dragforce[i] = 3.0 * math.pi * visco_cfd * \
                         par.data[CUBA.RADIUS] * 2.0 * rel_velo[i]
                 elif force_type == "Dala":
                     Rnumber = dens_liquid*abs(rel_velo) * \
-                        par.data[CUBA.RADIUS] * 2.0/visco_OF
+                        par.data[CUBA.RADIUS] * 2.0/visco_cfd
                     Cd = (0.63+4.8/math.sqrt(Rnumber))**2
                     dragforce[i] = 0.5*Cd*math.pi * \
                         par.data[CUBA.RADIUS]**2 * dens_liquid * \
                         abs(rel_velo)*rel_velo[i]
                 elif force_type == "Coul":
                     Rnumber = dens_liquid * abs(rel_velo) * \
-                        par.data[CUBA.RADIUS] * 2.0 / visco_OF
+                        par.data[CUBA.RADIUS] * 2.0 / visco_cfd
                     force[m] = math.pi * \
                         par.data[CUBA.RADIUS]**2 * \
                         dens_liquid * \
@@ -274,4 +276,4 @@ def main(output_path, mesh_name):
 
         # ******* Missing: Visualisation of particle trajectories*******
 
-    return dem_wrapper, wrapper_OF
+    return dem_wrapper, cfd_wrapper
