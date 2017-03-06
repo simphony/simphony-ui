@@ -43,10 +43,6 @@ def main(output_path, mesh_name):
     # define the wrapper for LIGGGHTS
     dem_wrapper = liggghts.LiggghtsWrapper(use_internal_interface=True)
 
-    if mode_OF == "internal":
-        path = output_path
-        print path
-
     # General settings
     number_iterations = 10
 
@@ -110,7 +106,7 @@ def main(output_path, mesh_name):
         if mesh_type == "block":
             if mode_OF == "internal":
                 openfoam_file_io. \
-                    create_block_mesh(path, mesh_name, wrapper_OF,
+                    create_block_mesh(output_path, mesh_name, wrapper_OF,
                                       OpenFoam_input.blockMeshDict)
             else:
                 openfoam_file_io. \
