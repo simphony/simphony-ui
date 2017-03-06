@@ -262,7 +262,7 @@ def main(output_path, mesh_name):
                         dens_liquid * \
                         abs(rel_velo) * \
                         (1.84 * Rnumber**(-0.31) +
-                            0.293*Rnumber**(0.06))**(3.45)
+                            0.293*Rnumber**0.06)**3.45
                 else:
                     print "Error: Unknown force_type! Must be " \
                           "Stokes,Coul or Dala."
