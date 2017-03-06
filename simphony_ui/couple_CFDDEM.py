@@ -9,7 +9,6 @@ import time
 import math
 import numpy as np
 from . import OpenFoam_input
-import tempfile
 
 # Imports simphony general
 from simphony.core.cuba import CUBA
@@ -120,7 +119,7 @@ def main(output_path, mesh_name):
                              (chansize[0], chansize[1], chansize[2]),
                              (0.0, chansize[1], chansize[2])]
 
-            openfoam_file_io.create_quad_mesh(tempfile.mkdtemp(), mesh_name,
+            openfoam_file_io.create_quad_mesh(output_path, mesh_name,
                                               wrapper_OF, corner_points,
                                               numgrid[0], numgrid[1],
                                               numgrid[2])
