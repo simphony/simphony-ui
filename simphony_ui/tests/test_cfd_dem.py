@@ -16,4 +16,6 @@ class TestCfeDem(unittest.TestCase):
     def test_output(self):
         cfd_dem.main()
         self.assertTrue(os.path.exists(self.output_dir))
+
+    def tearDown(self):
         shutil.rmtree(self.output_dir, ignore_errors=True)
