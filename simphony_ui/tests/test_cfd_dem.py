@@ -11,7 +11,7 @@ from simphony.core.cuds_item import CUDSItem
 from simphony.core.cuba import CUBA
 
 
-class TestCfeDem(unittest.TestCase):
+class TestCFEDem(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
