@@ -4,6 +4,7 @@ Tests
 
 import unittest
 import simphony_ui.couple_CFDDEM as cfd_dem
+from simphony.core.cuds_item import CUDSItem
 import shutil
 import os
 import tempfile
@@ -22,6 +23,19 @@ class TestCfeDem(unittest.TestCase):
         self.assertTrue(os.path.exists(
             os.path.join(self.tmp_dir, self.mesh_name)
         ))
+
+    def test_nb_entities(self):
+        dataset1 = self.dem_wrapper.get_dataset(
+            self.dem_wrapper.get_dataset_names()[0])
+        self.assertEqual(dataset1.count_of(CUDSItem.PARTICLE), 200)
+        self.assertEqual(dataset1.count_of(CUDSItem.BOND), 0)
+
+        dataset2 = self.cfd_wrapper.get_dataset(
+            self.cfd_wrapper.get_dataset_names()[0])
+        self.assertEqual(dataset2.count_of(CUDSItem.CELL), 15744)
+        self.assertEqual(dataset2.count_of(CUDSItem.FACE), 63448)
+        self.assertEqual(dataset2.count_of(CUDSItem.EDGE), 0)
+        self.assertEqual(dataset2.count_of(CUDSItem.POINT), 32432)
 
     @classmethod
     def tearDownClass(cls):
