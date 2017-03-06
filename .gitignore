@@ -1,1 +1,4 @@
 .idea
+simphony_ui.egg-info/
+*.pyc
+travis.log
