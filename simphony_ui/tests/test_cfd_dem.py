@@ -11,15 +11,18 @@ import tempfile
 
 class TestCfeDem(unittest.TestCase):
 
-    def setUp(self):
-        self.tmp_dir = tempfile.mkdtemp()
-        self.mesh_name = 'test_mesh'
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp_dir = tempfile.mkdtemp()
+        cls.mesh_name = 'test_mesh'
+        cls.dem_wrapper, cls.cfd_wrapper = \
+            cfd_dem.main(cls.tmp_dir, cls.mesh_name)
 
     def test_output(self):
-        cfd_dem.main(self.tmp_dir, self.mesh_name)
         self.assertTrue(os.path.exists(
             os.path.join(self.tmp_dir, self.mesh_name)
         ))
 
-    def tearDown(self):
-        shutil.rmtree(self.tmp_dir)
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmp_dir)
