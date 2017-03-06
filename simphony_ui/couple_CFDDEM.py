@@ -101,7 +101,7 @@ def main(output_path, mesh_name):
 
         run_readOF_start = time.time()
 
-        print "Reading mesh and conversion to CUDS file"
+        # Reading mesh and conversion to CUDS file
 
         if mesh_type == "block":
             path = output_path if mode_OF == "internal" else "."
@@ -127,11 +127,6 @@ def main(output_path, mesh_name):
 
         mesh_wOF = wrapper_OF.get_dataset(mesh_name)
 
-        print "Working directory", mesh_wOF.path
-
-        print ("Number of points in mesh: {}".
-               format(sum(1 for _ in mesh_wOF.iter_points())))
-
         run_readOF_end = time.time()
 
         time_read_OF = run_readOF_end - run_readOF_start
@@ -139,10 +134,9 @@ def main(output_path, mesh_name):
     # ********* Settings for liggghts wrapper **********
 
     # Reading existing particle file
-
     run_readLM_start = time.time()
 
-    print "\nReading particle file"
+    # Reading particle file
     particles_list = liggghts.read_data_file(restart_file)
 
     pc_flow = particles_list[0]
@@ -164,7 +158,7 @@ def main(output_path, mesh_name):
 
     pc_flow.data_extension[CUBAExtension.BOX_ORIGIN] = (0.0, 0.0, 0.0)
 
-    print "\nReading input files: done"
+    # Reading input files: done
 
     run_readLM_end = time.time()
 
@@ -231,9 +225,6 @@ def main(output_path, mesh_name):
     # result from previous iteration as input for new iteration
     for numrun in range(0, number_iterations):
 
-        print ("\n Performing iteration {} of {}".
-               format(numrun, number_iterations-1))
-
         if mode_OF != "none":
 
             # Open Foam calculation
@@ -241,8 +232,6 @@ def main(output_path, mesh_name):
             run_OF_start = time.time()
 
             # running OpenFoam
-            print ("RUNNING OPENFOAM for {} timesteps".format(
-                num_timesteps_OF))
             wrapper_OF.run()
 
             run_OF_end = time.time()
@@ -316,9 +305,6 @@ def main(output_path, mesh_name):
 
         run_LGT_start = time.time()
 
-        print ("RUNNNING LIGGGHTS for {} timesteps with size {}".format(
-            num_timesteps_DEM, dem_wrapper.CM[CUBA.TIME_STEP]))
-
         # Perform LIGGGHTS calculations
         dem_wrapper.run()
 
@@ -329,16 +315,5 @@ def main(output_path, mesh_name):
 
     # Compute total run time
     runend = time.time()
-
-    print "\ntotal time needed", runend - runstart
-
-    print "Fractions"
-    print ("Reading OpenFoam mesh: {}"
-           .format(time_read_OF/(runend - runstart)))
-    print ("Running OpenFoam: {}".format(time_OF/(runend - runstart)))
-    print ("Reading liggghts atoms: {}"
-           .format(time_read_LM/(runend - runstart)))
-    print ("Running liggghts: {}".format(time_LGT/(runend - runstart)))
-    print ("Computing drag forces: {}".format(time_drag/(runend - runstart)))
 
     return dem_wrapper, wrapper_OF
