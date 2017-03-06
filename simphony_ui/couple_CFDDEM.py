@@ -104,14 +104,12 @@ def main(output_path, mesh_name):
         print "Reading mesh and conversion to CUDS file"
 
         if mesh_type == "block":
-            if mode_OF == "internal":
-                openfoam_file_io. \
-                    create_block_mesh(output_path, mesh_name, wrapper_OF,
-                                      OpenFoam_input.blockMeshDict)
-            else:
-                openfoam_file_io. \
-                    create_block_mesh(".", mesh_name, wrapper_OF,
-                                      OpenFoam_input.blockMeshDict)
+            path = output_path if mode_OF == "internal" else "."
+
+            openfoam_file_io.create_block_mesh(
+                path, mesh_name, wrapper_OF,
+                OpenFoam_input.blockMeshDict
+            )
         else:
             corner_points = [(0.0, 0.0, 0.0),
                              (chansize[0], 0.0, 0.0),
