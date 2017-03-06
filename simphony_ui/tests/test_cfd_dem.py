@@ -2,13 +2,13 @@
 Tests
 """
 
+import os
+import shutil
+import tempfile
 import unittest
 import simphony_ui.couple_CFDDEM as cfd_dem
 from simphony.core.cuds_item import CUDSItem
 from simphony.core.cuba import CUBA
-import shutil
-import os
-import tempfile
 
 
 class TestCfeDem(unittest.TestCase):
