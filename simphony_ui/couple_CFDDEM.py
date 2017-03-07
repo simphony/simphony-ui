@@ -49,7 +49,7 @@ def run_calc(output_path, mesh_name):
     # OF settings
     num_timesteps_cfd = 10
     timestep_cfd = 2.0e-4
-    visco_cfd = 1.0e-3
+    viscosity_cfd = 1.0e-3
     dens_liquid = 1000.0
     delta_p = 0.008
 
@@ -85,7 +85,7 @@ def run_calc(output_path, mesh_name):
         cfd_wrapper.SP[CUBA.TIME_STEP] = timestep_cfd
         cfd_wrapper.SP[CUBA.NUMBER_OF_TIME_STEPS] = num_timesteps_cfd
         cfd_wrapper.SP[CUBA.DENSITY] = dens_liquid
-        cfd_wrapper.SP[CUBA.DYNAMIC_VISCOSITY] = visco_cfd
+        cfd_wrapper.SP[CUBA.DYNAMIC_VISCOSITY] = viscosity_cfd
 
         # setting BCs
         cfd_wrapper.BC[CUBA.VELOCITY] = {
@@ -247,18 +247,18 @@ def run_calc(output_path, mesh_name):
             dragforce = np.zeros(3)
             for i in range(0, 3):
                 if force_type == "Stokes":
-                    dragforce[i] = 3.0 * math.pi * visco_cfd * \
+                    dragforce[i] = 3.0 * math.pi * viscosity_cfd * \
                         par.data[CUBA.RADIUS] * 2.0 * rel_velo[i]
                 elif force_type == "Dala":
                     r_number = dens_liquid*abs(rel_velo) * \
-                        par.data[CUBA.RADIUS] * 2.0/visco_cfd
+                        par.data[CUBA.RADIUS] * 2.0/viscosity_cfd
                     coeff = (0.63+4.8/math.sqrt(r_number))**2
                     dragforce[i] = 0.5*coeff*math.pi * \
                         par.data[CUBA.RADIUS]**2 * dens_liquid * \
                         abs(rel_velo)*rel_velo[i]
                 elif force_type == "Coul":
                     r_number = dens_liquid * abs(rel_velo) * \
-                        par.data[CUBA.RADIUS] * 2.0 / visco_cfd
+                        par.data[CUBA.RADIUS] * 2.0 / viscosity_cfd
                     force[m] = math.pi * \
                         par.data[CUBA.RADIUS]**2 * \
                         dens_liquid * \
