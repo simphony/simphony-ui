@@ -22,7 +22,8 @@ from simphony.engine import liggghts
 from simliggghts import CUBAExtension
 
 
-def main(output_path, mesh_name):
+def run_calc(output_path, mesh_name):
+    """Executes the full calculation"""
     mode_cfd = "internal"
     mesh_type = "block"
 
