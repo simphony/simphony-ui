@@ -18,7 +18,7 @@ class TestCFEDem(unittest.TestCase):
         cls.tmp_dir = tempfile.mkdtemp()
         cls.mesh_name = 'test_mesh'
         cls.dem_wrapper, cls.cfd_wrapper = \
-            cfd_dem.main(cls.tmp_dir, cls.mesh_name)
+            cfd_dem.run_calc(cls.tmp_dir, cls.mesh_name)
 
     def test_output(self):
         self.assertTrue(os.path.exists(
