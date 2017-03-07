@@ -6,9 +6,24 @@ import os
 import shutil
 import tempfile
 import unittest
+import logging
+from contextlib import contextmanager
 import simphony_ui.couple_CFDDEM as cfd_dem
 from simphony.core.cuds_item import CUDSItem
 from simphony.core.cuba import CUBA
+
+
+@contextmanager
+def cleanup_garbage(tmpdir):
+    try:
+        yield
+    except:
+        try:
+            print "Things went bad. Cleaning up ", tmpdir
+            shutil.rmtree(tmpdir)
+        except OSError:
+            logging.exception("could not delete the tmp directory")
+        raise
 
 
 class TestCFEDem(unittest.TestCase):
@@ -16,9 +31,11 @@ class TestCFEDem(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmp_dir = tempfile.mkdtemp()
-        cls.mesh_name = 'test_mesh'
-        cls.dem_wrapper, cls.cfd_wrapper = \
-            cfd_dem.run_calc(cls.tmp_dir, cls.mesh_name)
+        with cleanup_garbage(cls.tmp_dir):
+            cls.mesh_name = 'test_mesh'
+            cls.dem_wrapper, cls.cfd_wrapper = \
+                cfd_dem.run_calc(cls.tmp_dir, cls.mesh_name)
+            super(TestCFEDem, cls).setUpClass()
 
     def test_output(self):
         self.assertTrue(os.path.exists(
@@ -46,7 +63,3 @@ class TestCFEDem(unittest.TestCase):
             avg_velo += cell.data[CUBA.VELOCITY][0]
         avg_velo = avg_velo/dataset.count_of(CUDSItem.CELL)
         self.assertAlmostEqual(avg_velo, 0.00151286)
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.tmp_dir)
