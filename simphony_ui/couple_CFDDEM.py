@@ -250,21 +250,21 @@ def run_calc(output_path, mesh_name):
                     dragforce[i] = 3.0 * math.pi * viscosity_cfd * \
                         par.data[CUBA.RADIUS] * 2.0 * rel_velo[i]
                 elif force_type == "Dala":
-                    r_number = dens_liquid*abs(rel_velo) * \
+                    reynold_number = dens_liquid*abs(rel_velo) * \
                         par.data[CUBA.RADIUS] * 2.0/viscosity_cfd
-                    coeff = (0.63+4.8/math.sqrt(r_number))**2
+                    coeff = (0.63+4.8/math.sqrt(reynold_number))**2
                     dragforce[i] = 0.5*coeff*math.pi * \
                         par.data[CUBA.RADIUS]**2 * dens_liquid * \
                         abs(rel_velo)*rel_velo[i]
                 elif force_type == "Coul":
-                    r_number = dens_liquid * abs(rel_velo) * \
+                    reynold_number = dens_liquid * abs(rel_velo) * \
                         par.data[CUBA.RADIUS] * 2.0 / viscosity_cfd
                     force[m] = math.pi * \
                         par.data[CUBA.RADIUS]**2 * \
                         dens_liquid * \
                         abs(rel_velo) * \
-                        (1.84 * r_number**(-0.31) +
-                            0.293*r_number**0.06)**3.45
+                        (1.84 * reynold_number**(-0.31) +
+                            0.293*reynold_number**0.06)**3.45
                 else:
                     print "Error: Unknown force_type! Must be " \
                           "Stokes,Coul or Dala."
