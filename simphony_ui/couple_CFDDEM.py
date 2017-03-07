@@ -23,7 +23,8 @@ from simphony.engine import liggghts
 from simliggghts import CUBAExtension
 
 
-def main():
+def run_calc(output_path, mesh_name):
+    """Executes the full calculation"""
     runstart = time.time()
 
     mode_OF = "internal"
@@ -44,7 +45,7 @@ def main():
     dem_wrapper = liggghts.LiggghtsWrapper(use_internal_interface=True)
 
     if mode_OF == "internal":
-        path = os.path.abspath(os.curdir)
+        path = output_path
         print path
 
     # General settings
@@ -53,7 +54,6 @@ def main():
     force_type = "Stokes"
 
     # OF settings
-    mesh_name = 'test_mesh'
     num_timesteps_OF = 10
     timestep_OF = 2.0e-4
     visco_OF = 1.0e-3
@@ -356,4 +356,4 @@ def main():
     print ("Running liggghts: {}".format(time_LGT/(runend - runstart)))
     print ("Computing drag forces: {}".format(time_drag/(runend - runstart)))
 
-    return dem_wrapper
+    return dem_wrapper, wrapper_OF
