@@ -137,6 +137,7 @@ def run_calc(output_path, mesh_name):
     pc_wall.name = "wall"
 
     num_particles = pc_flow.count_of(CUDSItem.PARTICLE)
+    num_particles_wall = pc_wall.count_of(CUDSItem.PARTICLE)
 
     # shift boxorigin to 0,0,0 and update particles accordingly
     boxorigin = pc_flow.data_extension[CUBAExtension.BOX_ORIGIN]
