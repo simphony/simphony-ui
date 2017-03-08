@@ -11,7 +11,6 @@ class GlobalParametersModel(HasStrictTraits):
     num_iterations = Int(10)
 
     force_type = Enum('Stokes', 'Coul', 'Dala')
-    force_type.default_value = 'Stokes'
 
     traits_view = View(
         VGroup(
@@ -57,7 +56,6 @@ class LiggghtsModel(HasStrictTraits):
     # TODO: Check in the documentation if there must be more
     # possibilities in dropdowns
     pair_potentials_1 = Enum('repulsion', 'cohesion')
-    pair_potentials_1.default_value = 'repulsion'
     pair_potentials_2 = Enum('repulsion', 'cohesion')
     pair_potentials_2.default_value = 'cohesion'
 
@@ -91,12 +89,10 @@ class OpenfoamModel(HasStrictTraits):
     """ The model of Openfoam input parameters """
 
     mode = Enum('internal', 'io')
-    mode.default_value = 'internal'
 
     # TODO: input_file = ???
     mesh_name = Str('mesh')
     mesh_type = Enum('block', 'quad')
-    mesh_type.default_value = 'block'
 
     output_path = Directory(os.path.abspath(os.path.curdir))
 
