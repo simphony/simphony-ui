@@ -36,14 +36,6 @@ class LiggghtsModel(HasStrictTraits):
     boundary_condition_z = Enum('periodic', 'fixed', 'shrink-wrapped')
     boundary_condition_z.default_value = 'periodic'
 
-    # TODO: The label is not displayed properly: fix it
-    boundary_condition = HGroup(
-        Item(name='boundary_condition_x', show_label=False),
-        Item(name='boundary_condition_y', show_label=False),
-        Item(name='boundary_condition_z', show_label=False),
-        label='Boundary conditions'
-    )
-
     # TODO: Checkboxes for particles fixed on the walls or not
 
     # TODO: Try to display arrays on only one line
@@ -59,13 +51,6 @@ class LiggghtsModel(HasStrictTraits):
     pair_potentials_2 = Enum('repulsion', 'cohesion')
     pair_potentials_2.default_value = 'cohesion'
 
-    # TODO: label is not displayed properly: fix it
-    pair_potentials = HGroup(
-        Item(name='pair_potentials_1', show_label=False),
-        Item(name='pair_potentials_2', show_label=False),
-        label='Pair potentials'
-    )
-
     traits_view = View(
         VGroup(
             Item(name='timestep'),
@@ -73,14 +58,25 @@ class LiggghtsModel(HasStrictTraits):
             '_',
             Item(name='input_file'),
             '_',
-            boundary_condition,
+            HGroup(
+                Item(name='boundary_condition_x', show_label=False),
+                Item(name='boundary_condition_y', show_label=False),
+                Item(name='boundary_condition_z', show_label=False),
+                # TODO: The label is not displayed properly: fix it
+                label='Boundary conditions'
+            ),
             '_',
             Item(name='young_modulus'),
             Item(name='poisson_ratio'),
             Item(name='restitution_coefficient'),
             Item(name='friction_coefficient'),
             Item(name='cohesion_energy_density'),
-            pair_potentials,
+            HGroup(
+                Item(name='pair_potentials_1', show_label=False),
+                Item(name='pair_potentials_2', show_label=False),
+                # TODO: label is not displayed properly: fix it
+                label='Pair potentials'
+            ),
         )
     )
 
