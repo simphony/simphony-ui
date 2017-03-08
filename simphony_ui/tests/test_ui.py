@@ -4,7 +4,7 @@ Tests user interface
 
 import unittest
 from traits.api import TraitError, HasStrictTraits
-from simphony_ui.tests.local_traits import PositiveInt, PositiveFloat
+from simphony_ui.local_traits import PositiveInt, PositiveFloat
 
 
 class TestModel(HasStrictTraits):

@@ -2,7 +2,7 @@ import os
 from traits.api import (HasStrictTraits, Float, Enum, Str, Directory, Array,
                         File)
 from traitsui.api import View, Item, VGroup
-from simphony_ui.tests.local_traits import PositiveFloat, PositiveInt
+from simphony_ui.local_traits import PositiveFloat, PositiveInt
 
 
 class OpenfoamModel(HasStrictTraits):
