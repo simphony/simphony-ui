@@ -3,14 +3,14 @@ Tests user interface
 """
 
 import unittest
-import simphony_ui.ui as ui
-from traits.api import TraitError
+from traits.api import TraitError, HasStrictTraits
+from simphony_ui.tests.local_traits import PositiveInt, PositiveFloat
 
 
-class TestModel(ui.HasStrictTraits):
+class TestModel(HasStrictTraits):
 
-    pos_float = ui.PositiveFloat(1e-6)
-    pos_int = ui.PositiveInt(10)
+    pos_float = PositiveFloat(1e-6)
+    pos_int = PositiveInt(10)
 
 
 class TestUI(unittest.TestCase):
