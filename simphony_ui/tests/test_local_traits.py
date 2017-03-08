@@ -1,5 +1,5 @@
 """
-Tests user interface
+Tests local traits
 """
 
 import unittest
@@ -13,7 +13,7 @@ class TestModel(HasStrictTraits):
     pos_int = PositiveInt(10)
 
 
-class TestUI(unittest.TestCase):
+class TestLocalTraits(unittest.TestCase):
 
     def setUp(self):
         self.test_model = TestModel()
