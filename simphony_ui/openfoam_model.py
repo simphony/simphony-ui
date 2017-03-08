@@ -46,6 +46,9 @@ class OpenfoamModel(HasStrictTraits):
 
     traits_view = View(
         VGroup(
+            Item(name='timestep'),
+            Item(name='num_iterations', label='Number of iterations'),
+            '_',
             Item(name='input_file'),
             '_',
             Item(name='mode', style='custom'),
@@ -54,9 +57,6 @@ class OpenfoamModel(HasStrictTraits):
             Item(name='mesh_type'),
             '_',
             Item(name='output_path'),
-            '_',
-            Item(name='timestep'),
-            Item(name='num_iterations', label='Number of iterations'),
             '_',
             Item(name='viscosity'),
             Item(name='density'),
