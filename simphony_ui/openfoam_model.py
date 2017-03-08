@@ -9,7 +9,6 @@ class OpenfoamModel(HasStrictTraits):
 
     mode = Enum('internal', 'io')
 
-    # TODO: input_file = ???
     mesh_name = Str('mesh')
     mesh_type = Enum('block', 'quad')
 
@@ -22,11 +21,6 @@ class OpenfoamModel(HasStrictTraits):
     density = PositiveFloat(1000.0)
     delta_p = Float(0.008)
 
-    # TODO: boundary_conditions_velocity = ???
-    # TODO: boundary_conditions_pressure = ???
-
-    # TODO: PosInt and PosFloat not working for Arrays....
-    # TODO: Try to display arrays on only one line
     channel_size = Array(PositiveFloat, (3,), [1.0e-1, 1.0e-2, 2.0e-3])
     num_grid = Array(PositiveInt, (3,), [400, 40, 1])
 

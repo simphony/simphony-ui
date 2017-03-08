@@ -10,7 +10,6 @@ class LiggghtsModel(HasStrictTraits):
 
     input_file = File()
 
-    # TODO: Display min value textbox when shrink-wrapped option is used
     boundary_condition_x = Enum('periodic', 'fixed', 'shrink-wrapped')
     boundary_condition_x.default_value = 'periodic'
     boundary_condition_y = Enum('periodic', 'fixed', 'shrink-wrapped')
@@ -18,17 +17,12 @@ class LiggghtsModel(HasStrictTraits):
     boundary_condition_z = Enum('periodic', 'fixed', 'shrink-wrapped')
     boundary_condition_z.default_value = 'periodic'
 
-    # TODO: Checkboxes for particles fixed on the walls or not
-
-    # TODO: Try to display arrays on only one line
     young_modulus = Array(Float, (2,), [2.e4, 2.e4])
     poisson_ratio = Array(Float, (2,), [0.45, 0.45])
     restitution_coefficient = Array(Float, (4,), [0.95, 0.95, 0.95, 0.95])
     friction_coefficient = Array(Float, (4,), [0.0, 0.0, 0.0, 0.0])
     cohesion_energy_density = Array(Float, (4,), [0.0, 0.0, 0.0, 0.0])
 
-    # TODO: Check in the documentation if there must be more
-    # possibilities in dropdowns
     pair_potentials_1 = Enum('repulsion', 'cohesion')
     pair_potentials_2 = Enum('repulsion', 'cohesion')
     pair_potentials_2.default_value = 'cohesion'
@@ -44,7 +38,6 @@ class LiggghtsModel(HasStrictTraits):
                 Item(name='boundary_condition_x', show_label=False),
                 Item(name='boundary_condition_y', show_label=False),
                 Item(name='boundary_condition_z', show_label=False),
-                # TODO: The label is not displayed properly: fix it
                 label='Boundary conditions'
             ),
             '_',
@@ -56,7 +49,6 @@ class LiggghtsModel(HasStrictTraits):
             HGroup(
                 Item(name='pair_potentials_1', show_label=False),
                 Item(name='pair_potentials_2', show_label=False),
-                # TODO: label is not displayed properly: fix it
                 label='Pair potentials'
             ),
         )
