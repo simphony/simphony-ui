@@ -1,11 +1,15 @@
 import os
-from traits.api import HasStrictTraits, Float, Enum, Str, Directory, Array
+from traits.api import (HasStrictTraits, Float, Enum, Str, Directory, Array,
+                        File)
 from traitsui.api import View, Item, VGroup
 from simphony_ui.tests.local_traits import PositiveFloat, PositiveInt
 
 
 class OpenfoamModel(HasStrictTraits):
     """ The model of Openfoam input parameters """
+
+    #: The input file used for OpenFoam.
+    input_file = File()
 
     #: The mode of computation used with Openfoam.
     mode = Enum('internal', 'io')
@@ -42,6 +46,8 @@ class OpenfoamModel(HasStrictTraits):
 
     traits_view = View(
         VGroup(
+            Item(name='input_file'),
+            '_',
             Item(name='mode', style='custom'),
             '_',
             Item(name='mesh_name'),
