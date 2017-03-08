@@ -5,7 +5,7 @@ from simphony_ui.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model import OpenfoamModel
 
 
-class TabsModel(HasStrictTraits):
+class Application(HasStrictTraits):
 
     global_settings = Instance(GlobalParametersModel)
     liggghts_settings = Instance(LiggghtsModel)
@@ -34,5 +34,5 @@ class TabsModel(HasStrictTraits):
         return OpenfoamModel()
 
 if __name__ == '__main__':
-    ui = TabsModel()
+    ui = Application()
     ui.configure_traits()
