@@ -16,7 +16,6 @@ class LiggghtsModel(HasStrictTraits):
 
     boundary_condition_x = Enum('periodic', 'fixed', 'shrink-wrapped')
     boundary_condition_y = Enum('periodic', 'fixed', 'shrink-wrapped')
-    boundary_condition_y.default_value = 'fixed'
     boundary_condition_z = Enum('periodic', 'fixed', 'shrink-wrapped')
 
     young_modulus = Array(Float, (2,), [2.e4, 2.e4])
@@ -27,7 +26,6 @@ class LiggghtsModel(HasStrictTraits):
 
     pair_potentials_1 = Enum('repulsion', 'cohesion')
     pair_potentials_2 = Enum('repulsion', 'cohesion')
-    pair_potentials_2.default_value = 'cohesion'
 
     traits_view = View(
         VGroup(
@@ -55,3 +53,9 @@ class LiggghtsModel(HasStrictTraits):
             ),
         )
     )
+
+    def _boundary_condition_y_default(self):
+        return 'fixed'
+
+    def _pair_potentials_2_default(self):
+        return 'cohesion'
