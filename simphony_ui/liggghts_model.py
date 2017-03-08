@@ -5,9 +5,13 @@ from traitsui.api import View, Item, VGroup, HGroup
 class LiggghtsModel(HasStrictTraits):
     """ The model of Liggghts input parameters """
 
+    #: The duration of a step of computation.
     timestep = Float(1e-6)
+
+    #: The number of iterations in the simulation.
     num_iterations = Int(10)
 
+    #: The input file used for liggghts.
     input_file = File()
 
     boundary_condition_x = Enum('periodic', 'fixed', 'shrink-wrapped')
