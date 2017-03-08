@@ -15,11 +15,9 @@ class LiggghtsModel(HasStrictTraits):
     input_file = File()
 
     boundary_condition_x = Enum('periodic', 'fixed', 'shrink-wrapped')
-    boundary_condition_x.default_value = 'periodic'
     boundary_condition_y = Enum('periodic', 'fixed', 'shrink-wrapped')
     boundary_condition_y.default_value = 'fixed'
     boundary_condition_z = Enum('periodic', 'fixed', 'shrink-wrapped')
-    boundary_condition_z.default_value = 'periodic'
 
     young_modulus = Array(Float, (2,), [2.e4, 2.e4])
     poisson_ratio = Array(Float, (2,), [0.45, 0.45])
