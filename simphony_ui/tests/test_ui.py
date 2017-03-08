@@ -15,9 +15,8 @@ class TestModel(ui.HasStrictTraits):
 
 class TestUI(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.test_model = TestModel()
+    def setUp(self):
+        self.test_model = TestModel()
 
     def test_positive_float(self):
         self.test_model.validate_trait('pos_float', 33.3)
