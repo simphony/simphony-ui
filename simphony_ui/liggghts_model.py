@@ -16,9 +16,9 @@ class LiggghtsModel(HasStrictTraits):
     input_file = File()
 
     # Boundary conditions parameters
-    boundary_condition_x = Enum('periodic', 'fixed', 'shrink-wrapped')
-    boundary_condition_y = Enum('periodic', 'fixed', 'shrink-wrapped')
-    boundary_condition_z = Enum('periodic', 'fixed', 'shrink-wrapped')
+    boundary_condition_x = Enum('periodic', 'fixed')
+    boundary_condition_y = Enum('periodic', 'fixed')
+    boundary_condition_z = Enum('periodic', 'fixed')
 
     flow_particles_fixed = Bool(False)
     wall_particles_fixed = Bool(True)
