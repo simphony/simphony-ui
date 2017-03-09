@@ -94,7 +94,7 @@ class BoundaryConditionsModel(HasStrictTraits):
     def _walls_BC_default(self):
         return SurfaceModel()
 
-    def _frontAndBack_BC_default(self):
+    def _front_and_back_BC_default(self):
         return SurfaceModel()
 
 if __name__ == '__main__':
