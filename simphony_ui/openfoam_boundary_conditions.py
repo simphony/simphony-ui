@@ -25,10 +25,10 @@ class BoundaryConditionModel(HasStrictTraits):
 class VelocityBoundaryConditionModel(BoundaryConditionModel):
 
     #: A fixed value of velocity gradient for the boundary
-    fixed_gradient = Array(Float, (3,))
+    fixed_gradient = Array(Float, (1, 3))
 
     #: A fixed value of velocity for the boundary
-    fixed_value = Array(Float, (3,))
+    fixed_value = Array(Float, (1, 3))
 
 
 class PressureBoundaryConditionModel(BoundaryConditionModel):
