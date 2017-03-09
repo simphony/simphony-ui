@@ -75,10 +75,26 @@ class BoundaryConditionsModel(HasStrictTraits):
 
     traits_view = View(
         Tabbed(
-            UItem(name='inlet_BC', style='custom'),
-            UItem(name='outlet_BC', style='custom'),
-            UItem(name='walls_BC', style='custom'),
-            UItem(name='front_and_back_BC', style='custom'),
+            UItem(
+                name='inlet_BC',
+                style='custom',
+                label='Inlet'
+            ),
+            UItem(
+                name='outlet_BC',
+                style='custom',
+                label='Outlet'
+            ),
+            UItem(
+                name='walls_BC',
+                style='custom',
+                label='Walls'
+            ),
+            UItem(
+                name='front_and_back_BC',
+                style='custom',
+                label='Front and Back'
+            ),
         )
     )
 
