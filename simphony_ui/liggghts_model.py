@@ -5,6 +5,7 @@ from traitsui.api import View, Item, VGroup, HGroup
 class LiggghtsModel(HasStrictTraits):
     """ The model of Liggghts input parameters """
 
+    # Computational method parameters
     #: The duration of a step of computation.
     timestep = Float(1e-6)
 
@@ -14,6 +15,7 @@ class LiggghtsModel(HasStrictTraits):
     #: The input file used for liggghts.
     input_file = File()
 
+    # Boundary conditions parameters
     boundary_condition_x = Enum('periodic', 'fixed', 'shrink-wrapped')
     boundary_condition_y = Enum('periodic', 'fixed', 'shrink-wrapped')
     boundary_condition_z = Enum('periodic', 'fixed', 'shrink-wrapped')
@@ -21,6 +23,7 @@ class LiggghtsModel(HasStrictTraits):
     flow_particles_fixed = Bool(False)
     wall_particles_fixed = Bool(True)
 
+    # System parameters/ conditions
     young_modulus = Array(Float, (2,), [2.e4, 2.e4])
     poisson_ratio = Array(Float, (2,), [0.45, 0.45])
     restitution_coefficient = Array(Float, (4,), [0.95, 0.95, 0.95, 0.95])
@@ -32,31 +35,34 @@ class LiggghtsModel(HasStrictTraits):
 
     traits_view = View(
         VGroup(
-            Item(name='timestep'),
-            Item(name='num_iterations', label='Number of iterations'),
-            '_',
-            Item(name='input_file'),
-            '_',
-            HGroup(
-                Item(name='boundary_condition_x', show_label=False),
-                Item(name='boundary_condition_y', show_label=False),
-                Item(name='boundary_condition_z', show_label=False),
+            VGroup(
+                Item(name='timestep'),
+                Item(name='num_iterations', label='Number of iterations'),
+                '_',
+                Item(name='input_file'),
+                label='Computational method parameters',
+            ),
+            VGroup(
+                HGroup(
+                    Item(name='boundary_condition_x'),
+                    Item(name='boundary_condition_y'),
+                    Item(name='boundary_condition_z'),
+                ),
+                '_',
+                Item(name='flow_particles_fixed'),
+                Item(name='wall_particles_fixed'),
                 label='Boundary conditions'
             ),
-            '_',
-            Item(name='flow_particles_fixed'),
-            Item(name='wall_particles_fixed'),
-            '_',
-            Item(name='young_modulus'),
-            Item(name='poisson_ratio'),
-            Item(name='restitution_coefficient'),
-            Item(name='friction_coefficient'),
-            Item(name='cohesion_energy_density'),
-            HGroup(
-                Item(name='pair_potentials_1', show_label=False),
-                Item(name='pair_potentials_2', show_label=False),
-                label='Pair potentials'
-            ),
+            VGroup(
+                Item(name='young_modulus'),
+                Item(name='poisson_ratio'),
+                Item(name='restitution_coefficient'),
+                Item(name='friction_coefficient'),
+                Item(name='cohesion_energy_density'),
+                Item(name='pair_potentials_1'),
+                Item(name='pair_potentials_2'),
+                label='System parameters/ conditions'
+            )
         )
     )
 
