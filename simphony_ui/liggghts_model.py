@@ -1,4 +1,4 @@
-from traits.api import HasStrictTraits, Int, Float, Enum, Array, File, Bool
+from traits.api import HasStrictTraits, Int, Float, Enum, File, Bool, Str
 from traitsui.api import View, Item, VGroup, HGroup
 
 
@@ -24,14 +24,33 @@ class LiggghtsModel(HasStrictTraits):
     wall_particles_fixed = Bool(True)
 
     # System parameters/ conditions
-    young_modulus = Array(Float, (2,), [2.e4, 2.e4])
-    poisson_ratio = Array(Float, (2,), [0.45, 0.45])
-    restitution_coefficient = Array(Float, (4,), [0.95, 0.95, 0.95, 0.95])
-    friction_coefficient = Array(Float, (4,), [0.0, 0.0, 0.0, 0.0])
-    cohesion_energy_density = Array(Float, (4,), [0.0, 0.0, 0.0, 0.0])
+    # Flow particles parameters
+    flow_young_modulus = Float(2.e4)
+    flow_poisson_ratio = Float(0.45)
+    flow_restitution_coefficient_flow = Float(0.95)
+    flow_restitution_coefficient_wall = Float(0.95)
+    flow_friction_coefficient_flow = Float(0.0)
+    flow_friction_coefficient_wall = Float(0.0)
+    flow_cohesion_energy_density_flow = Float(0.0)
+    flow_cohesion_energy_density_wall = Float(0.0)
 
-    pair_potentials_1 = Enum('repulsion', 'cohesion')
-    pair_potentials_2 = Enum('repulsion', 'cohesion')
+    flow_pair_potentials = Enum('repulsion', 'cohesion')
+
+    # Wall particles parameters
+    wall_young_modulus = Float(2.e4)
+    wall_poisson_ratio = Float(0.45)
+    wall_restitution_coefficient_wall = Float(0.95)
+    wall_restitution_coefficient_flow = Float(0.95)
+    wall_friction_coefficient_wall = Float(0.0)
+    wall_friction_coefficient_flow = Float(0.0)
+    wall_cohesion_energy_density_wall = Float(0.0)
+    wall_cohesion_energy_density_flow = Float(0.0)
+
+    wall_pair_potentials = Enum('repulsion', 'cohesion')
+
+    restitution_coefficient_title = Str('Restitution coefficient')
+    friction_coefficient_title = Str('Friction coefficient')
+    cohesion_energy_density_title = Str('Cohesion energy density')
 
     traits_view = View(
         VGroup(
@@ -41,6 +60,7 @@ class LiggghtsModel(HasStrictTraits):
                 '_',
                 Item(name='input_file'),
                 label='Computational method parameters',
+                show_border=True
             ),
             VGroup(
                 HGroup(
@@ -51,17 +71,122 @@ class LiggghtsModel(HasStrictTraits):
                 '_',
                 Item(name='flow_particles_fixed'),
                 Item(name='wall_particles_fixed'),
-                label='Boundary conditions'
+                label='Boundary conditions',
+                show_border=True
             ),
             VGroup(
-                Item(name='young_modulus'),
-                Item(name='poisson_ratio'),
-                Item(name='restitution_coefficient'),
-                Item(name='friction_coefficient'),
-                Item(name='cohesion_energy_density'),
-                Item(name='pair_potentials_1'),
-                Item(name='pair_potentials_2'),
-                label='System parameters/ conditions'
+                VGroup(
+                    Item(
+                        name='flow_young_modulus',
+                        label='Young\'s modulus'
+                    ),
+                    Item(
+                        name='flow_poisson_ratio',
+                        label='Poisson\'s ratio'
+                    ),
+                    '_',
+                    Item(
+                        name='restitution_coefficient_title',
+                        style='readonly',
+                        show_label=False,
+                    ),
+                    Item(
+                        name='flow_restitution_coefficient_flow',
+                        label='with flow particles'
+                    ),
+                    Item(
+                        name='flow_restitution_coefficient_wall',
+                        label='with wall particles'
+                    ),
+                    '_',
+                    Item(
+                        name='friction_coefficient_title',
+                        style='readonly',
+                        show_label=False,
+                    ),
+                    Item(
+                        name='flow_friction_coefficient_flow',
+                        label='with flow particles'
+                    ),
+                    Item(
+                        name='flow_friction_coefficient_wall',
+                        label='with wall particles'
+                    ),
+                    '_',
+                    Item(
+                        name='cohesion_energy_density_title',
+                        style='readonly',
+                        show_label=False,
+                    ),
+                    Item(
+                        name='flow_cohesion_energy_density_flow',
+                        label='with flow particles'
+                    ),
+                    Item(
+                        name='flow_cohesion_energy_density_wall',
+                        label='with wall particles'
+                    ),
+                    Item(name='flow_pair_potentials'),
+                    label='Flow particles parameters',
+                    show_border=True
+                ),
+                VGroup(
+                    Item(
+                        name='wall_young_modulus',
+                        label='Young\'s modulus'
+                    ),
+                    Item(
+                        name='wall_poisson_ratio',
+                        label='Poisson\'s ratio'
+                    ),
+                    '_',
+                    Item(
+                        name='restitution_coefficient_title',
+                        style='readonly',
+                        show_label=False,
+                    ),
+                    Item(
+                        name='wall_restitution_coefficient_wall',
+                        label='with wall particles'
+                    ),
+                    Item(
+                        name='wall_restitution_coefficient_flow',
+                        label='with flow particles'
+                    ),
+                    '_',
+                    Item(
+                        name='friction_coefficient_title',
+                        style='readonly',
+                        show_label=False,
+                    ),
+                    Item(
+                        name='wall_friction_coefficient_wall',
+                        label='with wall particles'
+                    ),
+                    Item(
+                        name='wall_friction_coefficient_flow',
+                        label='with flow particles'
+                    ),
+                    '_',
+                    Item(
+                        name='cohesion_energy_density_title',
+                        style='readonly',
+                        show_label=False,
+                    ),
+                    Item(
+                        name='wall_cohesion_energy_density_wall',
+                        label='with wall particles'
+                    ),
+                    Item(
+                        name='wall_cohesion_energy_density_flow',
+                        label='with flow particles'
+                    ),
+                    Item(name='wall_pair_potentials'),
+                    label='Wall particles parameters',
+                    show_border=True
+                ),
+                label='System parameters/ conditions',
+                show_border=True
             )
         )
     )
@@ -69,5 +194,5 @@ class LiggghtsModel(HasStrictTraits):
     def _y_wall_default(self):
         return 'fixed'
 
-    def _pair_potentials_2_default(self):
+    def _wall_pair_potentials_default(self):
         return 'cohesion'
