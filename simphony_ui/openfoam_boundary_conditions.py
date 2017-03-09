@@ -1,5 +1,5 @@
 from traits.api import HasStrictTraits, Float, Enum, Instance, Array
-from traitsui.api import View, Item, Tabbed, UItem
+from traitsui.api import View, Item, Tabbed, UItem, VGroup
 
 
 class BoundaryConditionModel(HasStrictTraits):
@@ -8,17 +8,18 @@ class BoundaryConditionModel(HasStrictTraits):
     type = Enum('none', 'empty', 'zeroGradient', 'fixedGradient', 'fixedValue')
 
     traits_view = View(
-        'type',
-        Item(
-            name='fixed_gradient',
-            visible_when='type == "fixedGradient"',
-            style='custom'
-        ),
-        Item(
-            name='fixed_value',
-            visible_when='type == "fixedValue"',
-            style='custom'
-        ),
+        VGroup(
+            'type',
+            Item(
+                name='fixed_gradient',
+                # visible_when='type == "fixedGradient"',
+            ),
+            Item(
+                name='fixed_value',
+                # visible_when='type == "fixedValue"',
+            ),
+            show_border=True,
+        )
     )
 
 
@@ -95,7 +96,7 @@ class BoundaryConditionsModel(HasStrictTraits):
                 name='front_and_back_BC',
                 style='custom',
                 label='Front and Back'
-            ),
+            )
         )
     )
 
@@ -145,4 +146,4 @@ class BoundaryConditionsModel(HasStrictTraits):
         return front_and_back_bc
 
 if __name__ == '__main__':
-    BoundaryConditionsModel().configure_traits()
+    SurfaceModel().configure_traits()

@@ -1,7 +1,7 @@
 import os
 from traits.api import (HasStrictTraits, Enum, Str, Directory, Array,
                         File, Instance)
-from traitsui.api import View, Item, VGroup
+from traitsui.api import View, Item, VGroup, Spring
 from simphony_ui.local_traits import PositiveFloat, PositiveInt
 from simphony_ui.openfoam_boundary_conditions import BoundaryConditionsModel
 
@@ -9,6 +9,7 @@ from simphony_ui.openfoam_boundary_conditions import BoundaryConditionsModel
 class OpenfoamModel(HasStrictTraits):
     """ The model of Openfoam input parameters """
 
+    # Computational method parameters
     #: The input file used for OpenFoam.
     input_file = File()
 
@@ -30,9 +31,11 @@ class OpenfoamModel(HasStrictTraits):
     #: The number of iterations in the simulation.
     num_iterations = PositiveInt(10)
 
+    # Boundary conditions parameters
     #: The boundary conditions during the simulation
     boundary_conditions = Instance(BoundaryConditionsModel)
 
+    # System parameters/ conditions
     #: The viscosity of the fluid.
     viscosity = PositiveFloat(1.0e-3)
 
@@ -47,25 +50,35 @@ class OpenfoamModel(HasStrictTraits):
 
     traits_view = View(
         VGroup(
-            Item(name='timestep'),
-            Item(name='num_iterations', label='Number of iterations'),
-            '_',
-            Item(name='input_file'),
-            '_',
-            Item(name='mode', style='custom'),
-            '_',
-            Item(name='mesh_name'),
-            Item(name='mesh_type'),
-            '_',
-            Item(name='output_path'),
-            '_',
-            Item(name='boundary_conditions', style='custom'),
-            '_',
-            Item(name='viscosity'),
-            Item(name='density'),
-            '_',
-            Item(name='channel_size'),
-            Item(name='num_grid'),
+            VGroup(
+                Item(name='timestep'),
+                Item(name='num_iterations', label='Number of iterations'),
+                '_',
+                Item(name='input_file'),
+                '_',
+                Item(name='mode', style='custom'),
+                '_',
+                Item(name='mesh_name'),
+                Item(name='mesh_type'),
+                '_',
+                Item(name='output_path'),
+                label='Computational method parameters',
+                show_border=True,
+            ),
+            VGroup(
+                Item(name='boundary_conditions', style='custom'),
+                show_border=True
+            ),
+            VGroup(
+                Item(name='viscosity'),
+                Item(name='density'),
+                '_',
+                Item(name='channel_size'),
+                Item(name='num_grid'),
+                label='System parameters/ conditions',
+                show_border=True,
+            ),
+            Spring(),
         )
     )
 
