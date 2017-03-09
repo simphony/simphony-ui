@@ -2,50 +2,37 @@ from traits.api import HasStrictTraits, Float, Enum, Instance, Array
 from traitsui.api import View, Item, Tabbed, UItem
 
 
-class VelocityBoundaryConditionModel(HasStrictTraits):
+class BoundaryConditionModel(HasStrictTraits):
 
     type = Enum('none', 'fixedGradient', 'fixedValue')
+
+    traits_view = View(
+        'type',
+        Item(
+            name='fixed_gradient',
+            visible_when='type == "fixedGradient"',
+            style='custom'
+        ),
+        Item(
+            name='fixed_value',
+            visible_when='type == "fixedValue"',
+            style='custom'
+        ),
+    )
+
+
+class VelocityBoundaryConditionModel(BoundaryConditionModel):
 
     fixed_gradient = Array(Float, (3,))
 
     fixed_value = Array(Float, (3,))
 
-    traits_view = View(
-        'type',
-        Item(
-            name='fixed_gradient',
-            visible_when='type == "fixedGradient"',
-            style='custom'
-        ),
-        Item(
-            name='fixed_value',
-            visible_when='type == "fixedValue"',
-            style='custom'
-        ),
-    )
 
-
-class PressureBoundaryConditionModel(HasStrictTraits):
-
-    type = Enum('none', 'fixedGradient', 'fixedValue')
+class PressureBoundaryConditionModel(BoundaryConditionModel):
 
     fixed_gradient = Float()
 
     fixed_value = Float()
-
-    traits_view = View(
-        'type',
-        Item(
-            name='fixed_gradient',
-            visible_when='type == "fixedGradient"',
-            style='custom',
-        ),
-        Item(
-            name='fixed_value',
-            visible_when='type == "fixedValue"',
-            style='custom'
-        ),
-    )
 
 
 class SurfaceModel(HasStrictTraits):
