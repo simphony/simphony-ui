@@ -100,16 +100,49 @@ class BoundaryConditionsModel(HasStrictTraits):
     )
 
     def _inlet_BC_default(self):
-        return SurfaceModel()
+        inlet_bc = SurfaceModel()
+
+        # Add default velocity values
+        inlet_bc.velocity_boundary_condition.type = 'zeroGradient'
+
+        # Add default pressure values
+        inlet_bc.pressure_boundary_condition.type = 'fixedValue'
+        inlet_bc.pressure_boundary_condition.fixed_value = 0.008
+
+        return inlet_bc
 
     def _outlet_BC_default(self):
-        return SurfaceModel()
+        outlet_bc = SurfaceModel()
+
+        # Add default velocity values
+        outlet_bc.velocity_boundary_condition.type = 'zeroGradient'
+
+        # Add default pressure values
+        outlet_bc.pressure_boundary_condition.type = 'fixedValue'
+
+        return outlet_bc
 
     def _walls_BC_default(self):
-        return SurfaceModel()
+        walls_bc = SurfaceModel()
+
+        # Add default velocity values
+        walls_bc.velocity_boundary_condition.type = 'fixedValue'
+
+        # Add default pressure values
+        walls_bc.pressure_boundary_condition.type = 'zeroGradient'
+
+        return walls_bc
 
     def _front_and_back_BC_default(self):
-        return SurfaceModel()
+        front_and_back_bc = SurfaceModel()
+
+        # Add default velocity values
+        front_and_back_bc.velocity_boundary_condition.type = 'empty'
+
+        # Add default pressure values
+        front_and_back_bc.pressure_boundary_condition.type = 'empty'
+
+        return front_and_back_bc
 
 if __name__ == '__main__':
     BoundaryConditionsModel().configure_traits()
