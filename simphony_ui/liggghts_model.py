@@ -1,4 +1,4 @@
-from traits.api import HasStrictTraits, Int, Float, Enum, Array, File
+from traits.api import HasStrictTraits, Int, Float, Enum, Array, File, Bool
 from traitsui.api import View, Item, VGroup, HGroup
 
 
@@ -17,6 +17,9 @@ class LiggghtsModel(HasStrictTraits):
     boundary_condition_x = Enum('periodic', 'fixed', 'shrink-wrapped')
     boundary_condition_y = Enum('periodic', 'fixed', 'shrink-wrapped')
     boundary_condition_z = Enum('periodic', 'fixed', 'shrink-wrapped')
+
+    flow_particles_fixed = Bool(False)
+    wall_particles_fixed = Bool(True)
 
     young_modulus = Array(Float, (2,), [2.e4, 2.e4])
     poisson_ratio = Array(Float, (2,), [0.45, 0.45])
@@ -40,6 +43,9 @@ class LiggghtsModel(HasStrictTraits):
                 Item(name='boundary_condition_z', show_label=False),
                 label='Boundary conditions'
             ),
+            '_',
+            Item(name='flow_particles_fixed'),
+            Item(name='wall_particles_fixed'),
             '_',
             Item(name='young_modulus'),
             Item(name='poisson_ratio'),
