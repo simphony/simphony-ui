@@ -1,8 +1,9 @@
 import os
-from traits.api import (HasStrictTraits, Float, Enum, Str, Directory, Array,
-                        File)
+from traits.api import (HasStrictTraits, Enum, Str, Directory, Array,
+                        File, Instance)
 from traitsui.api import View, Item, VGroup
 from simphony_ui.local_traits import PositiveFloat, PositiveInt
+from simphony_ui.openfoam_boundary_conditions import BoundaryConditionsModel
 
 
 class OpenfoamModel(HasStrictTraits):
@@ -29,14 +30,14 @@ class OpenfoamModel(HasStrictTraits):
     #: The number of iterations in the simulation.
     num_iterations = PositiveInt(10)
 
+    #: The boundary conditions during the simulation
+    boundary_conditions = Instance(BoundaryConditionsModel)
+
     #: The viscosity of the fluid.
     viscosity = PositiveFloat(1.0e-3)
 
     #: The density of the fluid.
     density = PositiveFloat(1000.0)
-
-    #: The pression difference.
-    delta_p = Float(0.008)
 
     #: The channel size.
     channel_size = Array(PositiveFloat, (3,), [1.0e-1, 1.0e-2, 2.0e-3])
@@ -58,11 +59,15 @@ class OpenfoamModel(HasStrictTraits):
             '_',
             Item(name='output_path'),
             '_',
+            Item(name='boundary_conditions', style='custom'),
+            '_',
             Item(name='viscosity'),
             Item(name='density'),
-            Item(name='delta_p'),
             '_',
             Item(name='channel_size'),
             Item(name='num_grid'),
         )
     )
+
+    def _boundary_conditions_default(self):
+        return BoundaryConditionsModel()
