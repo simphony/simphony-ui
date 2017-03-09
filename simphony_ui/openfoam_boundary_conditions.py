@@ -4,6 +4,7 @@ from traitsui.api import View, Item, Tabbed, UItem
 
 class BoundaryConditionModel(HasStrictTraits):
 
+    #: The type of the boundary condition
     type = Enum('none', 'empty', 'fixedGradient', 'fixedValue')
 
     traits_view = View(
@@ -23,22 +24,28 @@ class BoundaryConditionModel(HasStrictTraits):
 
 class VelocityBoundaryConditionModel(BoundaryConditionModel):
 
+    #: A fixed value of velocity gradient for the boundary
     fixed_gradient = Array(Float, (3,))
 
+    #: A fixed value of velocity for the boundary
     fixed_value = Array(Float, (3,))
 
 
 class PressureBoundaryConditionModel(BoundaryConditionModel):
 
+    #: A fixed value of pressure gradient for the boundary
     fixed_gradient = Float()
 
+    #: A fixed value of pressure for the boundary
     fixed_value = Float()
 
 
 class SurfaceModel(HasStrictTraits):
 
+    #: The velocity boundary condition model for the surface
     velocity_boundary_condition = Instance(VelocityBoundaryConditionModel)
 
+    #: The pressure boundary condition model for the surface
     pressure_boundary_condition = Instance(PressureBoundaryConditionModel)
 
     traits_view = View(
@@ -55,9 +62,16 @@ class SurfaceModel(HasStrictTraits):
 
 class BoundaryConditionsModel(HasStrictTraits):
 
+    #: The boundary conditions of the inlet
     inlet_BC = Instance(SurfaceModel)
+
+    #: The boundary conditions of the outlet
     outlet_BC = Instance(SurfaceModel)
+
+    #: The boundary conditions of the walls
     walls_BC = Instance(SurfaceModel)
+
+    #: The boundary conditions of the front and back
     front_and_back_BC = Instance(SurfaceModel)
 
     traits_view = View(
