@@ -71,14 +71,14 @@ class BoundaryConditionsModel(HasStrictTraits):
     inlet_BC = Instance(SurfaceModel)
     outlet_BC = Instance(SurfaceModel)
     walls_BC = Instance(SurfaceModel)
-    frontAndBack_BC = Instance(SurfaceModel)
+    front_and_back_BC = Instance(SurfaceModel)
 
     traits_view = View(
         Tabbed(
             UItem(name='inlet_BC', style='custom'),
             UItem(name='outlet_BC', style='custom'),
             UItem(name='walls_BC', style='custom'),
-            UItem(name='frontAndBack_BC', style='custom'),
+            UItem(name='front_and_back_BC', style='custom'),
         )
     )
 
