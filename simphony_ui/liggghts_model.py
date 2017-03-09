@@ -1,4 +1,4 @@
-from traits.api import HasStrictTraits, Int, Float, Enum, File, Bool, Str
+from traits.api import HasStrictTraits, Int, Float, Enum, File, Bool
 from traitsui.api import View, Item, VGroup, HGroup
 
 
@@ -48,10 +48,6 @@ class LiggghtsModel(HasStrictTraits):
 
     wall_pair_potentials = Enum('repulsion', 'cohesion')
 
-    restitution_coefficient_title = Str('Restitution coefficient')
-    friction_coefficient_title = Str('Friction coefficient')
-    cohesion_energy_density_title = Str('Cohesion energy density')
-
     traits_view = View(
         VGroup(
             VGroup(
@@ -93,47 +89,38 @@ class LiggghtsModel(HasStrictTraits):
                         name='flow_poisson_ratio',
                         label='Poisson\'s ratio'
                     ),
-                    '_',
-                    Item(
-                        name='restitution_coefficient_title',
-                        style='readonly',
-                        show_label=False,
+                    VGroup(
+                        Item(
+                            name='flow_restitution_coefficient_flow',
+                            label='with flow particles'
+                        ),
+                        Item(
+                            name='flow_restitution_coefficient_wall',
+                            label='with wall particles'
+                        ),
+                        label='Restitution Coefficient',
                     ),
-                    Item(
-                        name='flow_restitution_coefficient_flow',
-                        label='with flow particles'
+                    VGroup(
+                        Item(
+                            name='flow_friction_coefficient_flow',
+                            label='with flow particles'
+                        ),
+                        Item(
+                            name='flow_friction_coefficient_wall',
+                            label='with wall particles'
+                        ),
+                        label='Friction Coefficient',
                     ),
-                    Item(
-                        name='flow_restitution_coefficient_wall',
-                        label='with wall particles'
-                    ),
-                    '_',
-                    Item(
-                        name='friction_coefficient_title',
-                        style='readonly',
-                        show_label=False,
-                    ),
-                    Item(
-                        name='flow_friction_coefficient_flow',
-                        label='with flow particles'
-                    ),
-                    Item(
-                        name='flow_friction_coefficient_wall',
-                        label='with wall particles'
-                    ),
-                    '_',
-                    Item(
-                        name='cohesion_energy_density_title',
-                        style='readonly',
-                        show_label=False,
-                    ),
-                    Item(
-                        name='flow_cohesion_energy_density_flow',
-                        label='with flow particles'
-                    ),
-                    Item(
-                        name='flow_cohesion_energy_density_wall',
-                        label='with wall particles'
+                    VGroup(
+                        Item(
+                            name='flow_cohesion_energy_density_flow',
+                            label='with flow particles'
+                        ),
+                        Item(
+                            name='flow_cohesion_energy_density_wall',
+                            label='with wall particles'
+                        ),
+                        label='Cohesion energy density'
                     ),
                     Item(name='flow_pair_potentials'),
                     label='Flow particles parameters',
@@ -148,47 +135,38 @@ class LiggghtsModel(HasStrictTraits):
                         name='wall_poisson_ratio',
                         label='Poisson\'s ratio'
                     ),
-                    '_',
-                    Item(
-                        name='restitution_coefficient_title',
-                        style='readonly',
-                        show_label=False,
+                    VGroup(
+                        Item(
+                            name='wall_restitution_coefficient_wall',
+                            label='with wall particles'
+                        ),
+                        Item(
+                            name='wall_restitution_coefficient_flow',
+                            label='with flow particles'
+                        ),
+                        label='Restitution Coefficient'
                     ),
-                    Item(
-                        name='wall_restitution_coefficient_wall',
-                        label='with wall particles'
+                    VGroup(
+                        Item(
+                            name='wall_friction_coefficient_wall',
+                            label='with wall particles'
+                        ),
+                        Item(
+                            name='wall_friction_coefficient_flow',
+                            label='with flow particles'
+                        ),
+                        label='Friction Coefficient'
                     ),
-                    Item(
-                        name='wall_restitution_coefficient_flow',
-                        label='with flow particles'
-                    ),
-                    '_',
-                    Item(
-                        name='friction_coefficient_title',
-                        style='readonly',
-                        show_label=False,
-                    ),
-                    Item(
-                        name='wall_friction_coefficient_wall',
-                        label='with wall particles'
-                    ),
-                    Item(
-                        name='wall_friction_coefficient_flow',
-                        label='with flow particles'
-                    ),
-                    '_',
-                    Item(
-                        name='cohesion_energy_density_title',
-                        style='readonly',
-                        show_label=False,
-                    ),
-                    Item(
-                        name='wall_cohesion_energy_density_wall',
-                        label='with wall particles'
-                    ),
-                    Item(
-                        name='wall_cohesion_energy_density_flow',
-                        label='with flow particles'
+                    VGroup(
+                        Item(
+                            name='wall_cohesion_energy_density_wall',
+                            label='with wall particles'
+                        ),
+                        Item(
+                            name='wall_cohesion_energy_density_flow',
+                            label='with flow particles'
+                        ),
+                        label='Cohesion energy density'
                     ),
                     Item(name='wall_pair_potentials'),
                     label='Wall particles parameters',
