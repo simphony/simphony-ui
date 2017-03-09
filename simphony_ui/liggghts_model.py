@@ -16,9 +16,9 @@ class LiggghtsModel(HasStrictTraits):
     input_file = File()
 
     # Boundary conditions parameters
-    boundary_condition_x = Enum('periodic', 'fixed')
-    boundary_condition_y = Enum('periodic', 'fixed')
-    boundary_condition_z = Enum('periodic', 'fixed')
+    x_wall = Enum('periodic', 'fixed')
+    y_wall = Enum('periodic', 'fixed')
+    z_wall = Enum('periodic', 'fixed')
 
     flow_particles_fixed = Bool(False)
     wall_particles_fixed = Bool(True)
@@ -44,9 +44,9 @@ class LiggghtsModel(HasStrictTraits):
             ),
             VGroup(
                 HGroup(
-                    Item(name='boundary_condition_x'),
-                    Item(name='boundary_condition_y'),
-                    Item(name='boundary_condition_z'),
+                    Item(name='x_wall'),
+                    Item(name='y_wall'),
+                    Item(name='z_wall'),
                 ),
                 '_',
                 Item(name='flow_particles_fixed'),
@@ -66,7 +66,7 @@ class LiggghtsModel(HasStrictTraits):
         )
     )
 
-    def _boundary_condition_y_default(self):
+    def _y_wall_default(self):
         return 'fixed'
 
     def _pair_potentials_2_default(self):
