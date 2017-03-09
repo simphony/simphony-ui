@@ -40,10 +40,10 @@ class OpenfoamModel(HasStrictTraits):
     density = PositiveFloat(1000.0)
 
     #: The channel size.
-    channel_size = Array(PositiveFloat, (3,), [1.0e-1, 1.0e-2, 2.0e-3])
+    channel_size = Array(PositiveFloat, (1, 3), [[1.0e-1, 1.0e-2, 2.0e-3]])
 
     #: The number of elements in all channel-directions.
-    num_grid = Array(PositiveInt, (3,), [400, 40, 1])
+    num_grid = Array(PositiveInt, (1, 3), [[400, 40, 1]])
 
     traits_view = View(
         VGroup(
