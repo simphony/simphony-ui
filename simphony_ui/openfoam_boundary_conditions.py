@@ -4,7 +4,7 @@ from traitsui.api import View, Item, Tabbed, UItem
 
 class BoundaryConditionModel(HasStrictTraits):
 
-    type = Enum('none', 'fixedGradient', 'fixedValue')
+    type = Enum('none', 'empty', 'fixedGradient', 'fixedValue')
 
     traits_view = View(
         'type',
