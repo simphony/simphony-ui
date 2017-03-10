@@ -1,3 +1,4 @@
+import numpy as np
 from traits.api import HasStrictTraits, Float, Enum, Instance, Array
 from traitsui.api import View, Item, Tabbed, UItem, VGroup
 
@@ -6,6 +7,9 @@ class BoundaryConditionModel(HasStrictTraits):
 
     #: The type of the boundary condition
     type = Enum('none', 'empty', 'zeroGradient', 'fixedGradient', 'fixedValue')
+
+    #: A fixed value of velocity gradient for the boundary
+    fixed_gradient = Array(np.float, (1, 3))
 
     traits_view = View(
         VGroup(
@@ -25,17 +29,11 @@ class BoundaryConditionModel(HasStrictTraits):
 
 class VelocityBoundaryConditionModel(BoundaryConditionModel):
 
-    #: A fixed value of velocity gradient for the boundary
-    fixed_gradient = Array(Float, (1, 3))
-
     #: A fixed value of velocity for the boundary
-    fixed_value = Array(Float, (1, 3))
+    fixed_value = Array(np.float, (1, 3))
 
 
 class PressureBoundaryConditionModel(BoundaryConditionModel):
-
-    #: A fixed value of pressure gradient for the boundary
-    fixed_gradient = Float()
 
     #: A fixed value of pressure for the boundary
     fixed_value = Float()
@@ -115,10 +113,8 @@ class BoundaryConditionsModel(HasStrictTraits):
     def _outlet_BC_default(self):
         outlet_bc = SurfaceModel()
 
-        # Add default velocity values
         outlet_bc.velocity_boundary_condition.type = 'zeroGradient'
 
-        # Add default pressure values
         outlet_bc.pressure_boundary_condition.type = 'fixedValue'
 
         return outlet_bc
@@ -126,10 +122,8 @@ class BoundaryConditionsModel(HasStrictTraits):
     def _walls_BC_default(self):
         walls_bc = SurfaceModel()
 
-        # Add default velocity values
         walls_bc.velocity_boundary_condition.type = 'fixedValue'
 
-        # Add default pressure values
         walls_bc.pressure_boundary_condition.type = 'zeroGradient'
 
         return walls_bc
@@ -137,10 +131,8 @@ class BoundaryConditionsModel(HasStrictTraits):
     def _front_and_back_BC_default(self):
         front_and_back_bc = SurfaceModel()
 
-        # Add default velocity values
         front_and_back_bc.velocity_boundary_condition.type = 'empty'
 
-        # Add default pressure values
         front_and_back_bc.pressure_boundary_condition.type = 'empty'
 
         return front_and_back_bc
