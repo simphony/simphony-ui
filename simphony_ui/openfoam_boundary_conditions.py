@@ -7,6 +7,9 @@ class BoundaryConditionModel(HasStrictTraits):
     #: The type of the boundary condition
     type = Enum('none', 'empty', 'zeroGradient', 'fixedGradient', 'fixedValue')
 
+    #: A fixed value of velocity gradient for the boundary
+    fixed_gradient = Array(Float, (1, 3))
+
     traits_view = View(
         VGroup(
             'type',
@@ -25,17 +28,11 @@ class BoundaryConditionModel(HasStrictTraits):
 
 class VelocityBoundaryConditionModel(BoundaryConditionModel):
 
-    #: A fixed value of velocity gradient for the boundary
-    fixed_gradient = Array(Float, (1, 3))
-
     #: A fixed value of velocity for the boundary
     fixed_value = Array(Float, (1, 3))
 
 
 class PressureBoundaryConditionModel(BoundaryConditionModel):
-
-    #: A fixed value of pressure gradient for the boundary
-    fixed_gradient = Float()
 
     #: A fixed value of pressure for the boundary
     fixed_value = Float()
