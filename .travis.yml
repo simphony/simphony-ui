@@ -51,6 +51,10 @@ before_install:
 install:
   - pip install -r dev_requirements.txt
 #  - python -c "import simphony"
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
 script:
   - python -m unittest discover
   - flake8 .
