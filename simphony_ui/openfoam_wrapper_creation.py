@@ -92,6 +92,7 @@ def get_boundary_condition_description(bc):
 
     Raises
     ------
+    ValueError
         If bc.type doesn't have a proper value
     """
     if bc.type == 'none':
