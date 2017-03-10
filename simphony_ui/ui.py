@@ -30,7 +30,7 @@ class Application(HasStrictTraits):
     )
 
     @on_trait_change('run_button')
-    def get_parameters(self):
+    def run_calc(self):
         print 'Hello World !'
 
     def _global_settings_default(self):
