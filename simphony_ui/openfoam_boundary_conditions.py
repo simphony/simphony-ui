@@ -12,11 +12,11 @@ class BoundaryConditionModel(HasStrictTraits):
             'type',
             Item(
                 name='fixed_gradient',
-                # visible_when='type == "fixedGradient"',
+                visible_when='type == "fixedGradient"',
             ),
             Item(
                 name='fixed_value',
-                # visible_when='type == "fixedValue"',
+                visible_when='type == "fixedValue"',
             ),
             show_border=True,
         )
