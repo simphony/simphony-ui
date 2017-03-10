@@ -49,7 +49,7 @@ before_install:
   - make simphony-lammps
   - popd
 install:
-  - pip install -r --upgrade dev_requirements.txt
+  - pip install --upgrade -r dev_requirements.txt
 #  - python -c "import simphony"
 script:
   - python -m unittest discover
