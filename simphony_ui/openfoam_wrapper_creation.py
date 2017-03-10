@@ -76,7 +76,27 @@ def create_openfoam_wrapper(openfoam_settings):
 
 
 def get_boundary_condition_description(bc):
-    if bc.type == 'zeroGradient' or bc.type == 'empty':
+    """
+    Function which return the proper object defining the
+    boundary condition for the Openfoam wrapper
+
+    Parameters
+    ----------
+    bc : BoundaryConditionModel
+        The boundary condition model
+
+    Returns
+    -------
+        A description of the boundary condition respecting the
+        Openfoam wrapper expected input
+
+    Raises
+    ------
+        If bc.type doesn't have a proper value
+    """
+    if bc.type == 'none':
+        return None
+    elif bc.type == 'zeroGradient' or bc.type == 'empty':
         return bc.type
     elif bc.type == 'fixedGradient':
         # The shape of the fixed gradient is (1, 3)
@@ -86,5 +106,5 @@ def get_boundary_condition_description(bc):
             return bc.type, bc.fixed_value[0].tolist()
         else:
             return bc.type, bc.fixed_value
-
-    return None
+    raise ValueError(
+        '{} is not a possible boundary condition type'.format(bc.type))
