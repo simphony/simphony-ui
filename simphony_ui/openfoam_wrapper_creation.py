@@ -36,31 +36,27 @@ def create_openfoam_wrapper(openfoam_settings):
     walls_BC = openfoam_settings.boundary_conditions.walls_BC
     front_and_back_BC = openfoam_settings.boundary_conditions.front_and_back_BC
 
-    openfoam_wrapper.BC[CUBA.VELOCITY]['inlet'] = \
-        get_boundary_condition_description(
+    velocity_BC = {}
+    velocity_BC['inlet'] = get_boundary_condition_description(
             inlet_BC.velocity_boundary_condition)
-    openfoam_wrapper.BC[CUBA.VELOCITY]['outlet'] = \
-        get_boundary_condition_description(
+    velocity_BC['outlet'] = get_boundary_condition_description(
             outlet_BC.velocity_boundary_condition)
-    openfoam_wrapper.BC[CUBA.VELOCITY]['walls'] = \
-        get_boundary_condition_description(
+    velocity_BC['walls'] = get_boundary_condition_description(
             walls_BC.velocity_boundary_condition)
-    openfoam_wrapper.BC[CUBA.VELOCITY]['frontAndBack'] = \
-        get_boundary_condition_description(
+    velocity_BC['frontAndBack'] = get_boundary_condition_description(
             front_and_back_BC.velocity_boundary_condition)
+    openfoam_wrapper.BC[CUBA.VELOCITY] = velocity_BC
 
-    openfoam_wrapper.BC[CUBA.PRESSURE]['inlet'] = \
-        get_boundary_condition_description(
+    pressure_BC = {}
+    pressure_BC['inlet'] = get_boundary_condition_description(
             inlet_BC.pressure_boundary_condition)
-    openfoam_wrapper.BC[CUBA.PRESSURE]['outlet'] = \
-        get_boundary_condition_description(
+    pressure_BC['outlet'] = get_boundary_condition_description(
             outlet_BC.pressure_boundary_condition)
-    openfoam_wrapper.BC[CUBA.PRESSURE]['walls'] = \
-        get_boundary_condition_description(
+    pressure_BC['walls'] = get_boundary_condition_description(
             walls_BC.pressure_boundary_condition)
-    openfoam_wrapper.BC[CUBA.PRESSURE]['frontAndBack'] = \
-        get_boundary_condition_description(
+    pressure_BC['frontAndBack'] = get_boundary_condition_description(
             front_and_back_BC.pressure_boundary_condition)
+    openfoam_wrapper.BC[CUBA.PRESSURE] = pressure_BC
 
     return openfoam_wrapper
 
