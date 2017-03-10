@@ -1,13 +1,15 @@
 import os
-from traits.api import (HasStrictTraits, Float, Enum, Str, Directory, Array,
-                        File)
-from traitsui.api import View, Item, VGroup
+from traits.api import (HasStrictTraits, Enum, Str, Directory,
+                        File, Instance)
+from traitsui.api import View, Item, VGroup, HGroup, Spring
 from simphony_ui.local_traits import PositiveFloat, PositiveInt
+from simphony_ui.openfoam_boundary_conditions import BoundaryConditionsModel
 
 
 class OpenfoamModel(HasStrictTraits):
     """ The model of Openfoam input parameters """
 
+    # Computational method parameters
     #: The input file used for OpenFoam.
     input_file = File()
 
@@ -29,40 +31,71 @@ class OpenfoamModel(HasStrictTraits):
     #: The number of iterations in the simulation.
     num_iterations = PositiveInt(10)
 
+    # Boundary conditions parameters
+    #: The boundary conditions during the simulation
+    boundary_conditions = Instance(BoundaryConditionsModel)
+
+    # System parameters/ conditions
     #: The viscosity of the fluid.
     viscosity = PositiveFloat(1.0e-3)
 
     #: The density of the fluid.
     density = PositiveFloat(1000.0)
 
-    #: The pression difference.
-    delta_p = Float(0.008)
-
     #: The channel size.
-    channel_size = Array(PositiveFloat, (3,), [1.0e-1, 1.0e-2, 2.0e-3])
+    channel_size_x = PositiveFloat(1.0e-1)
+    channel_size_y = PositiveFloat(1.0e-2)
+    channel_size_z = PositiveFloat(2.0e-3)
 
     #: The number of elements in all channel-directions.
-    num_grid = Array(PositiveInt, (3,), [400, 40, 1])
+    num_grid_x = PositiveInt(400)
+    num_grid_y = PositiveInt(40)
+    num_grid_z = PositiveInt(1)
 
     traits_view = View(
         VGroup(
-            Item(name='timestep'),
-            Item(name='num_iterations', label='Number of iterations'),
-            '_',
-            Item(name='input_file'),
-            '_',
-            Item(name='mode', style='custom'),
-            '_',
-            Item(name='mesh_name'),
-            Item(name='mesh_type'),
-            '_',
-            Item(name='output_path'),
-            '_',
-            Item(name='viscosity'),
-            Item(name='density'),
-            Item(name='delta_p'),
-            '_',
-            Item(name='channel_size'),
-            Item(name='num_grid'),
+            VGroup(
+                Item(name='timestep'),
+                Item(name='num_iterations', label='Number of iterations'),
+                '_',
+                Item(name='input_file'),
+                '_',
+                Item(name='mode', style='custom'),
+                '_',
+                Item(name='mesh_name'),
+                Item(name='mesh_type'),
+                '_',
+                Item(name='output_path'),
+                label='Computational method parameters',
+                show_border=True,
+            ),
+            VGroup(
+                Item(name='boundary_conditions', style='custom'),
+                show_border=True
+            ),
+            VGroup(
+                Item(name='viscosity'),
+                Item(name='density'),
+                HGroup(
+                    Item(name='channel_size_x', label='x'),
+                    Item(name='channel_size_y', label='y'),
+                    Item(name='channel_size_z', label='z'),
+                    label='Channel size',
+                    show_border=True,
+                ),
+                HGroup(
+                    Item(name='num_grid_x', label='x'),
+                    Item(name='num_grid_y', label='y'),
+                    Item(name='num_grid_z', label='z'),
+                    label='Number of elements in channel directions',
+                    show_border=True,
+                ),
+                label='System parameters/ conditions',
+                show_border=True,
+            ),
+            Spring(),
         )
     )
+
+    def _boundary_conditions_default(self):
+        return BoundaryConditionsModel()
