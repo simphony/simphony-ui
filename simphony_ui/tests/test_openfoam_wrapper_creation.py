@@ -62,3 +62,27 @@ class TestOpenfoamWrapperCreation(unittest.TestCase):
                 CUBA.DYNAMIC_VISCOSITY],
             1.5e-3
         )
+
+    def test_velocity_boundary_conditions(self):
+        self.assertDictEqual(
+            create_openfoam_wrapper(self.openfoam_model).BC[
+                CUBA.VELOCITY],
+            {
+                'inlet': 'zeroGradient',
+                'outlet': 'zeroGradient',
+                'walls': ('fixedValue', [0, 0, 0]),
+                'frontAndBack': 'empty'
+            }
+        )
+
+    def test_pressure_boundary_conditions(self):
+        self.assertDictEqual(
+            create_openfoam_wrapper(self.openfoam_model).BC[
+                CUBA.PRESSURE],
+            {
+                'inlet': ('fixedValue', 0.008),
+                'outlet': ('fixedValue', 0.0),
+                'walls': 'zeroGradient',
+                'frontAndBack': 'empty'
+            }
+        )
