@@ -74,7 +74,10 @@ class OpenfoamModel(HasStrictTraits):
                 Item(name='density'),
                 '_',
                 Item(name='channel_size'),
-                Item(name='num_grid'),
+                Item(
+                    name='num_grid',
+                    label='Number of elements in channel directions'
+                ),
                 label='System parameters/ conditions',
                 show_border=True,
             ),
