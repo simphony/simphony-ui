@@ -26,5 +26,15 @@ def create_liggghts_wrapper(liggghts_settings):
     # Set system parameters/ conditions
 
     # Set boundary conditions
+    liggghts_wrapper.BC_extension[liggghts.CUBAExtension.BOX_FACES] = [
+        liggghts_settings.x_wall_boundary_condition,
+        liggghts_settings.y_wall_boundary_condition,
+        liggghts_settings.z_wall_boundary_condition
+    ]
+
+    liggghts_wrapper.BC_extension[liggghts.CUBAExtension.FIXED_GROUP] = [
+        1 if liggghts_settings.flow_particles_fixed else 0,
+        1 if liggghts_settings.wall_particles_fixed else 0
+    ]
 
     return liggghts_wrapper
