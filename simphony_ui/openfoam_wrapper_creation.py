@@ -4,6 +4,20 @@ from simphony.core.cuba import CUBA
 
 
 def create_openfoam_wrapper(openfoam_settings):
+    """ Creates the Openfoam wrapper setup from the settings as provided
+    by the model object
+
+    Parameters
+    ----------
+    openfoam_settings : OpenfoamModel
+        The traited model describing the openfoam parameters
+
+    Returns
+    -------
+    openfoam_wrapper : Wrapper
+        an instance of the appropriate Wrapper object, properly configured.
+    """
+
     openfoam_wrapper = None
     openfoam_cuba_ext = None
 
