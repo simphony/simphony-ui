@@ -19,6 +19,9 @@ def create_liggghts_wrapper(liggghts_settings):
     liggghts_wrapper = liggghts.LiggghtsWrapper(use_internal_interface=True)
 
     # Set Computational method parameters
+    liggghts_wrapper.CM[CUBA.NUMBER_OF_TIME_STEPS] = \
+        liggghts_settings.num_iterations
+    liggghts_wrapper.CM[CUBA.TIME_STEP] = liggghts_settings.timestep
 
     # Set system parameters/ conditions
 
