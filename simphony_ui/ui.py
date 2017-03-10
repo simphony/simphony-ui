@@ -1,5 +1,5 @@
-from traits.api import HasStrictTraits, Instance
-from traitsui.api import View, UItem, Tabbed
+from traits.api import HasStrictTraits, Instance, Button, on_trait_change
+from traitsui.api import View, UItem, Tabbed, VGroup
 from simphony_ui.global_parameters_model import GlobalParametersModel
 from simphony_ui.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model import OpenfoamModel
@@ -11,11 +11,16 @@ class Application(HasStrictTraits):
     liggghts_settings = Instance(LiggghtsModel)
     openfoam_settings = Instance(OpenfoamModel)
 
+    run_button = Button("Run")
+
     traits_view = View(
-        Tabbed(
-            UItem('global_settings'),
-            UItem('liggghts_settings'),
-            UItem('openfoam_settings'),
+        VGroup(
+            Tabbed(
+                UItem('global_settings'),
+                UItem('liggghts_settings'),
+                UItem('openfoam_settings'),
+            ),
+            UItem(name='run_button'),
         ),
         title='Simphony UI',
         resizable=True,
@@ -23,6 +28,10 @@ class Application(HasStrictTraits):
         width=1.0,
         height=1.0
     )
+
+    @on_trait_change('run_button')
+    def run_calc(self):
+        print 'Hello World !'
 
     def _global_settings_default(self):
         return GlobalParametersModel()
