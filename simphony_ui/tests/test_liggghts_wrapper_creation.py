@@ -124,7 +124,7 @@ class TestLiggghtsDatasetsCreation(unittest.TestCase):
         self.liggghts_model = LiggghtsModel()
         self.liggghts_model.input_file = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            'DEM_input.dat'
+            'liggghts_input.dat'
         )
         self.liggghts_wrapper = create_liggghts_wrapper(self.liggghts_model)
 
