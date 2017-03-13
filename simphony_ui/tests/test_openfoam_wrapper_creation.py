@@ -3,10 +3,23 @@ Tests Openfoam wrapper creation
 """
 
 import unittest
+from traits.api import Float, Enum
 from simphony.engine import openfoam_file_io, openfoam_internal
 from simphony.core.cuba import CUBA
-from simphony_ui.openfoam_wrapper_creation import create_openfoam_wrapper
+from simphony_ui.openfoam_wrapper_creation import (
+    create_openfoam_wrapper, get_boundary_condition_description)
 from simphony_ui.openfoam_model import OpenfoamModel
+from simphony_ui.openfoam_boundary_conditions import (
+    BoundaryConditionModel)
+
+
+class BoundaryConditionTest(BoundaryConditionModel):
+
+    type = Enum(
+        'none', 'empty', 'zeroGradient',
+        'fixedGradient', 'fixedValue', 'coucou')
+
+    fixed_value = Float()
 
 
 class TestOpenfoamWrapperCreation(unittest.TestCase):
@@ -86,3 +99,51 @@ class TestOpenfoamWrapperCreation(unittest.TestCase):
                 'frontAndBack': 'empty'
             }
         )
+
+
+class TestGetBoundaryConditions(unittest.TestCase):
+
+    def setUp(self):
+        self.boundary_condition = BoundaryConditionTest()
+
+    def test_none(self):
+        self.boundary_condition.type = 'none'
+        self.assertEqual(
+            get_boundary_condition_description(self.boundary_condition),
+            None
+        )
+
+    def test_zero_gradient(self):
+        self.boundary_condition.type = 'zeroGradient'
+        self.assertEqual(
+            get_boundary_condition_description(self.boundary_condition),
+            'zeroGradient'
+        )
+
+    def test_empty(self):
+        self.boundary_condition.type = 'empty'
+        self.assertEqual(
+            get_boundary_condition_description(self.boundary_condition),
+            'empty'
+        )
+
+    def test_fixedGradient(self):
+        self.boundary_condition.type = 'fixedGradient'
+        self.boundary_condition.fixed_gradient = [[36, 23, 12]]
+        self.assertTupleEqual(
+            get_boundary_condition_description(self.boundary_condition),
+            ('fixedGradient', [36, 23, 12])
+        )
+
+    def test_fixed_value(self):
+        self.boundary_condition.type = 'fixedValue'
+        self.boundary_condition.fixed_value = 36
+        self.assertTupleEqual(
+            get_boundary_condition_description(self.boundary_condition),
+            ('fixedValue', 36)
+        )
+
+    def test_raise(self):
+        self.boundary_condition.type = 'coucou'
+        with self.assertRaises(ValueError):
+            get_boundary_condition_description(self.boundary_condition)
