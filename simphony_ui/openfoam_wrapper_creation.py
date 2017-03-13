@@ -109,3 +109,53 @@ def get_boundary_condition_description(bc):
             return bc.type, bc.fixed_value
     raise ValueError(
         '{} is not a possible boundary condition type'.format(bc.type))
+
+
+def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
+    if openfoam_settings.mesh_type == 'block':
+        path = openfoam_settings.output_path if \
+            openfoam_settings.mode == 'internal' else '.'
+
+        with open(openfoam_settings.input_file, 'r') as input_file:
+            input_mesh = input_file.read()
+
+        openfoam_file_io.create_block_mesh(
+            path, openfoam_settings.mesh_name, openfoam_wrapper,
+            input_mesh
+        )
+        return
+    elif openfoam_settings.mesh_type == 'quad':
+        corner_points = [
+            (0.0, 0.0, 0.0),
+            (openfoam_settings.channel_size_x, 0.0, 0.0),
+            (
+                openfoam_settings.channel_size_x,
+                openfoam_settings.channel_size_y,
+                0.0
+            ),
+            (0.0, openfoam_settings.channel_size_y, 0.0),
+            (0.0, 0.0, openfoam_settings.channel_size_z),
+            (
+                openfoam_settings.channel_size_x,
+                0.0,
+                openfoam_settings.channel_size_z),
+            (
+                openfoam_settings.channel_size_x,
+                openfoam_settings.channel_size_y,
+                openfoam_settings.channel_size_z),
+            (
+                0.0,
+                openfoam_settings.channel_size_y,
+                openfoam_settings.channel_size_z)
+        ]
+
+        openfoam_file_io.create_quad_mesh(
+            openfoam_settings.output_path, openfoam_settings.mesh_name,
+            openfoam_wrapper, corner_points,
+            openfoam_settings.num_grid_x,
+            openfoam_settings.num_grid_y,
+            openfoam_settings.num_grid_z
+        )
+        return
+    raise ValueError(
+        '{} is not a supported mesh type'.format(openfoam_settings.mesh_type))
