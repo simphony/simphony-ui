@@ -29,7 +29,7 @@ def cleanup_garbage(tmpdir):
         raise
 
 
-class TestCFEDem(unittest.TestCase):
+class TestCalculation(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -55,7 +55,7 @@ class TestCFEDem(unittest.TestCase):
                 cls.openfoam_settings,
                 cls.liggghts_settings
             )
-            super(TestCFEDem, cls).setUpClass()
+            super(TestCalculation, cls).setUpClass()
 
     def test_output(self):
         self.assertTrue(os.path.exists(
