@@ -112,6 +112,21 @@ def get_boundary_condition_description(bc):
 
 
 def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
+    """ Creates the Openfoam dataset from the settings as provided
+    by the model object
+
+    Parameters
+    ----------
+    openfoam_wrapper : Wrapper
+        The Openfoam wrapper in which you want to put the dataset
+    openfoam_settings : OpenfoamModel
+        The traited model describing the openfoam parameters
+
+    Returns
+    -------
+    mesh_dataset :
+        The dataset representing the openfoam mesh
+    """
     if openfoam_settings.mesh_type == 'block':
         path = openfoam_settings.output_path if \
             openfoam_settings.mode == 'internal' else '.'
