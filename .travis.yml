@@ -54,4 +54,5 @@ install:
 script:
   - python -m unittest discover
   - flake8 .
-
+after_success:
+  - codecov
