@@ -10,7 +10,7 @@ import logging
 from contextlib import contextmanager
 from simphony.core.cuds_item import CUDSItem
 from simphony.core.cuba import CUBA
-from simphony_ui.couple_CFDDEM import run_calc
+from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.global_parameters_model import GlobalParametersModel
 from simphony_ui.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model import OpenfoamModel
