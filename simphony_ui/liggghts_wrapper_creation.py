@@ -24,6 +24,37 @@ def create_liggghts_wrapper(liggghts_settings):
     liggghts_wrapper.CM[CUBA.TIME_STEP] = liggghts_settings.timestep
 
     # Set system parameters/ conditions
+    liggghts_wrapper.SP[CUBA.YOUNG_MODULUS] = [
+        liggghts_settings.flow_young_modulus,
+        liggghts_settings.wall_young_modulus
+    ]
+    liggghts_wrapper.SP[CUBA.POISSON_RATIO] = [
+        liggghts_settings.flow_poisson_ratio,
+        liggghts_settings.wall_poisson_ratio
+    ]
+    liggghts_wrapper.SP[CUBA.RESTITUTION_COEFFICIENT] = [
+        liggghts_settings.flow_restitution_coefficient_flow,
+        liggghts_settings.flow_restitution_coefficient_wall,
+        liggghts_settings.wall_restitution_coefficient_flow,
+        liggghts_settings.wall_restitution_coefficient_wall
+    ]
+    liggghts_wrapper.SP[CUBA.FRICTION_COEFFICIENT] = [
+        liggghts_settings.flow_friction_coefficient_flow,
+        liggghts_settings.flow_friction_coefficient_wall,
+        liggghts_settings.wall_friction_coefficient_flow,
+        liggghts_settings.wall_friction_coefficient_wall
+    ]
+    liggghts_wrapper.SP[CUBA.COHESION_ENERGY_DENSITY] = [
+        liggghts_settings.flow_cohesion_energy_density_flow,
+        liggghts_settings.flow_cohesion_energy_density_wall,
+        liggghts_settings.wall_cohesion_energy_density_flow,
+        liggghts_settings.wall_cohesion_energy_density_wall
+    ]
+
+    liggghts_wrapper.SP_extension[liggghts.CUBAExtension.PAIR_POTENTIALS] = [
+        liggghts_settings.flow_pair_potentials,
+        liggghts_settings.wall_pair_potentials
+    ]
 
     # Set boundary conditions
     liggghts_wrapper.BC_extension[liggghts.CUBAExtension.BOX_FACES] = [
