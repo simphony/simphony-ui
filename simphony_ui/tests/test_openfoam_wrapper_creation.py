@@ -171,7 +171,7 @@ class TestGetBoundaryConditions(unittest.TestCase):
 class TestOpenfoamMeshCreation(unittest.TestCase):
 
     def setUp(self):
-        self.openfoam_model = OpenfoamModel()
+        self.openfoam_model = CustomOpenfoamModel()
         self.openfoam_model.output_path = tempfile.mkdtemp()
         self.openfoam_model.mesh_name = 'test_mesh'
         self.openfoam_model.input_file = \
@@ -180,7 +180,24 @@ class TestOpenfoamMeshCreation(unittest.TestCase):
                 'openfoam_input.txt'
             )
 
-    def test_mesh_creation(self):
+    def test_block_mesh_creation(self):
         openfoam_wrapper = create_openfoam_wrapper(self.openfoam_model)
         with cleanup_garbage(self.openfoam_model.output_path):
             create_openfoam_mesh(openfoam_wrapper, self.openfoam_model)
+
+    def test_quad_mesh_creation(self):
+        self.openfoam_model.mesh_type = 'quad'
+        openfoam_wrapper = create_openfoam_wrapper(self.openfoam_model)
+        with cleanup_garbage(self.openfoam_model.output_path):
+            create_openfoam_mesh(openfoam_wrapper, self.openfoam_model)
+
+    def test_unknown_mesh_type(self):
+        self.openfoam_model.mesh_type = 'coucou'
+        openfoam_wrapper = create_openfoam_wrapper(self.openfoam_model)
+        with self.assertRaises(ValueError):
+            create_openfoam_mesh(openfoam_wrapper, self.openfoam_model)
+
+
+class CustomOpenfoamModel(OpenfoamModel):
+
+    mesh_type = Enum('block', 'quad', 'coucou')
