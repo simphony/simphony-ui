@@ -123,7 +123,8 @@ def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
             path, openfoam_settings.mesh_name, openfoam_wrapper,
             input_mesh
         )
-        return
+
+        return openfoam_wrapper.get_dataset(openfoam_settings.mesh_name)
     elif openfoam_settings.mesh_type == 'quad':
         corner_points = [
             (0.0, 0.0, 0.0),
@@ -156,6 +157,8 @@ def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
             openfoam_settings.num_grid_y,
             openfoam_settings.num_grid_z
         )
-        return
+
+        return openfoam_wrapper.get_dataset(openfoam_settings.mesh_name)
+
     raise ValueError(
         '{} is not a supported mesh type'.format(openfoam_settings.mesh_type))
