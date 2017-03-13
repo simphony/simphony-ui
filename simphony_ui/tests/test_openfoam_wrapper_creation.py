@@ -12,7 +12,8 @@ from traits.api import Float, Enum
 from simphony.engine import openfoam_file_io, openfoam_internal
 from simphony.core.cuba import CUBA
 from simphony_ui.openfoam_wrapper_creation import (
-    create_openfoam_wrapper, get_boundary_condition_description, create_openfoam_mesh)
+    create_openfoam_mesh, create_openfoam_wrapper,
+    get_boundary_condition_description)
 from simphony_ui.openfoam_model import OpenfoamModel
 from simphony_ui.openfoam_boundary_conditions import (
     BoundaryConditionModel)
