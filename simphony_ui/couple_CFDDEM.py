@@ -1,7 +1,3 @@
-"""Example to solve 2D poiseuille flow
-
-"""
-
 import math
 import numpy as np
 from simphony.core.cuba import CUBA
@@ -13,7 +9,22 @@ from simphony_ui.liggghts_wrapper_creation import (
 
 
 def run_calc(global_settings, openfoam_settings, liggghts_settings):
-    """Executes the full calculation"""
+    """ Main routine which creates the wrappers and run the calculation
+
+    Parameters
+    ----------
+    global_settings : GlobalParametersModel
+        The trait model containing the global parameters of the calculation
+    openfoam_settings : OpenfoamModel
+        The trait model containing the Openfoam parameters
+    liggghts_settings : LiggghtsModel
+        The trait model containing the Liggghts parameters
+
+    Returns
+    -------
+    openfoam_wrapper, liggghts_wrapper:
+        A tuple containing the wrapper of Openfoam and the wrapper of Liggghts
+    """
     # Create Openfoam wrapper
     openfoam_wrapper = create_openfoam_wrapper(openfoam_settings)
 
