@@ -55,7 +55,7 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
 
     # Generate cell list
     cellmat = {}
-    index = {}
+    index = np.zeros(3, dtype=np.int)
     gridsize = [
         channel_size[0] / num_grid[0],
         channel_size[1] / num_grid[1],
@@ -90,7 +90,7 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
         # Compute relative velocity & drag force
         for particle in flow_dataset.iter_particles():
             testpoint = particle.coordinates
-            index = {}
+            index = np.zeros(3, dtype=np.int)
 
             for i in range(3):
                 index[i] = int(math.floor(
@@ -105,7 +105,7 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
             cell_id = cellmat[index[0], index[1], index[2]]
             cell = openfoam_mesh.get_cell(cell_id)
 
-            rel_velo = {}
+            rel_velo = np.zeros(3, dtype=np.int)
             for i in range(3):
                 rel_velo[i] = cell.data[CUBA.VELOCITY][i] - \
                     list(particle.data[CUBA.VELOCITY])[i]
@@ -118,19 +118,19 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
                         particle.data[CUBA.RADIUS] * 2.0 * rel_velo[i]
                 elif global_settings.force_type == "Dala":
                     reynold_number = \
-                        density * abs(rel_velo) * \
+                        density * np.linalg.norm(rel_velo) * \
                         particle.data[CUBA.RADIUS] * 2.0 / viscosity
                     coeff = (0.63+4.8/math.sqrt(reynold_number))**2
                     dragforce[i] = \
                         0.5*coeff*math.pi * particle.data[CUBA.RADIUS]**2 * \
-                        density * abs(rel_velo)*rel_velo[i]
+                        density * np.linalg.norm(rel_velo)*rel_velo[i]
                 elif global_settings.force_type == "Coul":
                     reynold_number = \
-                        density * abs(rel_velo) * \
+                        density * np.linalg.norm(rel_velo) * \
                         particle.data[CUBA.RADIUS] * 2.0 / viscosity
                     dragforce[i] = \
                         math.pi * particle.data[CUBA.RADIUS]**2 * \
-                        density * abs(rel_velo) * \
+                        density * np.linalg.norm(rel_velo) * \
                         (1.84 * reynold_number**(-0.31) +
                             0.293*reynold_number**0.06)**3.45
                 else:
