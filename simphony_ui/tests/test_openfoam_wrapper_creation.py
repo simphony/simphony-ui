@@ -168,6 +168,11 @@ class TestGetBoundaryConditions(unittest.TestCase):
             get_boundary_condition_description(self.boundary_condition)
 
 
+class CustomOpenfoamModel(OpenfoamModel):
+
+    mesh_type = Enum('block', 'quad', 'coucou')
+
+
 class TestOpenfoamMeshCreation(unittest.TestCase):
 
     def setUp(self):
@@ -197,8 +202,3 @@ class TestOpenfoamMeshCreation(unittest.TestCase):
         openfoam_wrapper = create_openfoam_wrapper(self.openfoam_model)
         with self.assertRaises(ValueError):
             create_openfoam_mesh(openfoam_wrapper, self.openfoam_model)
-
-
-class CustomOpenfoamModel(OpenfoamModel):
-
-    mesh_type = Enum('block', 'quad', 'coucou')

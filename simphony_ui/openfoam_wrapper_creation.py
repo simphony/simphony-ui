@@ -29,8 +29,10 @@ def create_openfoam_wrapper(openfoam_settings):
         openfoam_cuba_ext = openfoam_file_io.CUBAExt
 
     # Set Computational method parameters
-    openfoam_wrapper.CM_extensions[openfoam_cuba_ext.GE] = \
-        (openfoam_cuba_ext.INCOMPRESSIBLE, openfoam_cuba_ext.LAMINAR_MODEL)
+    openfoam_wrapper.CM_extensions[openfoam_cuba_ext.GE] = (
+        openfoam_cuba_ext.INCOMPRESSIBLE,
+        openfoam_cuba_ext.LAMINAR_MODEL
+    )
 
     openfoam_wrapper.CM[CUBA.NAME] = openfoam_settings.mesh_name
 
@@ -133,8 +135,9 @@ def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
         If the mesh type specified in openfoam_settings is not supported
     """
     if openfoam_settings.mesh_type == 'block':
-        path = openfoam_settings.output_path if \
-            openfoam_settings.mode == 'internal' else '.'
+        path = (openfoam_settings.output_path
+                if openfoam_settings.mode == 'internal'
+                else '.')
 
         with open(openfoam_settings.input_file, 'r') as input_file:
             input_mesh = input_file.read()
@@ -171,8 +174,10 @@ def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
         ]
 
         openfoam_file_io.create_quad_mesh(
-            openfoam_settings.output_path, openfoam_settings.mesh_name,
-            openfoam_wrapper, corner_points,
+            openfoam_settings.output_path,
+            openfoam_settings.mesh_name,
+            openfoam_wrapper,
+            corner_points,
             openfoam_settings.num_grid_x,
             openfoam_settings.num_grid_y,
             openfoam_settings.num_grid_z
