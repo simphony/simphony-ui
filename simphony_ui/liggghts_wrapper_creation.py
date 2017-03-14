@@ -89,10 +89,7 @@ def create_liggghts_datasets(liggghts_settings):
     """
     input_file = liggghts_settings.input_file
 
-    list_particles = liggghts.read_data_file(input_file)
-
-    flow_particles = list_particles[0]
-    wall_particles = list_particles[1]
+    flow_particles, wall_particles = liggghts.read_data_file(input_file)
 
     flow_particles.name = 'flow_particles'
     wall_particles.name = 'wall_particles'
