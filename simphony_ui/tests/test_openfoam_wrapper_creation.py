@@ -4,10 +4,7 @@ Tests Openfoam wrapper creation
 
 import unittest
 import os
-import shutil
-import logging
 import tempfile
-from contextlib import contextmanager
 from traits.api import Float, Enum
 from simphony.engine import openfoam_file_io, openfoam_internal
 from simphony.core.cuba import CUBA
@@ -17,19 +14,7 @@ from simphony_ui.openfoam_wrapper_creation import (
 from simphony_ui.openfoam_model import OpenfoamModel
 from simphony_ui.openfoam_boundary_conditions import (
     BoundaryConditionModel)
-
-
-@contextmanager
-def cleanup_garbage(tmpdir):
-    try:
-        yield
-    except:
-        try:
-            print "Things went bad. Cleaning up ", tmpdir
-            shutil.rmtree(tmpdir)
-        except OSError:
-            logging.exception("could not delete the tmp directory")
-        raise
+from simphony_ui.tests.test_utils import cleanup_garbage
 
 
 class BoundaryConditionTest(BoundaryConditionModel):
