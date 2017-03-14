@@ -176,7 +176,8 @@ class TestOpenfoamMeshCreation(unittest.TestCase):
         self.openfoam_model.mesh_name = 'test_mesh'
         self.openfoam_model.input_file = \
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
+                os.path.dirname(os.path.dirname(
+                    os.path.abspath(__file__))),
                 'openfoam_input.txt'
             )
 

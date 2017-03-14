@@ -104,7 +104,7 @@ def run_calc(output_path, mesh_name):
 
             input_file = \
                 os.path.join(
-                    os.path.dirname(__file__),
+                    os.path.dirname(os.path.abspath(__file__)),
                     'openfoam_input.txt'
                 )
 
