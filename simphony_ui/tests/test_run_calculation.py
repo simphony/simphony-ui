@@ -7,7 +7,6 @@ import tempfile
 import unittest
 from simphony.core.cuds_item import CUDSItem
 from simphony.core.cuba import CUBA
-from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.ui import Application
 from simphony_ui.tests.test_utils import cleanup_garbage
 
@@ -34,11 +33,8 @@ class TestCalculation(unittest.TestCase):
         temp_dir = tempfile.mkdtemp()
         with cleanup_garbage(temp_dir):
             cls.app_parameters.openfoam_settings.output_path = temp_dir
-            cls.openfoam_wrapper, cls.liggghts_wrapper = run_calc(
-                cls.app_parameters.global_settings,
-                cls.app_parameters.openfoam_settings,
-                cls.app_parameters.liggghts_settings
-            )
+            cls.openfoam_wrapper, cls.liggghts_wrapper = \
+                cls.app_parameters.run_calc()
             super(TestCalculation, cls).setUpClass()
 
     def test_output(self):

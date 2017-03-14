@@ -3,6 +3,7 @@ from traitsui.api import View, UItem, Tabbed, VGroup
 from simphony_ui.global_parameters_model import GlobalParametersModel
 from simphony_ui.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model import OpenfoamModel
+from simphony_ui.couple_openfoam_liggghts import run_calc
 
 
 class Application(HasStrictTraits):
@@ -31,7 +32,11 @@ class Application(HasStrictTraits):
 
     @on_trait_change('run_button')
     def run_calc(self):
-        print 'Hello World !'
+        return run_calc(
+            self.global_settings,
+            self.openfoam_settings,
+            self.liggghts_settings
+        )
 
     def _global_settings_default(self):
         return GlobalParametersModel()
