@@ -1,7 +1,6 @@
 import math
 import numpy as np
 from simphony.core.cuba import CUBA
-from simphony.core.cuds_item import CUDSItem
 from simphony_ui.openfoam_wrapper_creation import (
     create_openfoam_wrapper, create_openfoam_mesh)
 from simphony_ui.liggghts_wrapper_creation import (
@@ -54,8 +53,6 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
 
     flow_dataset = liggghts_wrapper.get_dataset(flow_dataset.name)
 
-    num_flow_particles = flow_dataset.count_of(CUDSItem.PARTICLE)
-
     # Generate cell list
     cellmat = {}
     index = {}
@@ -89,9 +86,6 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
     for numrun in range(global_settings.num_iterations):
         # Perform Openfoam calculations
         openfoam_wrapper.run()
-
-        m = 0
-        force = np.zeros(num_flow_particles)
 
         # Compute relative velocity & drag force
         for particle in flow_dataset.iter_particles():
@@ -134,7 +128,7 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
                     reynold_number = \
                         density * abs(rel_velo) * \
                         particle.data[CUBA.RADIUS] * 2.0 / viscosity
-                    force[m] = \
+                    dragforce[i] = \
                         math.pi * particle.data[CUBA.RADIUS]**2 * \
                         density * abs(rel_velo) * \
                         (1.84 * reynold_number**(-0.31) +
