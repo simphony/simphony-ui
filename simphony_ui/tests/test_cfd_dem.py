@@ -3,27 +3,12 @@ Tests
 """
 
 import os
-import shutil
 import tempfile
 import unittest
-import logging
-from contextlib import contextmanager
 import simphony_ui.couple_CFDDEM as cfd_dem
 from simphony.core.cuds_item import CUDSItem
 from simphony.core.cuba import CUBA
-
-
-@contextmanager
-def cleanup_garbage(tmpdir):
-    try:
-        yield
-    except:
-        try:
-            print "Things went bad. Cleaning up ", tmpdir
-            shutil.rmtree(tmpdir)
-        except OSError:
-            logging.exception("could not delete the tmp directory")
-        raise
+from simphony_ui.tests.test_utils import cleanup_garbage
 
 
 class TestCFEDem(unittest.TestCase):

@@ -29,8 +29,10 @@ def create_openfoam_wrapper(openfoam_settings):
         openfoam_cuba_ext = openfoam_file_io.CUBAExt
 
     # Set Computational method parameters
-    openfoam_wrapper.CM_extensions[openfoam_cuba_ext.GE] = \
-        (openfoam_cuba_ext.INCOMPRESSIBLE, openfoam_cuba_ext.LAMINAR_MODEL)
+    openfoam_wrapper.CM_extensions[openfoam_cuba_ext.GE] = (
+        openfoam_cuba_ext.INCOMPRESSIBLE,
+        openfoam_cuba_ext.LAMINAR_MODEL
+    )
 
     openfoam_wrapper.CM[CUBA.NAME] = openfoam_settings.mesh_name
 
@@ -109,3 +111,69 @@ def get_boundary_condition_description(bc):
             return bc.type, bc.fixed_value
     raise ValueError(
         '{} is not a possible boundary condition type'.format(bc.type))
+
+
+def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
+    """ Creates the Openfoam dataset from the settings as provided
+    by the model object
+
+    Parameters
+    ----------
+    openfoam_wrapper : Wrapper
+        The Openfoam wrapper in which you want to put the dataset
+    openfoam_settings : OpenfoamModel
+        The traited model describing the openfoam parameters
+
+    Returns
+    -------
+    mesh_dataset
+        The dataset representing the openfoam mesh
+
+    Raises
+    ------
+    ValueError
+        If the mesh type specified in openfoam_settings is not supported
+    """
+    if openfoam_settings.mesh_type == 'block':
+        path = (openfoam_settings.output_path
+                if openfoam_settings.mode == 'internal'
+                else '.')
+
+        with open(openfoam_settings.input_file, 'r') as input_file:
+            input_mesh = input_file.read()
+
+        openfoam_file_io.create_block_mesh(
+            path, openfoam_settings.mesh_name, openfoam_wrapper,
+            input_mesh
+        )
+
+        return openfoam_wrapper.get_dataset(openfoam_settings.mesh_name)
+    elif openfoam_settings.mesh_type == 'quad':
+        size_x = openfoam_settings.channel_size_x
+        size_y = openfoam_settings.channel_size_y
+        size_z = openfoam_settings.channel_size_z
+        corner_points = [
+            (0.0, 0.0, 0.0),
+            (size_x, 0.0, 0.0),
+            (size_x, size_y, 0.0),
+            (0.0, size_y, 0.0),
+            (0.0, 0.0, size_z),
+            (size_x, 0.0, size_z),
+            (size_x, size_y, size_z),
+            (0.0, size_y, size_z)
+        ]
+
+        openfoam_file_io.create_quad_mesh(
+            openfoam_settings.output_path,
+            openfoam_settings.mesh_name,
+            openfoam_wrapper,
+            corner_points,
+            openfoam_settings.num_grid_x,
+            openfoam_settings.num_grid_y,
+            openfoam_settings.num_grid_z
+        )
+
+        return openfoam_wrapper.get_dataset(openfoam_settings.mesh_name)
+
+    raise ValueError(
+        '{} is not a supported mesh type'.format(openfoam_settings.mesh_type))

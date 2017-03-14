@@ -7,7 +7,6 @@ import os
 import sys
 import math
 import numpy as np
-from . import OpenFoam_input
 
 # Imports simphony general
 from simphony.core.cuba import CUBA
@@ -103,9 +102,18 @@ def run_calc(output_path, mesh_name):
         if mesh_type == "block":
             path = output_path if openfoam_mode == "internal" else "."
 
+            input_file = \
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    'openfoam_input.txt'
+                )
+
+            with open(input_file, 'r') as input_file:
+                input_mesh = input_file.read()
+
             openfoam_file_io.create_block_mesh(
                 path, mesh_name, openfoam_wrapper,
-                OpenFoam_input.blockMeshDict
+                input_mesh
             )
         else:
             corner_points = [
