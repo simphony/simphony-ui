@@ -68,7 +68,7 @@ def run_calc(output_path, mesh_name):
     liggghts_timestep = 1e-6
 
     restart_file = os.path.join(
-        os.path.dirname(__file__), "liggghts_input.dat")
+        os.path.dirname(os.path.abspath(__file__)), "liggghts_input.dat")
 
     if openfoam_mode != "none":
 
