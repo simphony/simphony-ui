@@ -124,12 +124,12 @@ def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
 
     Returns
     -------
-    mesh_dataset :
+    mesh_dataset
         The dataset representing the openfoam mesh
 
     Raises
     ------
-    ValueError :
+    ValueError
         If the mesh type specified in openfoam_settings is not supported
     """
     if openfoam_settings.mesh_type == 'block':
