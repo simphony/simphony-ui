@@ -129,7 +129,6 @@ class TestLiggghtsDatasetsCreation(unittest.TestCase):
         self.liggghts_wrapper = create_liggghts_wrapper(self.liggghts_model)
 
     def test_flow_dataset(self):
-        flow_dataset, _ = create_liggghts_datasets(
-            self.liggghts_wrapper, self.liggghts_model)
+        flow_dataset, _ = create_liggghts_datasets(self.liggghts_model)
         self.assertEqual(flow_dataset.count_of(CUDSItem.PARTICLE), 200)
         self.assertEqual(flow_dataset.count_of(CUDSItem.BOND), 0)

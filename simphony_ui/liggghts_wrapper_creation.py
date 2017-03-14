@@ -71,22 +71,20 @@ def create_liggghts_wrapper(liggghts_settings):
     return liggghts_wrapper
 
 
-def create_liggghts_datasets(liggghts_wrapper, liggghts_settings):
+def create_liggghts_datasets(liggghts_settings):
     """ Creates the liggghts particles datasets from the settings as provided
     by the model object
 
     Parameters
     ----------
-    liggghts_wrapper : LiggghtsWrapper
-        Your liggghts wrapper in which you want to put the datasets
     liggghts_settings : LiggghtsModel
         The traited model describing the liggghts parameters
 
     Returns
     -------
-    flow_dataset :
+    flow_particles :
         A dataset containing flow particles
-    wall_dataset :
+    wall_particles :
         A dataset containing wall particles
     """
     input_file = liggghts_settings.input_file
@@ -113,10 +111,4 @@ def create_liggghts_datasets(liggghts_wrapper, liggghts_settings):
     flow_particles.data_extension[liggghts.CUBAExtension.BOX_ORIGIN] = \
         (0.0, 0.0, 0.0)
 
-    liggghts_wrapper.add_dataset(flow_particles)
-    liggghts_wrapper.add_dataset(wall_particles)
-
-    flow_dataset = liggghts_wrapper.get_dataset(flow_particles.name)
-    wall_dataset = liggghts_wrapper.get_dataset(wall_particles.name)
-
-    return flow_dataset, wall_dataset
+    return flow_particles, wall_particles
