@@ -149,28 +149,18 @@ def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
 
         return openfoam_wrapper.get_dataset(openfoam_settings.mesh_name)
     elif openfoam_settings.mesh_type == 'quad':
+        size_x = openfoam_settings.channel_size_x
+        size_y = openfoam_settings.channel_size_y
+        size_z = openfoam_settings.channel_size_z
         corner_points = [
             (0.0, 0.0, 0.0),
-            (openfoam_settings.channel_size_x, 0.0, 0.0),
-            (
-                openfoam_settings.channel_size_x,
-                openfoam_settings.channel_size_y,
-                0.0
-            ),
-            (0.0, openfoam_settings.channel_size_y, 0.0),
-            (0.0, 0.0, openfoam_settings.channel_size_z),
-            (
-                openfoam_settings.channel_size_x,
-                0.0,
-                openfoam_settings.channel_size_z),
-            (
-                openfoam_settings.channel_size_x,
-                openfoam_settings.channel_size_y,
-                openfoam_settings.channel_size_z),
-            (
-                0.0,
-                openfoam_settings.channel_size_y,
-                openfoam_settings.channel_size_z)
+            (size_x, 0.0, 0.0),
+            (size_x, size_y, 0.0),
+            (0.0, size_y, 0.0),
+            (0.0, 0.0, size_z),
+            (size_x, 0.0, size_z),
+            (size_x, size_y, size_z),
+            (0.0, size_y, size_z)
         ]
 
         openfoam_file_io.create_quad_mesh(
