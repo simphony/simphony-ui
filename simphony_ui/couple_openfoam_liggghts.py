@@ -110,33 +110,13 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
                 rel_velo[i] = cell.data[CUBA.VELOCITY][i] - \
                     list(particle.data[CUBA.VELOCITY])[i]
 
-            dragforce = np.zeros(3)
-            for i in range(3):
-                if global_settings.force_type == "Stokes":
-                    dragforce[i] = \
-                        3.0 * math.pi * viscosity * \
-                        particle.data[CUBA.RADIUS] * 2.0 * rel_velo[i]
-                elif global_settings.force_type == "Dala":
-                    reynold_number = \
-                        density * np.linalg.norm(rel_velo) * \
-                        particle.data[CUBA.RADIUS] * 2.0 / viscosity
-                    coeff = (0.63+4.8/math.sqrt(reynold_number))**2
-                    dragforce[i] = \
-                        0.5*coeff*math.pi * particle.data[CUBA.RADIUS]**2 * \
-                        density * np.linalg.norm(rel_velo)*rel_velo[i]
-                elif global_settings.force_type == "Coul":
-                    reynold_number = \
-                        density * np.linalg.norm(rel_velo) * \
-                        particle.data[CUBA.RADIUS] * 2.0 / viscosity
-                    dragforce[i] = \
-                        math.pi * particle.data[CUBA.RADIUS]**2 * \
-                        density * np.linalg.norm(rel_velo) * \
-                        (1.84 * reynold_number**(-0.31) +
-                            0.293*reynold_number**0.06)**3.45
-                else:
-                    raise ValueError(
-                        '{} is not a supported force '
-                        'type'.format(global_settings.force_type))
+            dragforce = compute_drag_force(
+                global_settings.force_type,
+                particle.data[CUBA.RADIUS],
+                rel_velo,
+                viscosity,
+                density
+            )
 
             particle.data[CUBA.EXTERNAL_APPLIED_FORCE] = tuple(dragforce)
             flow_dataset.update_particles([particle])
@@ -145,3 +125,35 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
         liggghts_wrapper.run()
 
     return openfoam_wrapper, liggghts_wrapper
+
+
+def compute_drag_force(force_type, radius, rel_velo, viscosity, density):
+    dragforce = np.zeros(3)
+
+    for i in range(3):
+        if force_type == "Stokes":
+            dragforce[i] = \
+                3.0 * math.pi * viscosity * \
+                radius * 2.0 * rel_velo[i]
+        elif force_type == "Dala":
+            reynold_number = \
+                density * np.linalg.norm(rel_velo) * radius * 2.0 / viscosity
+            coeff = (0.63 + 4.8 / math.sqrt(reynold_number)) ** 2
+            dragforce[i] = \
+                0.5 * coeff * math.pi * radius ** 2 * \
+                density * np.linalg.norm(rel_velo) * rel_velo[i]
+        elif force_type == "Coul":
+            reynold_number = \
+                density * np.linalg.norm(rel_velo) * \
+                radius * 2.0 / viscosity
+            dragforce[i] = \
+                math.pi * radius ** 2 * \
+                density * np.linalg.norm(rel_velo) * \
+                (1.84 * reynold_number ** (-0.31) +
+                 0.293 * reynold_number ** 0.06) ** 3.45
+        else:
+            raise ValueError(
+                '{} is not a supported force '
+                'type'.format(force_type))
+
+    return dragforce
