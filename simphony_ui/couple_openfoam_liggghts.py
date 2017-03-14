@@ -47,10 +47,12 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
     # Create Liggghts wrapper
     liggghts_wrapper = create_liggghts_wrapper(liggghts_settings)
 
-    flow_dataset, _ = create_liggghts_datasets(
-        liggghts_wrapper,
-        liggghts_settings
-    )
+    flow_dataset, wall_dataset = create_liggghts_datasets(liggghts_settings)
+
+    liggghts_wrapper.add_dataset(flow_dataset)
+    liggghts_wrapper.add_dataset(wall_dataset)
+
+    flow_dataset = liggghts_wrapper.get_dataset(flow_dataset.name)
 
     num_flow_particles = flow_dataset.count_of(CUDSItem.PARTICLE)
 
