@@ -4,10 +4,8 @@ Tests Openfoam wrapper creation
 
 import unittest
 import os
-import shutil
-import logging
 import tempfile
-from contextlib import contextmanager
+import shutil
 from traits.api import Float, Enum
 from simphony.engine import openfoam_file_io, openfoam_internal
 from simphony.core.cuba import CUBA
@@ -17,19 +15,7 @@ from simphony_ui.openfoam_wrapper_creation import (
 from simphony_ui.openfoam_model import OpenfoamModel
 from simphony_ui.openfoam_boundary_conditions import (
     BoundaryConditionModel)
-
-
-@contextmanager
-def cleanup_garbage(tmpdir):
-    try:
-        yield
-    except:
-        try:
-            print "Things went bad. Cleaning up ", tmpdir
-            shutil.rmtree(tmpdir)
-        except OSError:
-            logging.exception("could not delete the tmp directory")
-        raise
+from simphony_ui.tests.test_utils import cleanup_garbage
 
 
 class BoundaryConditionTest(BoundaryConditionModel):
@@ -168,28 +154,33 @@ class TestGetBoundaryConditions(unittest.TestCase):
             get_boundary_condition_description(self.boundary_condition)
 
 
+class CustomOpenfoamModel(OpenfoamModel):
+
+    mesh_type = Enum('block', 'quad', 'coucou')
+
+
 class TestOpenfoamMeshCreation(unittest.TestCase):
 
     def setUp(self):
-        self.openfoam_model = CustomOpenfoamModel()
-        self.openfoam_model.output_path = tempfile.mkdtemp()
-        self.openfoam_model.mesh_name = 'test_mesh'
-        self.openfoam_model.input_file = \
-            os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
+        self.temp_dir = tempfile.mkdtemp()
+        with cleanup_garbage(self.temp_dir):
+            self.openfoam_model = CustomOpenfoamModel()
+            self.openfoam_model.output_path = self.temp_dir
+            self.openfoam_model.mesh_name = 'test_mesh'
+            self.openfoam_model.input_file = os.path.join(
+                os.path.dirname(os.path.dirname(
+                    os.path.abspath(__file__))),
                 'openfoam_input.txt'
             )
 
     def test_block_mesh_creation(self):
         openfoam_wrapper = create_openfoam_wrapper(self.openfoam_model)
-        with cleanup_garbage(self.openfoam_model.output_path):
-            create_openfoam_mesh(openfoam_wrapper, self.openfoam_model)
+        create_openfoam_mesh(openfoam_wrapper, self.openfoam_model)
 
     def test_quad_mesh_creation(self):
         self.openfoam_model.mesh_type = 'quad'
         openfoam_wrapper = create_openfoam_wrapper(self.openfoam_model)
-        with cleanup_garbage(self.openfoam_model.output_path):
-            create_openfoam_mesh(openfoam_wrapper, self.openfoam_model)
+        create_openfoam_mesh(openfoam_wrapper, self.openfoam_model)
 
     def test_unknown_mesh_type(self):
         self.openfoam_model.mesh_type = 'coucou'
@@ -197,7 +188,5 @@ class TestOpenfoamMeshCreation(unittest.TestCase):
         with self.assertRaises(ValueError):
             create_openfoam_mesh(openfoam_wrapper, self.openfoam_model)
 
-
-class CustomOpenfoamModel(OpenfoamModel):
-
-    mesh_type = Enum('block', 'quad', 'coucou')
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)

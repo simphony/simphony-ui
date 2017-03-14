@@ -3,30 +3,15 @@ Tests
 """
 
 import os
-import shutil
 import tempfile
 import unittest
-import logging
-from contextlib import contextmanager
 from simphony.core.cuds_item import CUDSItem
 from simphony.core.cuba import CUBA
 from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.global_parameters_model import GlobalParametersModel
 from simphony_ui.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model import OpenfoamModel
-
-
-@contextmanager
-def cleanup_garbage(tmpdir):
-    try:
-        yield
-    except:
-        try:
-            print "Things went bad. Cleaning up ", tmpdir
-            shutil.rmtree(tmpdir)
-        except OSError:
-            logging.exception("could not delete the tmp directory")
-        raise
+from simphony_ui.tests.test_utils import cleanup_garbage
 
 
 class TestCalculation(unittest.TestCase):
@@ -39,17 +24,20 @@ class TestCalculation(unittest.TestCase):
 
         cls.openfoam_settings.input_file = \
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
+                os.path.dirname(os.path.dirname(
+                    os.path.abspath(__file__))),
                 'openfoam_input.txt'
             )
         cls.liggghts_settings.input_file = \
             os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
+                os.path.dirname(os.path.dirname(
+                    os.path.abspath(__file__))),
                 'liggghts_input.dat'
             )
 
-        cls.openfoam_settings.output_path = tempfile.mkdtemp()
-        with cleanup_garbage(cls.openfoam_settings.output_path):
+        temp_dir = tempfile.mkdtemp()
+        with cleanup_garbage(temp_dir):
+            cls.openfoam_settings.output_path = temp_dir
             cls.openfoam_wrapper, cls.liggghts_wrapper = run_calc(
                 cls.global_settings,
                 cls.openfoam_settings,
