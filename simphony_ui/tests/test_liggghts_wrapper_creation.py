@@ -4,11 +4,13 @@ Tests Liggghts wrapper creation
 
 import os
 import unittest
-from simphony.engine import liggghts
+
 from simphony.core.cuba import CUBA
 from simphony.core.cuds_item import CUDSItem
-from simphony_ui.liggghts_model import LiggghtsModel
-from simphony_ui.liggghts_wrapper_creation import (
+from simphony.engine import liggghts
+from simphony_ui.liggghts.liggghts_model import LiggghtsModel
+
+from simphony_ui.liggghts.liggghts_wrapper_creation import (
     create_liggghts_wrapper, create_liggghts_datasets)
 
 
@@ -122,10 +124,14 @@ class TestLiggghtsDatasetsCreation(unittest.TestCase):
 
     def setUp(self):
         self.liggghts_model = LiggghtsModel()
-        self.liggghts_model.input_file = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            'liggghts_input.dat'
-        )
+        project_dir = \
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.liggghts_model.input_file = \
+            os.path.join(
+                os.path.join(project_dir, 'liggghts'),
+                'liggghts_input.dat'
+            )
+
         self.liggghts_wrapper = create_liggghts_wrapper(self.liggghts_model)
 
     def test_flow_dataset(self):

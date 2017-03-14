@@ -2,19 +2,21 @@
 Tests Openfoam wrapper creation
 """
 
-import unittest
 import os
-import tempfile
 import shutil
-from traits.api import Float, Enum
-from simphony.engine import openfoam_file_io, openfoam_internal
+import tempfile
+import unittest
+
 from simphony.core.cuba import CUBA
-from simphony_ui.openfoam_wrapper_creation import (
+from simphony.engine import openfoam_file_io, openfoam_internal
+from simphony_ui.openfoam.openfoam_boundary_conditions import (
+    BoundaryConditionModel)
+from simphony_ui.openfoam.openfoam_wrapper_creation import (
     create_openfoam_mesh, create_openfoam_wrapper,
     get_boundary_condition_description)
-from simphony_ui.openfoam_model import OpenfoamModel
-from simphony_ui.openfoam_boundary_conditions import (
-    BoundaryConditionModel)
+from traits.api import Float, Enum
+
+from simphony_ui.openfoam.openfoam_model import OpenfoamModel
 from simphony_ui.tests.test_utils import cleanup_garbage
 
 
@@ -167,9 +169,10 @@ class TestOpenfoamMeshCreation(unittest.TestCase):
             self.openfoam_model = CustomOpenfoamModel()
             self.openfoam_model.output_path = self.temp_dir
             self.openfoam_model.mesh_name = 'test_mesh'
+            project_dir = \
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             self.openfoam_model.input_file = os.path.join(
-                os.path.dirname(os.path.dirname(
-                    os.path.abspath(__file__))),
+                os.path.join(project_dir, 'openfoam'),
                 'openfoam_input.txt'
             )
 

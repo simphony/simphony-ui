@@ -18,16 +18,16 @@ class TestCalculation(unittest.TestCase):
     def setUpClass(cls):
         cls.app_parameters = Application()
 
+        project_dir = \
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         cls.app_parameters.openfoam_settings.input_file = \
             os.path.join(
-                os.path.dirname(os.path.dirname(
-                    os.path.abspath(__file__))),
+                os.path.join(project_dir, 'openfoam'),
                 'openfoam_input.txt'
             )
         cls.app_parameters.liggghts_settings.input_file = \
             os.path.join(
-                os.path.dirname(os.path.dirname(
-                    os.path.abspath(__file__))),
+                os.path.join(project_dir, 'liggghts'),
                 'liggghts_input.dat'
             )
 

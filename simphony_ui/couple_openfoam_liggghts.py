@@ -1,10 +1,12 @@
 import math
+
 import numpy as np
 from simphony.core.cuba import CUBA
-from simphony_ui.openfoam_wrapper_creation import (
-    create_openfoam_wrapper, create_openfoam_mesh)
-from simphony_ui.liggghts_wrapper_creation import (
+
+from simphony_ui.liggghts.liggghts_wrapper_creation import (
     create_liggghts_wrapper, create_liggghts_datasets)
+from simphony_ui.openfoam.openfoam_wrapper_creation import (
+    create_openfoam_wrapper, create_openfoam_mesh)
 
 
 def run_calc(global_settings, openfoam_settings, liggghts_settings):
