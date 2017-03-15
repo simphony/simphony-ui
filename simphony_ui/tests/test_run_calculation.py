@@ -13,6 +13,7 @@ from simphony_ui.couple_openfoam_liggghts import compute_drag_force
 
 
 class TestCalculation(unittest.TestCase):
+    # This test class only runs the calculation once
 
     @classmethod
     def setUpClass(cls):
