@@ -1,6 +1,7 @@
-import threading
-from pyface.api import GUI
-import copy
+from concurrent import futures
+from pyface.gui import GUI
+from simphony.cuds.abc_modeling_engine import ABCModelingEngine
+
 from traits.api import HasStrictTraits, Instance, Button, on_trait_change
 from traitsui.api import View, UItem, Tabbed, VGroup
 from simphony.core.cuds_item import CUDSItem
@@ -11,43 +12,20 @@ from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
 
 
-class ThreadedCalculation(threading.Thread):
-
-    def __init__(
-            self,
-            callback,
-            global_settings,
-            openfoam_settings,
-            liggghts_settings,
-            **kwargs):
-        threading.Thread.__init__(self, **kwargs)
-        self.callback = callback
-        self.global_settings = global_settings
-        self.openfoam_settings = openfoam_settings
-        self.liggghts_settings = liggghts_settings
-        self.openfoam_wrapper = None
-        self.liggghts_wrapper = None
-
-    def run(self):
-        print "Performing computation..."
-        self.openfoam_wrapper, self.liggghts_wrapper = run_calc(
-            self.global_settings,
-            self.openfoam_settings,
-            self.liggghts_settings
-        )
-        print('Done')
-        GUI.invoke_later(self.callback)
-
 
 class Application(HasStrictTraits):
-
     global_settings = Instance(GlobalParametersModel)
     liggghts_settings = Instance(LiggghtsModel)
     openfoam_settings = Instance(OpenfoamModel)
 
+    openfoam_wrapper = Instance(ABCModelingEngine)
+    liggghts_wrapper = Instance(ABCModelingEngine)
+
     run_button = Button("Run")
 
-    thread_calculation = Instance(ThreadedCalculation)
+    # Private traits.
+    #: Executor for the threaded action.
+    _executor = Instance(futures.ThreadPoolExecutor)
 
     traits_view = View(
         VGroup(
@@ -67,13 +45,25 @@ class Application(HasStrictTraits):
 
     @on_trait_change('run_button')
     def run_calc(self):
-        self.thread_calculation = ThreadedCalculation(
-            self.get_wrappers,
-            copy.deepcopy(self.global_settings),
-            copy.deepcopy(self.openfoam_settings),
-            copy.deepcopy(self.liggghts_settings)
+        future = self._executor.submit(self._run_calc_threaded)
+        future.add_done_callback(self._calculation_done)
+
+    def _run_calc_threaded(self):
+        return run_calc(
+            self.global_settings,
+            self.openfoam_settings,
+            self.liggghts_settings
         )
-        self.thread_calculation.start()
+
+    def _calculation_done(self, result):
+        GUI.invoke_later(self._update_result, result)
+
+    def _update_result(self, result):
+        self.openfoam_wrapper = result.openfoam_wrapper
+        self.liggghts_wrapper = result.liggghts_wrapper
+
+    def __executor_default(self):
+        return futures.ThreadPoolExecutor(max_workers=1)
 
     def get_wrappers(self):
         openfoam_wrapper = self.thread_calculation.openfoam_wrapper
