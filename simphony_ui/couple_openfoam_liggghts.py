@@ -130,6 +130,27 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
 
 
 def compute_drag_force(force_type, radius, rel_velo, viscosity, density):
+    """ Function which compute the force applied on a particle
+
+    Parameters
+    ----------
+    force_type : Str
+        The type of the applied force. Supported force types are
+        "Stokes", "Dala" and "Coul"
+    radius : Float
+        The radius of the particle
+    rel_velo : List
+        The relative velocity of the particle
+    viscosity : Float
+        The fluid viscosity
+    density : Float
+        The fluid density
+
+    Returns
+    -------
+    dragforce : List
+        The computed force applied on the particle
+    """
     dragforce = np.zeros(3)
 
     for i in range(3):
