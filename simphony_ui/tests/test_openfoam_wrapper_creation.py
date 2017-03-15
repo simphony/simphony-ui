@@ -9,14 +9,14 @@ import unittest
 
 from simphony.core.cuba import CUBA
 from simphony.engine import openfoam_file_io, openfoam_internal
-from simphony_ui.openfoam.openfoam_boundary_conditions import (
+from simphony_ui.openfoam_model.openfoam_boundary_conditions import (
     BoundaryConditionModel)
-from simphony_ui.openfoam.openfoam_wrapper_creation import (
+from simphony_ui.openfoam_model.openfoam_wrapper_creation import (
     create_openfoam_mesh, create_openfoam_wrapper,
     get_boundary_condition_description)
 from traits.api import Float, Enum
 
-from simphony_ui.openfoam.openfoam_model import OpenfoamModel
+from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
 from simphony_ui.tests.test_utils import cleanup_garbage
 
 
@@ -172,7 +172,7 @@ class TestOpenfoamMeshCreation(unittest.TestCase):
             project_dir = \
                 os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             self.openfoam_model.input_file = os.path.join(
-                os.path.join(project_dir, 'openfoam'),
+                os.path.join(project_dir, 'openfoam_model'),
                 'openfoam_input.txt'
             )
 

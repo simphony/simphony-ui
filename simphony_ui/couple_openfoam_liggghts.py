@@ -3,9 +3,9 @@ import math
 import numpy as np
 from simphony.core.cuba import CUBA
 
-from simphony_ui.liggghts.liggghts_wrapper_creation import (
+from simphony_ui.liggghts_model.liggghts_wrapper_creation import (
     create_liggghts_wrapper, create_liggghts_datasets)
-from simphony_ui.openfoam.openfoam_wrapper_creation import (
+from simphony_ui.openfoam_model.openfoam_wrapper_creation import (
     create_openfoam_wrapper, create_openfoam_mesh)
 
 

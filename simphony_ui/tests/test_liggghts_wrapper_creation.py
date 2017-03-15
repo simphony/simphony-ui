@@ -8,9 +8,9 @@ import unittest
 from simphony.core.cuba import CUBA
 from simphony.core.cuds_item import CUDSItem
 from simphony.engine import liggghts
-from simphony_ui.liggghts.liggghts_model import LiggghtsModel
+from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
 
-from simphony_ui.liggghts.liggghts_wrapper_creation import (
+from simphony_ui.liggghts_model.liggghts_wrapper_creation import (
     create_liggghts_wrapper, create_liggghts_datasets)
 
 
@@ -128,7 +128,7 @@ class TestLiggghtsDatasetsCreation(unittest.TestCase):
             os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.liggghts_model.input_file = \
             os.path.join(
-                os.path.join(project_dir, 'liggghts'),
+                os.path.join(project_dir, 'liggghts_model'),
                 'liggghts_input.dat'
             )
 

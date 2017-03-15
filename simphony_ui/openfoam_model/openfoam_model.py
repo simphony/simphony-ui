@@ -5,7 +5,7 @@ from traits.api import (HasStrictTraits, Enum, Str, Directory,
 from traitsui.api import View, Item, VGroup, HGroup, Spring
 
 from simphony_ui.local_traits import PositiveFloat, PositiveInt
-from simphony_ui.openfoam.openfoam_boundary_conditions import (
+from simphony_ui.openfoam_model.openfoam_boundary_conditions import (
     BoundaryConditionsModel)
 
 

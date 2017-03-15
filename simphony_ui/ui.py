@@ -3,8 +3,8 @@ from traitsui.api import View, UItem, Tabbed, VGroup
 
 from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.global_parameters_model import GlobalParametersModel
-from simphony_ui.liggghts.liggghts_model import LiggghtsModel
-from simphony_ui.openfoam.openfoam_model import OpenfoamModel
+from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
+from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
 
 
 class Application(HasStrictTraits):

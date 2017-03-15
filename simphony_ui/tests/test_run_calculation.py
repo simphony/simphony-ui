@@ -22,12 +22,12 @@ class TestCalculation(unittest.TestCase):
             os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         cls.app_parameters.openfoam_settings.input_file = \
             os.path.join(
-                os.path.join(project_dir, 'openfoam'),
+                os.path.join(project_dir, 'openfoam_model'),
                 'openfoam_input.txt'
             )
         cls.app_parameters.liggghts_settings.input_file = \
             os.path.join(
-                os.path.join(project_dir, 'liggghts'),
+                os.path.join(project_dir, 'liggghts_model'),
                 'liggghts_input.dat'
             )
 
