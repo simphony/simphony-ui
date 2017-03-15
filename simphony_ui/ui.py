@@ -3,6 +3,8 @@ from pyface.api import GUI
 import copy
 from traits.api import HasStrictTraits, Instance, Button, on_trait_change
 from traitsui.api import View, UItem, Tabbed, VGroup
+from simphony.core.cuds_item import CUDSItem
+from simphony.core.cuba import CUBA
 from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.global_parameters_model import GlobalParametersModel
 from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
@@ -13,12 +15,13 @@ class ThreadedCalculation(threading.Thread):
 
     def __init__(
             self,
+            callback,
             global_settings,
             openfoam_settings,
             liggghts_settings,
             **kwargs):
         threading.Thread.__init__(self, **kwargs)
-        self.done = False
+        self.callback = callback
         self.global_settings = global_settings
         self.openfoam_settings = openfoam_settings
         self.liggghts_settings = liggghts_settings
@@ -27,16 +30,13 @@ class ThreadedCalculation(threading.Thread):
 
     def run(self):
         print "Performing computation..."
-        GUI.invoke_later(self._run_calculation)
-
-    def _run_calculation(self):
         self.openfoam_wrapper, self.liggghts_wrapper = run_calc(
             self.global_settings,
             self.openfoam_settings,
             self.liggghts_settings
         )
-        self.done = True
         print('Done')
+        GUI.invoke_later(self.callback)
 
 
 class Application(HasStrictTraits):
@@ -46,6 +46,8 @@ class Application(HasStrictTraits):
     openfoam_settings = Instance(OpenfoamModel)
 
     run_button = Button("Run")
+
+    thread_calculation = Instance(ThreadedCalculation)
 
     traits_view = View(
         VGroup(
@@ -65,12 +67,25 @@ class Application(HasStrictTraits):
 
     @on_trait_change('run_button')
     def run_calc(self):
-        calculation = ThreadedCalculation(
+        self.thread_calculation = ThreadedCalculation(
+            self.get_wrappers,
             copy.deepcopy(self.global_settings),
             copy.deepcopy(self.openfoam_settings),
             copy.deepcopy(self.liggghts_settings)
         )
-        calculation.start()
+        self.thread_calculation.start()
+
+    def get_wrappers(self):
+        openfoam_wrapper = self.thread_calculation.openfoam_wrapper
+        # liggghts_wrapper = self.thread_calculation.liggghts_wrapper
+
+        mesh_dataset = openfoam_wrapper.get_dataset(
+            openfoam_wrapper.get_dataset_names()[0])
+        avg_velo = 0.0
+        for cell in mesh_dataset.iter_cells():
+            avg_velo += cell.data[CUBA.VELOCITY][0]
+        avg_velo = avg_velo / mesh_dataset.count_of(CUDSItem.CELL)
+        print avg_velo
 
     def _global_settings_default(self):
         return GlobalParametersModel()
