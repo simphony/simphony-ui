@@ -18,18 +18,20 @@ class TestCalculation(unittest.TestCase):
     def setUpClass(cls):
         cls.app_parameters = Application()
 
-        project_dir = \
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        cls.app_parameters.openfoam_settings.input_file = \
+        cls.app_parameters.openfoam_settings.input_file = os.path.join(
             os.path.join(
-                os.path.join(project_dir, 'openfoam_model'),
-                'openfoam_input.txt'
-            )
-        cls.app_parameters.liggghts_settings.input_file = \
+                os.path.dirname(os.path.abspath(__file__)),
+                'fixtures'
+            ),
+            'openfoam_input.txt'
+        )
+        cls.app_parameters.liggghts_settings.input_file = os.path.join(
             os.path.join(
-                os.path.join(project_dir, 'liggghts_model'),
-                'liggghts_input.dat'
-            )
+                os.path.dirname(os.path.abspath(__file__)),
+                'fixtures'
+            ),
+            'liggghts_input.dat'
+        )
 
         temp_dir = tempfile.mkdtemp()
         with cleanup_garbage(temp_dir):

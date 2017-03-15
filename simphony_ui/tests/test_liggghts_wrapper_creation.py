@@ -124,13 +124,10 @@ class TestLiggghtsDatasetsCreation(unittest.TestCase):
 
     def setUp(self):
         self.liggghts_model = LiggghtsModel()
-        project_dir = \
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.liggghts_model.input_file = \
-            os.path.join(
-                os.path.join(project_dir, 'liggghts_model'),
-                'liggghts_input.dat'
-            )
+        self.liggghts_model.input_file = os.path.join(os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), 'fixtures'),
+            'liggghts_input.dat'
+        )
 
         self.liggghts_wrapper = create_liggghts_wrapper(self.liggghts_model)
 

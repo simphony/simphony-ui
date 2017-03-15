@@ -169,10 +169,8 @@ class TestOpenfoamMeshCreation(unittest.TestCase):
             self.openfoam_model = CustomOpenfoamModel()
             self.openfoam_model.output_path = self.temp_dir
             self.openfoam_model.mesh_name = 'test_mesh'
-            project_dir = \
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            self.openfoam_model.input_file = os.path.join(
-                os.path.join(project_dir, 'openfoam_model'),
+            self.openfoam_model.input_file = os.path.join(os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), 'fixtures'),
                 'openfoam_input.txt'
             )
 
