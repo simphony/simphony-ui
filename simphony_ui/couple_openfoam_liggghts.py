@@ -85,7 +85,7 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
 
     # Repeating OF calculation several times with modified pressure drop last
     # result from previous iteration as input for new iteration
-    for numrun in range(global_settings.num_iterations):
+    for numrun in xrange(global_settings.num_iterations):
         # Perform Openfoam calculations
         openfoam_wrapper.run()
 
