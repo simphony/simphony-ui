@@ -70,7 +70,7 @@ class Application(HasStrictTraits):
     def _update_result(self, result):
         self.openfoam_wrapper, self.liggghts_wrapper = result
         self.calculation_running = False
-        self.progress_dialog.close()
+        self.progress_dialog.update(100)
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
