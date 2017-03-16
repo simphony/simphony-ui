@@ -16,12 +16,16 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         openfoam_wrapper = mock.Mock(spec=ABCModelingEngine)
         liggghts_wrapper = mock.Mock(spec=ABCModelingEngine)
 
-        def mock_wait(*args, **kwargs):
-            time.sleep(10)
+        def mock_run_calc(global_settings, openfoam_settings,
+                          liggghts_settings, progress_callback):
+            time.sleep(5)
+            progress_callback(50)
+            time.sleep(5)
+            progress_callback(100)
             return openfoam_wrapper, liggghts_wrapper
 
         with mock.patch('simphony_ui.ui.run_calc') as mock_run:
-            mock_run.side_effect = mock_wait
+            mock_run.side_effect = mock_run_calc
 
             self.assertIsNone(self.application.openfoam_wrapper)
             self.assertIsNone(self.application.liggghts_wrapper)
