@@ -27,8 +27,16 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
             self.assertIsNone(self.application.liggghts_wrapper)
 
             with self.event_loop_until_condition(
-                    lambda: self.application.openfoam_wrapper is not None, timeout=20):
+                    lambda: self.application.openfoam_wrapper is not None,
+                    timeout=20
+            ):
                 self.application.run_calc()
 
-            self.assertEqual(self.application.openfoam_wrapper, openfoam_wrapper)
-            self.assertEqual(self.application.liggghts_wrapper, liggghts_wrapper)
+            self.assertEqual(
+                self.application.openfoam_wrapper,
+                openfoam_wrapper
+            )
+            self.assertEqual(
+                self.application.liggghts_wrapper,
+                liggghts_wrapper
+            )
