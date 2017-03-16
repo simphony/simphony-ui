@@ -2,15 +2,14 @@ from concurrent import futures
 from pyface.gui import GUI
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
-from traits.api import HasStrictTraits, Instance, Button, on_trait_change
+from traits.api import (HasStrictTraits, Instance, Button,
+                        on_trait_change, Bool)
 from traitsui.api import View, UItem, Tabbed, VGroup
-from simphony.core.cuds_item import CUDSItem
-from simphony.core.cuba import CUBA
+from pyface.api import ProgressDialog
 from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.global_parameters_model import GlobalParametersModel
 from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
-
 
 
 class Application(HasStrictTraits):
@@ -22,6 +21,10 @@ class Application(HasStrictTraits):
     liggghts_wrapper = Instance(ABCModelingEngine)
 
     run_button = Button("Run")
+
+    progress_dialog = Instance(ProgressDialog)
+
+    calculation_running = Bool(False)
 
     # Private traits.
     #: Executor for the threaded action.
@@ -35,6 +38,7 @@ class Application(HasStrictTraits):
                 UItem('openfoam_settings'),
             ),
             UItem(name='run_button'),
+            enabled_when='calculation_running == False',
         ),
         title='Simphony UI',
         resizable=True,
@@ -45,6 +49,8 @@ class Application(HasStrictTraits):
 
     @on_trait_change('run_button')
     def run_calc(self):
+        self.calculation_running = True
+        self.progress_dialog.open()
         future = self._executor.submit(self._run_calc_threaded)
         future.add_done_callback(self._calculation_done)
 
@@ -52,30 +58,26 @@ class Application(HasStrictTraits):
         return run_calc(
             self.global_settings,
             self.openfoam_settings,
-            self.liggghts_settings
+            self.liggghts_settings,
+            self.update_progress_bar
         )
 
-    def _calculation_done(self, result):
-        GUI.invoke_later(self._update_result, result)
+    def _calculation_done(self, future):
+        GUI.invoke_later(self._update_result, future.result())
 
     def _update_result(self, result):
-        self.openfoam_wrapper = result.openfoam_wrapper
-        self.liggghts_wrapper = result.liggghts_wrapper
+        self.openfoam_wrapper, self.liggghts_wrapper = result
+        self.calculation_running = False
+        self.progress_dialog.close()
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
 
-    def get_wrappers(self):
-        openfoam_wrapper = self.thread_calculation.openfoam_wrapper
-        # liggghts_wrapper = self.thread_calculation.liggghts_wrapper
+    def update_progress_bar(self, progress):
+        GUI.invoke_later(self.progress_dialog.update, progress)
 
-        mesh_dataset = openfoam_wrapper.get_dataset(
-            openfoam_wrapper.get_dataset_names()[0])
-        avg_velo = 0.0
-        for cell in mesh_dataset.iter_cells():
-            avg_velo += cell.data[CUBA.VELOCITY][0]
-        avg_velo = avg_velo / mesh_dataset.count_of(CUDSItem.CELL)
-        print avg_velo
+    def _progress_dialog_default(self):
+        return ProgressDialog(min=0, max=100)
 
     def _global_settings_default(self):
         return GlobalParametersModel()
