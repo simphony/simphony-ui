@@ -120,9 +120,6 @@ class Application(HasStrictTraits):
         self.calculation_running = False
         self.progress_dialog.update(100)
 
-    def __executor_default(self):
-        return futures.ThreadPoolExecutor(max_workers=1)
-
     def update_progress_bar(self, progress):
         """ Function called in the secondary thread. It will transfer the
         progress status of the calculation to the main thread
@@ -133,6 +130,9 @@ class Application(HasStrictTraits):
             The progress of the calculation (Integer in the range [0, 100])
         """
         GUI.invoke_later(self.progress_dialog.update, progress)
+
+    def __executor_default(self):
+        return futures.ThreadPoolExecutor(max_workers=1)
 
     def _progress_dialog_default(self):
         return ProgressDialog(
