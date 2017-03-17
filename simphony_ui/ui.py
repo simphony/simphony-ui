@@ -20,6 +20,10 @@ from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
 
 
+def dataset2cudssource(dataset):
+    return CUDSSource(cuds=dataset)
+
+
 class Application(HasStrictTraits):
     """ Main GUI application which allows user to set global, Openfoam
     and Liggghts parameters of the computation and visualize it
@@ -107,7 +111,7 @@ class Application(HasStrictTraits):
         # Get Openfoam dataset
         openfoam_dataset = self.openfoam_wrapper.get_dataset(
             self.openfoam_wrapper.get_dataset_names()[0])
-        openfoam_source = CUDSSource(cuds=openfoam_dataset)
+        openfoam_source = dataset2cudssource(openfoam_dataset)
 
         modules = default_module(openfoam_source)
 
@@ -131,8 +135,8 @@ class Application(HasStrictTraits):
         liggghts_wall_dataset = self.liggghts_wrapper.get_dataset(
             'wall_particles')
 
-        liggghts_flow_source = CUDSSource(cuds=liggghts_flow_dataset)
-        liggghts_wall_source = CUDSSource(cuds=liggghts_wall_dataset)
+        liggghts_flow_source = dataset2cudssource(liggghts_flow_dataset)
+        liggghts_wall_source = dataset2cudssource(liggghts_wall_dataset)
 
         flow_modules = default_module(liggghts_flow_source)
         wall_modules = default_module(liggghts_wall_source)
