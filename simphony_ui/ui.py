@@ -50,7 +50,7 @@ class Application(HasStrictTraits):
     @on_trait_change('run_button')
     def run_calc(self):
         if self.calculation_running:
-            raise BaseException('Calculation already running...')
+            raise RuntimeError('Calculation already running...')
         self.calculation_running = True
         self.progress_dialog.open()
         future = self._executor.submit(self._run_calc_threaded)
