@@ -11,7 +11,7 @@ from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool)
-from traitsui.api import View, UItem, Tabbed, VGroup, HGroup
+from traitsui.api import View, UItem, Tabbed, VGroup, HSplit
 
 from pyface.api import ProgressDialog
 
@@ -66,7 +66,7 @@ class Application(HasStrictTraits):
     _executor = Instance(futures.ThreadPoolExecutor)
 
     traits_view = View(
-        HGroup(
+        HSplit(
             VGroup(
                 Tabbed(
                     UItem('global_settings'),
