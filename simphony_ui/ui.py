@@ -5,6 +5,7 @@ from mayavi.tools.mlab_scene_model import MlabSceneModel
 from simphony_mayavi.sources.api import CUDSSource
 from tvtk.pyface.scene_editor import SceneEditor
 from simphony_mayavi.modules.default_module import default_module
+from mayavi.core.ui.mayavi_scene import MayaviScene
 
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
@@ -75,7 +76,11 @@ class Application(HasStrictTraits):
                 UItem(name='run_button'),
                 enabled_when='calculation_running == False',
             ),
-            UItem(name='mayavi_scene', editor=SceneEditor())
+            UItem(
+                name='mayavi_scene',
+                editor=SceneEditor(scene_class=MayaviScene),
+                resizable=True
+            )
         ),
         title='Simphony UI',
         resizable=True,
