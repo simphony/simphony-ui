@@ -47,6 +47,11 @@ class Application(HasStrictTraits):
     # at the end of the documentation
     liggghts_wrapper = Instance(ABCModelingEngine)
 
+    openfoam_source = Instance(CUDSSource)
+
+    liggghts_flow_source = Instance(CUDSSource)
+    liggghts_wall_source = Instance(CUDSSource)
+
     #: The button on which the user will click to run the
     # calculation
     run_button = Button("Run")
@@ -110,17 +115,23 @@ class Application(HasStrictTraits):
         """ Function which add the Openfoam dataset to the
         mayavi scene
         """
+        # Clear the scene
+        try:
+            self.mlab_model.mayavi_scene.remove_child(self.openfoam_source)
+        except ValueError:
+            pass
+
         mayavi_engine = self.mlab_model.engine
 
         # Get Openfoam dataset
         openfoam_dataset = self.openfoam_wrapper.get_dataset(
             self.openfoam_wrapper.get_dataset_names()[0])
-        openfoam_source = dataset2cudssource(openfoam_dataset)
+        self.openfoam_source = dataset2cudssource(openfoam_dataset)
 
-        modules = default_module(openfoam_source)
+        modules = default_module(self.openfoam_source)
 
         # Add Openfoam source
-        mayavi_engine.add_source(openfoam_source)
+        mayavi_engine.add_source(self.openfoam_source)
 
         # Add default Openfoam modules
         for module in modules:
@@ -131,6 +142,15 @@ class Application(HasStrictTraits):
         """ Function which add the Liggghts datasets to the
         mayavi scene
         """
+        # Clear the scene
+        try:
+            self.mlab_model.mayavi_scene.remove_child(
+                self.liggghts_flow_source)
+            self.mlab_model.mayavi_scene.remove_child(
+                self.liggghts_wall_source)
+        except ValueError:
+            pass
+
         mayavi_engine = self.mlab_model.engine
 
         # Get Liggghts datasets
@@ -139,20 +159,20 @@ class Application(HasStrictTraits):
         liggghts_wall_dataset = self.liggghts_wrapper.get_dataset(
             'wall_particles')
 
-        liggghts_flow_source = dataset2cudssource(liggghts_flow_dataset)
-        liggghts_wall_source = dataset2cudssource(liggghts_wall_dataset)
+        self.liggghts_flow_source = dataset2cudssource(liggghts_flow_dataset)
+        self.liggghts_wall_source = dataset2cudssource(liggghts_wall_dataset)
 
-        flow_modules = default_module(liggghts_flow_source)
-        wall_modules = default_module(liggghts_wall_source)
+        flow_modules = default_module(self.liggghts_flow_source)
+        wall_modules = default_module(self.liggghts_wall_source)
 
         # Add Liggghts sources
-        mayavi_engine.add_source(liggghts_flow_source)
+        mayavi_engine.add_source(self.liggghts_flow_source)
 
         # Add default Liggghts modules
         for module in flow_modules:
             mayavi_engine.add_module(module)
 
-        mayavi_engine.add_source(liggghts_wall_source)
+        mayavi_engine.add_source(self.liggghts_wall_source)
 
         for module in wall_modules:
             mayavi_engine.add_module(module)
