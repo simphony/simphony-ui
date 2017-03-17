@@ -13,6 +13,10 @@ from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
 
 
 class Application(HasStrictTraits):
+    """ Main GUI application which allows user to set global, Openfoam
+    and Liggghts parameters of the computation and visualize it
+    with Mayavi
+    """
     global_settings = Instance(GlobalParametersModel)
     liggghts_settings = Instance(LiggghtsModel)
     openfoam_settings = Instance(OpenfoamModel)
