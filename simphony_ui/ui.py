@@ -83,7 +83,11 @@ class Application(HasStrictTraits):
         GUI.invoke_later(self.progress_dialog.update, progress)
 
     def _progress_dialog_default(self):
-        return ProgressDialog(min=0, max=100)
+        return ProgressDialog(
+            min=0,
+            max=100,
+            title='Calculation running...'
+        )
 
     def _global_settings_default(self):
         return GlobalParametersModel()
