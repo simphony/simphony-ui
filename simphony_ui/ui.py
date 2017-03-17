@@ -17,17 +17,33 @@ class Application(HasStrictTraits):
     and Liggghts parameters of the computation and visualize it
     with Mayavi
     """
+    #: The global settings for the calculation
     global_settings = Instance(GlobalParametersModel)
+
+    #: The Liggghts settings for the calculation
     liggghts_settings = Instance(LiggghtsModel)
+
+    #: The Openfoam settings for the calculation
     openfoam_settings = Instance(OpenfoamModel)
 
+    #: The Openfoam wrapper containing the mesh
+    # dataset at the end of the documentation
     openfoam_wrapper = Instance(ABCModelingEngine)
+
+    #: The Liggghts wrapper containing the particles datasets
+    # at the end of the documentation
     liggghts_wrapper = Instance(ABCModelingEngine)
 
+    #: The button on which the user will click to run the
+    # calculation
     run_button = Button("Run")
 
+    #: The pop up dialog which will show the status of the
+    # calculation
     progress_dialog = Instance(ProgressDialog)
 
+    #: Boolean representing if the calculation is running
+    # or not
     calculation_running = Bool(False)
 
     # Private traits.
@@ -53,6 +69,14 @@ class Application(HasStrictTraits):
 
     @on_trait_change('run_button')
     def run_calc(self):
+        """ Function which will start the calculation on a secondary
+        thread on run button click
+
+        Raises
+        ------
+        RuntimeError
+            If the calculation is already running
+        """
         if self.calculation_running:
             raise RuntimeError('Calculation already running...')
         self.calculation_running = True
@@ -61,6 +85,9 @@ class Application(HasStrictTraits):
         future.add_done_callback(self._calculation_done)
 
     def _run_calc_threaded(self):
+        """ Function which will run the calculation. This function
+        is only run by the secondary thread
+        """
         return run_calc(
             self.global_settings,
             self.openfoam_settings,
@@ -69,9 +96,26 @@ class Application(HasStrictTraits):
         )
 
     def _calculation_done(self, future):
+        """ Function which will return the result of the computation to
+        the main thread
+
+        Parameters
+        ----------
+        future
+            Object containing the result of the calculation
+        """
         GUI.invoke_later(self._update_result, future.result())
 
     def _update_result(self, result):
+        """ Function called in the main thread to get the result of the
+        calculation from the secondary thread
+
+        Parameters
+        ----------
+        result
+            The result of the calculation, it is a tuple containing the
+            Openfoam wrapper and the Liggghts wrapper
+        """
         self.openfoam_wrapper, self.liggghts_wrapper = result
         self.calculation_running = False
         self.progress_dialog.update(100)
@@ -80,6 +124,14 @@ class Application(HasStrictTraits):
         return futures.ThreadPoolExecutor(max_workers=1)
 
     def update_progress_bar(self, progress):
+        """ Function called in the secondary thread. It will transfer the
+        progress status of the calculation to the main thread
+
+        Parameters
+        ----------
+        progress
+            The progress of the calculation (Integer in the range [0, 100])
+        """
         GUI.invoke_later(self.progress_dialog.update, progress)
 
     def _progress_dialog_default(self):
