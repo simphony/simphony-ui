@@ -18,4 +18,10 @@ setup(
         by established use-cases.'''),
     install_requires=requirements,
     packages=find_packages(),
+    entry_points={
+        'gui_scripts': [
+            ('openfoam_liggghts_ui = '
+             'simphony_ui.cli.openfoam_liggghts_ui:main')
+        ]
+    },
 )
