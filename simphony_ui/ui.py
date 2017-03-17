@@ -99,6 +99,9 @@ class Application(HasStrictTraits):
 
     @on_trait_change('openfoam_wrapper')
     def show_openfoam_result(self):
+        """ Function which add the Openfoam dataset to the
+        mayavi scene
+        """
         mayavi_engine = self.mayavi_scene.engine
 
         # Get Openfoam dataset
@@ -117,11 +120,16 @@ class Application(HasStrictTraits):
 
     @on_trait_change('liggghts_wrapper')
     def show_liggghts_result(self):
+        """ Function which add the Liggghts datasets to the
+        mayavi scene
+        """
         mayavi_engine = self.mayavi_scene.engine
 
         # Get Liggghts datasets
-        liggghts_flow_dataset = self.liggghts_wrapper.get_dataset('flow_particles')
-        liggghts_wall_dataset = self.liggghts_wrapper.get_dataset('wall_particles')
+        liggghts_flow_dataset = self.liggghts_wrapper.get_dataset(
+            'flow_particles')
+        liggghts_wall_dataset = self.liggghts_wrapper.get_dataset(
+            'wall_particles')
 
         liggghts_flow_source = CUDSSource(cuds=liggghts_flow_dataset)
         liggghts_wall_source = CUDSSource(cuds=liggghts_wall_dataset)
