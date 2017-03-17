@@ -147,12 +147,14 @@ class Application(HasStrictTraits):
         wall_modules = default_module(liggghts_wall_source)
 
         # Add Liggghts sources
-        mayavi_engine.add_source(liggghts_wall_source)
         mayavi_engine.add_source(liggghts_flow_source)
 
         # Add default Liggghts modules
         for module in flow_modules:
             mayavi_engine.add_module(module)
+
+        mayavi_engine.add_source(liggghts_wall_source)
+
         for module in wall_modules:
             mayavi_engine.add_module(module)
 
