@@ -1,11 +1,19 @@
 from concurrent import futures
 from pyface.gui import GUI
+
+from mayavi.tools.mlab_scene_model import MlabSceneModel
+from simphony_mayavi.sources.api import CUDSSource
+from tvtk.pyface.scene_editor import SceneEditor
+from simphony_mayavi.modules.default_module import default_module
+
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool)
-from traitsui.api import View, UItem, Tabbed, VGroup
+from traitsui.api import View, UItem, Tabbed, VGroup, HGroup
+
 from pyface.api import ProgressDialog
+
 from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.global_parameters_model import GlobalParametersModel
 from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
@@ -26,19 +34,24 @@ class Application(HasStrictTraits):
 
     calculation_running = Bool(False)
 
+    mayavi_scene = Instance(MlabSceneModel, ())
+
     # Private traits.
     #: Executor for the threaded action.
     _executor = Instance(futures.ThreadPoolExecutor)
 
     traits_view = View(
-        VGroup(
-            Tabbed(
-                UItem('global_settings'),
-                UItem('liggghts_settings'),
-                UItem('openfoam_settings'),
+        HGroup(
+            VGroup(
+                Tabbed(
+                    UItem('global_settings'),
+                    UItem('liggghts_settings'),
+                    UItem('openfoam_settings'),
+                ),
+                UItem(name='run_button'),
+                enabled_when='calculation_running == False',
             ),
-            UItem(name='run_button'),
-            enabled_when='calculation_running == False',
+            UItem(name='mayavi_scene', editor=SceneEditor())
         ),
         title='Simphony UI',
         resizable=True,
@@ -56,6 +69,48 @@ class Application(HasStrictTraits):
         future = self._executor.submit(self._run_calc_threaded)
         future.add_done_callback(self._calculation_done)
 
+    @on_trait_change('openfoam_wrapper')
+    def show_openfoam_result(self):
+        mayavi_engine = self.mayavi_scene.engine
+
+        # Get Openfoam dataset
+        openfoam_dataset = self.openfoam_wrapper.get_dataset(
+            self.openfoam_wrapper.get_dataset_names()[0])
+        openfoam_source = CUDSSource(cuds=openfoam_dataset)
+
+        modules = default_module(openfoam_source)
+
+        # Add Openfoam source
+        mayavi_engine.add_source(openfoam_source)
+
+        # Add default Openfoam modules
+        for module in modules:
+            mayavi_engine.add_module(module)
+
+    @on_trait_change('liggghts_wrapper')
+    def show_liggghts_result(self):
+        mayavi_engine = self.mayavi_scene.engine
+
+        # Get Liggghts datasets
+        liggghts_flow_dataset = self.liggghts_wrapper.get_dataset('flow_particles')
+        liggghts_wall_dataset = self.liggghts_wrapper.get_dataset('wall_particles')
+
+        liggghts_flow_source = CUDSSource(cuds=liggghts_flow_dataset)
+        liggghts_wall_source = CUDSSource(cuds=liggghts_wall_dataset)
+
+        flow_modules = default_module(liggghts_flow_source)
+        wall_modules = default_module(liggghts_wall_source)
+
+        # Add Liggghts sources
+        mayavi_engine.add_source(liggghts_wall_source)
+        mayavi_engine.add_source(liggghts_flow_source)
+
+        # Add default Liggghts modules
+        for module in flow_modules:
+            mayavi_engine.add_module(module)
+        for module in wall_modules:
+            mayavi_engine.add_module(module)
+
     def _run_calc_threaded(self):
         return run_calc(
             self.global_settings,
@@ -72,11 +127,12 @@ class Application(HasStrictTraits):
         self.calculation_running = False
         self.progress_dialog.update(100)
 
-    def __executor_default(self):
-        return futures.ThreadPoolExecutor(max_workers=1)
-
     def update_progress_bar(self, progress):
         GUI.invoke_later(self.progress_dialog.update, progress)
+
+
+    def __executor_default(self):
+        return futures.ThreadPoolExecutor(max_workers=1)
 
     def _progress_dialog_default(self):
         return ProgressDialog(min=0, max=100)
@@ -89,6 +145,7 @@ class Application(HasStrictTraits):
 
     def _openfoam_settings_default(self):
         return OpenfoamModel()
+
 
 if __name__ == '__main__':
     ui = Application()
