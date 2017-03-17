@@ -24,6 +24,8 @@ def run_calc(global_settings, openfoam_settings,
         The trait model containing the Liggghts parameters
     progress_callback
         A callback function which will return the progress of the computation
+        which will be called with the progress state of the calculation as an
+        integer in the range [0, 100]
 
     Returns
     -------

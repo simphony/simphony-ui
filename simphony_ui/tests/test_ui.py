@@ -48,5 +48,5 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
     def test_double_run(self):
         # Simulate the calculation running
         self.application.calculation_running = True
-        with self.assertRaises(BaseException):
+        with self.assertRaises(RuntimeError):
             self.application.run_calc()
