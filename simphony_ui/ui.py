@@ -59,7 +59,7 @@ class Application(HasStrictTraits):
     # or not
     calculation_running = Bool(False)
 
-    mayavi_scene = Instance(MlabSceneModel, ())
+    mlab_model = Instance(MlabSceneModel, ())
 
     # Private traits.
     #: Executor for the threaded action.
@@ -77,9 +77,8 @@ class Application(HasStrictTraits):
                 enabled_when='calculation_running == False',
             ),
             UItem(
-                name='mayavi_scene',
-                editor=SceneEditor(scene_class=MayaviScene),
-                resizable=True
+                name='mlab_model',
+                editor=SceneEditor(scene_class=MayaviScene)
             )
         ),
         title='Simphony UI',
@@ -111,7 +110,7 @@ class Application(HasStrictTraits):
         """ Function which add the Openfoam dataset to the
         mayavi scene
         """
-        mayavi_engine = self.mayavi_scene.engine
+        mayavi_engine = self.mlab_model.engine
 
         # Get Openfoam dataset
         openfoam_dataset = self.openfoam_wrapper.get_dataset(
@@ -132,7 +131,7 @@ class Application(HasStrictTraits):
         """ Function which add the Liggghts datasets to the
         mayavi scene
         """
-        mayavi_engine = self.mayavi_scene.engine
+        mayavi_engine = self.mlab_model.engine
 
         # Get Liggghts datasets
         liggghts_flow_dataset = self.liggghts_wrapper.get_dataset(
