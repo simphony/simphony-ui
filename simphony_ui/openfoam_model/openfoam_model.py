@@ -80,19 +80,17 @@ class OpenfoamModel(HasStrictTraits):
             VGroup(
                 Item(name='viscosity'),
                 Item(name='density'),
+                '10',
                 HGroup(
-                    Item(name='channel_size_x', label='x'),
+                    Item(name='channel_size_x', label='Channel size x'),
                     Item(name='channel_size_y', label='y'),
                     Item(name='channel_size_z', label='z'),
-                    label='Channel Size',
-                    show_border=True,
                 ),
+                '10',
                 HGroup(
-                    Item(name='num_grid_x', label='x'),
+                    Item(name='num_grid_x', label='Nb Of Elements x'),
                     Item(name='num_grid_y', label='y'),
                     Item(name='num_grid_z', label='z'),
-                    label='Number Of Elements In Channel Directions',
-                    show_border=True,
                 ),
                 label='System Parameters / Conditions',
                 show_border=True,
