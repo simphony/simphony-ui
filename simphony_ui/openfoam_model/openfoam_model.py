@@ -63,7 +63,7 @@ class OpenfoamModel(HasStrictTraits):
                 '_',
                 Item(name='input_file'),
                 '_',
-                Item(name='mode', style='custom'),
+                Item(name='mode'),
                 '_',
                 Item(name='mesh_name'),
                 Item(name='mesh_type'),
