@@ -137,34 +137,34 @@ class LiggghtsModel(HasStrictTraits):
                     ),
                     VGroup(
                         Item(
-                            name='wall_restitution_coefficient_wall',
-                            label='with wall particles'
-                        ),
-                        Item(
                             name='wall_restitution_coefficient_flow',
                             label='with flow particles'
+                        ),
+                        Item(
+                            name='wall_restitution_coefficient_wall',
+                            label='with wall particles'
                         ),
                         label='Restitution Coefficient'
                     ),
                     VGroup(
                         Item(
-                            name='wall_friction_coefficient_wall',
-                            label='with wall particles'
-                        ),
-                        Item(
                             name='wall_friction_coefficient_flow',
                             label='with flow particles'
+                        ),
+                        Item(
+                            name='wall_friction_coefficient_wall',
+                            label='with wall particles'
                         ),
                         label='Friction Coefficient'
                     ),
                     VGroup(
                         Item(
-                            name='wall_cohesion_energy_density_wall',
-                            label='with wall particles'
-                        ),
-                        Item(
                             name='wall_cohesion_energy_density_flow',
                             label='with flow particles'
+                        ),
+                        Item(
+                            name='wall_cohesion_energy_density_wall',
+                            label='with wall particles'
                         ),
                         label='Cohesion energy density'
                     ),
