@@ -93,7 +93,7 @@ class OpenfoamModel(HasStrictTraits):
                     label='Number Of Elements In Channel Directions',
                     show_border=True,
                 ),
-                label='System Parameters/ Conditions',
+                label='System Parameters / Conditions',
                 show_border=True,
             ),
             Spring(),

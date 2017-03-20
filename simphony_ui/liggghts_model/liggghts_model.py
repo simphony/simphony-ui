@@ -172,7 +172,7 @@ class LiggghtsModel(HasStrictTraits):
                     label='Wall Particles Parameters',
                     show_border=True
                 ),
-                label='System Parameters/ Conditions',
+                label='System Parameters / Conditions',
                 show_border=True
             )
         )
