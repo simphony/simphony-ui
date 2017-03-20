@@ -43,36 +43,34 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         def mock_add_module(module):
             return module
 
-        with mock.patch(run_calc_target) as mock_run:
+        with mock.patch(run_calc_target) as mock_run, \
+                mock.patch(dataset2cudssource_target) as mock_cuds, \
+                mock.patch(default_module_target) as mock_def, \
+                mock.patch(add_module_target) as mock_add:
+
             mock_run.side_effect = mock_run_calc
+            mock_cuds.side_effect = mock_dataset2cudssource
+            mock_def.side_effect = mock_default_module
+            mock_add.side_effect = mock_add_module
 
-            with mock.patch(dataset2cudssource_target) as mock_cuds:
-                mock_cuds.side_effect = mock_dataset2cudssource
+            self.assertIsNone(self.application.openfoam_wrapper)
+            self.assertIsNone(self.application.liggghts_wrapper)
 
-                with mock.patch(default_module_target) as mock_def:
-                    mock_def.side_effect = mock_default_module
+            with self.event_loop_until_condition(
+                    lambda: (self.application.openfoam_wrapper
+                             is not None),
+                    timeout=20
+            ):
+                self.application.run_calc()
 
-                    with mock.patch(add_module_target) as mock_add:
-                        mock_add.side_effect = mock_add_module
-
-                        self.assertIsNone(self.application.openfoam_wrapper)
-                        self.assertIsNone(self.application.liggghts_wrapper)
-
-                        with self.event_loop_until_condition(
-                                lambda: (self.application.openfoam_wrapper
-                                         is not None),
-                                timeout=20
-                        ):
-                            self.application.run_calc()
-
-                        self.assertEqual(
-                            self.application.openfoam_wrapper,
-                            openfoam_wrapper
-                        )
-                        self.assertEqual(
-                            self.application.liggghts_wrapper,
-                            liggghts_wrapper
-                        )
+            self.assertEqual(
+                self.application.openfoam_wrapper,
+                openfoam_wrapper
+            )
+            self.assertEqual(
+                self.application.liggghts_wrapper,
+                liggghts_wrapper
+            )
 
     def test_double_run(self):
         # Simulate the calculation running
