@@ -14,8 +14,10 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         self.application = Application()
 
     def test_multi_thread(self):
-        openfoam_wrapper = mock.MagicMock(spec=ABCModelingEngine)
+        openfoam_wrapper = mock.Mock(spec=ABCModelingEngine)
         liggghts_wrapper = mock.Mock(spec=ABCModelingEngine)
+
+        openfoam_wrapper.get_dataset_names = mock.MagicMock()
 
         run_calc_target = 'simphony_ui.ui.run_calc'
 
