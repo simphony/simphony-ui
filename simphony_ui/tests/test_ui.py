@@ -41,7 +41,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
             'simphony_ui.ui.mayavi.tools.mlab_scene_model.Engine.add_module'
 
         def mock_add_module(module):
-            print module
+            return module
 
         with mock.patch(run_calc_target) as mock_run:
             mock_run.side_effect = mock_run_calc
