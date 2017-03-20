@@ -15,5 +15,6 @@ class GlobalParametersModel(HasStrictTraits):
         VGroup(
             Item(name='num_iterations', label='Number of iterations'),
             Item(name='force_type'),
+            show_border=True
         )
     )
