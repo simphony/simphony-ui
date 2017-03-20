@@ -80,7 +80,11 @@ class Application(HasStrictTraits):
                     UItem('liggghts_settings'),
                     UItem('openfoam_settings', label='OpenFOAM settings'),
                 ),
-                UItem(name='run_button'),
+                UItem(
+                    name='run_button',
+                    enabled_when='openfoam_settings.input_file != "" '
+                                 'and liggghts_settings != ""'
+                ),
                 enabled_when='calculation_running == False',
             ),
             UItem(
