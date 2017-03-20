@@ -1,7 +1,7 @@
 from concurrent import futures
 from pyface.gui import GUI
 
-from mayavi.tools.mlab_scene_model import MlabSceneModel
+import mayavi.tools.mlab_scene_model
 from simphony_mayavi.sources.api import CUDSSource
 from tvtk.pyface.scene_editor import SceneEditor
 from simphony_mayavi.modules.default_module import default_module
@@ -19,6 +19,8 @@ from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.global_parameters_model import GlobalParametersModel
 from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
+
+MlabSceneModel = mayavi.tools.mlab_scene_model.MlabSceneModel
 
 
 def dataset2cudssource(dataset):
