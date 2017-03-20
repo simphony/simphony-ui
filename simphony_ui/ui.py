@@ -148,6 +148,9 @@ class Application(HasStrictTraits):
         try:
             self.mlab_model.mayavi_scene.remove_child(
                 self.liggghts_flow_source)
+        except ValueError:
+            pass
+        try:
             self.mlab_model.mayavi_scene.remove_child(
                 self.liggghts_wall_source)
         except ValueError:
