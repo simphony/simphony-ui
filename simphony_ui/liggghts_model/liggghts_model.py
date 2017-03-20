@@ -79,7 +79,7 @@ class LiggghtsModel(HasStrictTraits):
                 label='Boundary Conditions',
                 show_border=True
             ),
-            VGroup(
+            HGroup(
                 VGroup(
                     Item(
                         name='flow_young_modulus',
