@@ -55,7 +55,7 @@ class LiggghtsModel(HasStrictTraits):
                 Item(name='num_iterations', label='Number of iterations'),
                 '_',
                 Item(name='input_file'),
-                label='Computational method parameters',
+                label='Computational Method Parameters',
                 show_border=True
             ),
             VGroup(
@@ -76,7 +76,7 @@ class LiggghtsModel(HasStrictTraits):
                 '_',
                 Item(name='flow_particles_fixed'),
                 Item(name='wall_particles_fixed'),
-                label='Boundary conditions',
+                label='Boundary Conditions',
                 show_border=True
             ),
             VGroup(
@@ -123,7 +123,7 @@ class LiggghtsModel(HasStrictTraits):
                         label='Cohesion energy density'
                     ),
                     Item(name='flow_pair_potentials'),
-                    label='Flow particles parameters',
+                    label='Flow Particles Parameters',
                     show_border=True
                 ),
                 VGroup(
@@ -169,10 +169,10 @@ class LiggghtsModel(HasStrictTraits):
                         label='Cohesion energy density'
                     ),
                     Item(name='wall_pair_potentials'),
-                    label='Wall particles parameters',
+                    label='Wall Particles Parameters',
                     show_border=True
                 ),
-                label='System parameters/ conditions',
+                label='System Parameters/ Conditions',
                 show_border=True
             )
         )
