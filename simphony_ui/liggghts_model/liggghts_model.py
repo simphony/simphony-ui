@@ -74,8 +74,8 @@ class LiggghtsModel(HasStrictTraits):
                     ),
                 ),
                 '_',
-                Item(name='flow_particles_fixed'),
-                Item(name='wall_particles_fixed'),
+                Item(name='flow_particles_fixed', label='Fix flow particles'),
+                Item(name='wall_particles_fixed', label='Fix wall particles'),
                 label='Boundary Conditions',
                 show_border=True
             ),
