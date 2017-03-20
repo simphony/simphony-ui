@@ -2,7 +2,7 @@ import os
 
 from traits.api import (HasStrictTraits, Enum, Str, Directory,
                         File, Instance)
-from traitsui.api import View, Item, VGroup, HGroup, Spring
+from traitsui.api import View, Item, VGroup, HGroup, Spring, UItem
 
 from simphony_ui.local_traits import PositiveFloat, PositiveInt
 from simphony_ui.openfoam_model.openfoam_boundary_conditions import (
@@ -73,7 +73,8 @@ class OpenfoamModel(HasStrictTraits):
                 show_border=True,
             ),
             VGroup(
-                Item(name='boundary_conditions', style='custom'),
+                UItem(name='boundary_conditions', style='custom'),
+                label='Boundary Conditions',
                 show_border=True
             ),
             VGroup(
