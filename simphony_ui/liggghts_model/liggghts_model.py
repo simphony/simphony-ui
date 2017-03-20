@@ -1,4 +1,5 @@
-from traits.api import HasStrictTraits, Int, Float, Enum, File, Bool
+from traits.api import (HasStrictTraits, Int, Float, Enum, File, Bool,
+                        on_trait_change)
 from traitsui.api import View, Item, VGroup, HGroup
 
 
@@ -47,6 +48,8 @@ class LiggghtsModel(HasStrictTraits):
     wall_cohesion_energy_density_flow = Float(0.0)
 
     wall_pair_potentials = Enum('repulsion', 'cohesion')
+
+    valid = Bool(False)
 
     traits_view = View(
         VGroup(
@@ -176,6 +179,10 @@ class LiggghtsModel(HasStrictTraits):
             )
         )
     )
+
+    @on_trait_change('input_file')
+    def is_valid(self):
+        self.valid = self.input_file != ''
 
     def _y_wall_boundary_condition_default(self):
         return 'fixed'

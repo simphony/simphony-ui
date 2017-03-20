@@ -1,7 +1,7 @@
 import os
 
 from traits.api import (HasStrictTraits, Enum, Str, Directory,
-                        File, Instance)
+                        File, Instance, Bool, on_trait_change)
 from traitsui.api import View, Item, VGroup, HGroup, Spring, UItem
 
 from simphony_ui.local_traits import PositiveFloat, PositiveInt
@@ -14,7 +14,7 @@ class OpenfoamModel(HasStrictTraits):
 
     # Computational method parameters
     #: The input file used for OpenFoam.
-    input_file = File()
+    input_file = File(auto_set=True)
 
     #: The mode of computation used with Openfoam.
     mode = Enum('internal', 'io')
@@ -54,6 +54,8 @@ class OpenfoamModel(HasStrictTraits):
     num_grid_x = PositiveInt(400)
     num_grid_y = PositiveInt(40)
     num_grid_z = PositiveInt(1)
+
+    valid = Bool(False)
 
     traits_view = View(
         VGroup(
@@ -98,6 +100,10 @@ class OpenfoamModel(HasStrictTraits):
             Spring(),
         )
     )
+
+    @on_trait_change('input_file')
+    def is_valid(self):
+        self.valid = self.input_file != ''
 
     def _boundary_conditions_default(self):
         return BoundaryConditionsModel()
