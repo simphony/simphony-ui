@@ -78,7 +78,7 @@ class Application(HasStrictTraits):
                 Tabbed(
                     UItem('global_settings'),
                     UItem('liggghts_settings'),
-                    UItem('openfoam_settings'),
+                    UItem('openfoam_settings', label='OpenFOAM settings'),
                 ),
                 UItem(name='run_button'),
                 enabled_when='calculation_running == False',
