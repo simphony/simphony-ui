@@ -3,7 +3,7 @@ import mock
 import time
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
-from simphony_ui.ui import Application
+from simphony_ui.ui import Application, dataset2cudssource
 from simphony_mayavi.sources.api import CUDSSource
 
 
@@ -79,3 +79,13 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         self.application.calculation_running = True
         with self.assertRaises(RuntimeError):
             self.application.run_calc()
+
+    def test_dataset2cudssource(self):
+
+        def mock_cudssource(cuds):
+            return cuds
+
+        with mock.patch('simphony_ui.ui.CUDSSource') as mock_cuds:
+            mock_cuds.side_effect = mock_cudssource
+
+            self.assertEqual(dataset2cudssource(36), 36)
