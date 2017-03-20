@@ -48,8 +48,11 @@ class SurfaceModel(HasStrictTraits):
     pressure_boundary_condition = Instance(PressureBoundaryConditionModel)
 
     traits_view = View(
-        Item(name='velocity_boundary_condition', style='custom'),
-        Item(name='pressure_boundary_condition', style='custom'),
+        VGroup(
+            Item(name='velocity_boundary_condition', style='custom'),
+            Item(name='pressure_boundary_condition', style='custom'),
+            show_border=True
+        )
     )
 
     def _velocity_boundary_condition_default(self):
