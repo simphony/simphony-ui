@@ -11,7 +11,7 @@ from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool)
-from traitsui.api import View, UItem, Tabbed, VGroup, HSplit
+from traitsui.api import View, UItem, Tabbed, VGroup, HSplit, message
 
 from pyface.api import ProgressDialog
 
@@ -186,12 +186,15 @@ class Application(HasStrictTraits):
         """ Function which will run the calculation. This function
         is only run by the secondary thread
         """
-        return run_calc(
-            self.global_settings,
-            self.openfoam_settings,
-            self.liggghts_settings,
-            self.update_progress_bar
-        )
+        try:
+            return run_calc(
+                self.global_settings,
+                self.openfoam_settings,
+                self.liggghts_settings,
+                self.update_progress_bar
+            )
+        except Exception:
+            return None
 
     def _calculation_done(self, future):
         """ Function which will return the result of the computation to
@@ -214,9 +217,15 @@ class Application(HasStrictTraits):
             The result of the calculation, it is a tuple containing the
             Openfoam wrapper and the Liggghts wrapper
         """
-        self.openfoam_wrapper, self.liggghts_wrapper = result
-        self.calculation_running = False
+        # Close progress dialog
         self.progress_dialog.update(100)
+
+        if result is not None:
+            self.openfoam_wrapper, self.liggghts_wrapper = result
+        else:
+            message('Oups ! Something went wrong...', 'Error')
+
+        self.calculation_running = False
 
     def update_progress_bar(self, progress):
         """ Function called in the secondary thread. It will transfer the
