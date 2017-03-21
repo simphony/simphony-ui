@@ -14,7 +14,7 @@ User Manual
 .. toctree::
    :maxdepth: 1
 
-   CUDS <cuds_definition>
+   UI <ui_doc>
 
 Indices and tables
 ==================
