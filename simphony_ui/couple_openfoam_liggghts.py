@@ -1,3 +1,4 @@
+from __future__ import division
 import math
 
 import numpy as np
@@ -9,7 +10,8 @@ from simphony_ui.openfoam_model.openfoam_wrapper_creation import (
     create_openfoam_wrapper, create_openfoam_mesh)
 
 
-def run_calc(global_settings, openfoam_settings, liggghts_settings):
+def run_calc(global_settings, openfoam_settings,
+             liggghts_settings, progress_callback):
     """ Main routine which creates the wrappers and run the calculation
 
     Parameters
@@ -20,6 +22,10 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
         The trait model containing the Openfoam parameters
     liggghts_settings : LiggghtsModel
         The trait model containing the Liggghts parameters
+    progress_callback
+        A callback function which will return the progress of the computation
+        which will be called with the progress state of the calculation as an
+        integer in the range [0, 100]
 
     Returns
     -------
@@ -86,6 +92,8 @@ def run_calc(global_settings, openfoam_settings, liggghts_settings):
     # Repeating OF calculation several times with modified pressure drop last
     # result from previous iteration as input for new iteration
     for numrun in xrange(global_settings.num_iterations):
+        progress_callback(numrun/global_settings.num_iterations*100)
+
         # Perform Openfoam calculations
         openfoam_wrapper.run()
 
