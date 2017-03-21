@@ -61,7 +61,7 @@ class OpenfoamModel(HasStrictTraits):
     traits_view = View(
         VGroup(
             VGroup(
-                Item(name='timestep'),
+                Item(name='timestep', label='Timestep (s)'),
                 Item(name='num_iterations', label='Number of iterations'),
                 '_',
                 Item(name='input_file'),
@@ -81,11 +81,11 @@ class OpenfoamModel(HasStrictTraits):
                 show_border=True
             ),
             VGrid(
-                Label('Viscosity'),
+                Label('Viscosity (Pa.s)'),
                 UItem(name='viscosity'),
-                Label('Density'),
+                Label('Density (kg/m^3)'),
                 UItem(name='density'),
-                Label('Channel size'),
+                Label('Channel size (m)'),
                 HGroup(
                     Item(name='channel_size_x', label='x'),
                     Item(name='channel_size_y', label='y'),

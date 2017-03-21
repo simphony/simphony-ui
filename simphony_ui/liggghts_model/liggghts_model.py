@@ -54,7 +54,7 @@ class LiggghtsModel(HasStrictTraits):
     traits_view = View(
         VGroup(
             VGroup(
-                Item(name='timestep'),
+                Item(name='timestep', label='Timestep (s)'),
                 Item(name='num_iterations', label='Number of iterations'),
                 '_',
                 Item(name='input_file'),
@@ -85,7 +85,7 @@ class LiggghtsModel(HasStrictTraits):
                 VGroup(
                     Item(
                         name='flow_young_modulus',
-                        label='Young\'s modulus'
+                        label='Young\'s modulus (Pa)'
                     ),
                     Item(
                         name='flow_poisson_ratio',
@@ -122,7 +122,7 @@ class LiggghtsModel(HasStrictTraits):
                             name='flow_cohesion_energy_density_wall',
                             label='with wall particles'
                         ),
-                        label='Cohesion energy density'
+                        label='Cohesion energy density (J/m^3)'
                     ),
                     Item(name='flow_pair_potentials'),
                     label='Flow Particles Parameters',
@@ -131,7 +131,7 @@ class LiggghtsModel(HasStrictTraits):
                 VGroup(
                     Item(
                         name='wall_young_modulus',
-                        label='Young\'s modulus'
+                        label='Young\'s modulus (Pa)'
                     ),
                     Item(
                         name='wall_poisson_ratio',
@@ -168,7 +168,7 @@ class LiggghtsModel(HasStrictTraits):
                             name='wall_cohesion_energy_density_wall',
                             label='with wall particles'
                         ),
-                        label='Cohesion energy density'
+                        label='Cohesion energy density (J/m^3)'
                     ),
                     Item(name='wall_pair_potentials'),
                     label='Wall Particles Parameters',
