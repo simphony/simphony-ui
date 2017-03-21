@@ -2,7 +2,8 @@ import os
 
 from traits.api import (HasStrictTraits, Enum, Str, Directory,
                         File, Instance, Bool, on_trait_change)
-from traitsui.api import View, Item, VGroup, HGroup, Spring, UItem, VGrid, Label
+from traitsui.api import (View, Item, VGroup, HGroup, Spring, UItem, VGrid,
+                          Label)
 
 from simphony_ui.local_traits import PositiveFloat, PositiveInt
 from simphony_ui.openfoam_model.openfoam_boundary_conditions import (
