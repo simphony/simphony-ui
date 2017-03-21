@@ -53,22 +53,15 @@ Directory structure
 
 The module is structured as following:
 
-- simphony_ui -- core of the simphony_ui module
+- simphony_ui -- Core of the simphony_ui module
 
-  - liggghts_model
+  - liggghts_model -- The Liggghts trait model and wrapper creation
 
-    - liggghts_model -- the trait model defining the Liggghts input parameters
-    - liggghts_wrapper_creation -- the routine which creates Liggghts wrapper
+  - openfoam_model -- The OpenFOAM trait model and wrapper creation
 
-  - openfoam_model
+  - couple_openfoam_liggghts -- Main routine which run the calculation
 
-    - openfoam_model -- the trait model defining the OpenFOAM input parameters
-    - openfoam_boundary_conditions -- the trait model defining the OpenFOAM input boundary conditions
-    - openfoam_wrapper_creation -- the routine which creates OpenFOAM wrapper
-
-  - couple_openfoam_liggghts -- main routine which run the calculation
-
-  - ui -- main trait model which contains the whole UI with the Mayavi view
+  - ui -- Main trait model which contains the whole UI with the Mayavi view
 
 - doc -- Documentation related files
 
