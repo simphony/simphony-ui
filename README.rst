@@ -41,6 +41,14 @@ or::
     # build for in-place development
     python setup.py develop
 
+Quick start:
+------------
+
+Once installed, you can run SimPhoNy-UI with::
+
+   # run simphony-ui
+   openfoam_liggghts_ui
+
 Testing
 -------
 
