@@ -15,7 +15,7 @@ low-level CUDS components (e.g Point, Bond, LatticeNode)
 Modelling engine
 ----------------
 
-.. figure:: ./images/engine.png
+.. figure:: ./_static/simphony_logo.png
 
   **Figure. 1:** UML description of a CUDS modelling engine.
 
@@ -35,10 +35,6 @@ engine.
 
 CUDS containers
 ---------------
-
-.. figure:: ./images/containers.png
-
-  **Figure. 2:** UML description of a CUDS Containers
 
 The CUDS containers, with the exception of the Lattice, are multi-type
 container (i.e. contain different types of objects). For each type the
@@ -71,48 +67,14 @@ container instance they where extracted from.
 CUDS Items
 ----------
 
-.. figure:: ./images/items.png
-
-   **Figure 3:** UML diagram of the CUDS items and their relations.
-
 Low-level items are the smallest objects that can hold CUBA information in
 SimPhoNy simulations. Each CUDS container supports a specific set of
-these types as presented in **Fig. 2**.
-
-Core items
-----------
-
-.. figure:: ./images/data_container.png
-
-   **Figure 4:** UML diagram of the DataContainer.
-
-The CUBA attribute container part of the SimPhoNy core. A dictionary
-like object maps :class:`~.CUBA` enum keys to they values. In its
-native python implementation it can support all CUBA attributes.
-
-Materials
-----------
-
-.. figure:: ./images/material_materials.png
-
-   **Figure 4:** UML diagram of Materials and Material.
-
-In the SimPhoNy modeling framework, :class:`~.Materials` and :class:`~.Material`
-are used to describe materials and to define common material properties. Each
-low-level object (e.g. Point, Particle) can be of a certain material.
+these types as presented in **Fig. 1**.
 
 MaterialRelation
 ----------------
-
-.. figure:: ./images/material_relation.png
-
-   **Figure 4:** UML diagram of MaterialRelation.
 
 In the SimPhoNy modeling framework, :class:`~.MaterialRelation`
 are used to describe relationship between materials.  For each ``kind`` of
 material relation, there exists a subclasses of :class:`~.MaterialRelation`.
 See the following table for a list of each type of material relation:
-
-.. _material-relations-table:
-
-.. include:: material_relations_table.rst
