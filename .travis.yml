@@ -28,7 +28,7 @@ before_install:
   - sudo apt-get install ccache
   - ccache -s
   - export PATH=/usr/lib/ccache:${PATH}
-  - git clone --branch=0.3.1 https://github.com/simphony/simphony-framework.git $HOME/simphony-framework
+  - git clone --branch=v0.3 https://github.com/simphony/simphony-framework.git $HOME/simphony-framework
   - pushd $HOME/simphony-framework
   - sudo make base
   - if test ! -e $HOME/debcache/openfoam231_0-1_amd64.deb; then wget http://dl.openfoam.org/ubuntu/dists/trusty/main/binary-amd64/openfoam231_0-1_amd64.deb -O $HOME/debcache/openfoam231_0-1_amd64.deb; fi
