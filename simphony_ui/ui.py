@@ -68,6 +68,8 @@ class Application(HasStrictTraits):
 
     mlab_model = Instance(MlabSceneModel, ())
 
+    valid = Bool(False)
+
     # Private traits.
     #: Executor for the threaded action.
     _executor = Instance(futures.ThreadPoolExecutor)
@@ -78,9 +80,12 @@ class Application(HasStrictTraits):
                 Tabbed(
                     UItem('global_settings'),
                     UItem('liggghts_settings'),
-                    UItem('openfoam_settings'),
+                    UItem('openfoam_settings', label='OpenFOAM settings'),
                 ),
-                UItem(name='run_button'),
+                UItem(
+                    name='run_button',
+                    enabled_when='valid'
+                ),
                 enabled_when='calculation_running == False',
             ),
             UItem(
@@ -94,6 +99,12 @@ class Application(HasStrictTraits):
         width=1.0,
         height=1.0
     )
+
+    @on_trait_change('openfoam_settings:valid,'
+                     'liggghts_settings:valid')
+    def update_valid(self):
+        self.valid = (self.openfoam_settings.valid and
+                      self.liggghts_settings.valid)
 
     @on_trait_change('run_button')
     def run_calc(self):

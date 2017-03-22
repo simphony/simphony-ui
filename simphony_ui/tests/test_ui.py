@@ -89,3 +89,10 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
             mock_cuds.side_effect = mock_cudssource
 
             self.assertEqual(dataset2cudssource(36), 36)
+
+    def test_update_valid(self):
+        self.assertFalse(self.application.valid)
+        self.application.openfoam_settings.valid = True
+        self.assertFalse(self.application.valid)
+        self.application.liggghts_settings.valid = True
+        self.assertTrue(self.application.valid)
