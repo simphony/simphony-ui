@@ -1,6 +1,6 @@
 from concurrent import futures
+import logging
 from pyface.gui import GUI
-from pyface.timer.api import do_after
 
 import mayavi.tools.mlab_scene_model
 from simphony_mayavi.sources.api import CUDSSource
@@ -11,9 +11,9 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool, Str, Float)
+                        on_trait_change, Bool, Event)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit,
-                          HGroup, Item, spring)
+                          message)
 
 from pyface.api import ProgressDialog
 
@@ -27,34 +27,6 @@ MlabSceneModel = mayavi.tools.mlab_scene_model.MlabSceneModel
 
 def dataset2cudssource(dataset):
     return CUDSSource(cuds=dataset)
-
-
-class CustomErrorMessage(HasStrictTraits):
-
-    # The message to be shown:
-    message = Str('Oups ! Something went wrong...')
-
-    # The time (in seconds) to show the message:
-    time = Float(20)
-
-    def show(self):
-        """ Display the error message for a limited duration.
-        """
-        view = View(
-            HGroup(
-                spring,
-                Item('message',
-                     show_label=False,
-                     style='readonly'
-                     ),
-                spring
-            ),
-            buttons=['OK'],
-            title='Error'
-        )
-
-        do_after(int(1000.0 * self.time),
-                 self.edit_traits(view=view).dispose)
 
 
 class Application(HasStrictTraits):
@@ -98,6 +70,10 @@ class Application(HasStrictTraits):
 
     mlab_model = Instance(MlabSceneModel, ())
 
+    event = Event()
+
+    logger = Instance(logging.Logger)
+
     # Private traits.
     #: Executor for the threaded action.
     _executor = Instance(futures.ThreadPoolExecutor)
@@ -124,6 +100,10 @@ class Application(HasStrictTraits):
         width=1.0,
         height=1.0
     )
+
+    @on_trait_change('event', dispatch='ui')
+    def show_error(self, msg):
+        message('Oups ! Something went bad:\n{}'.format(msg), 'Error')
 
     @on_trait_change('run_button')
     def run_calc(self):
@@ -223,7 +203,9 @@ class Application(HasStrictTraits):
                 self.liggghts_settings,
                 self.update_progress_bar
             )
-        except Exception:
+        except Exception as e:
+            self.event = str(e)
+            self.logger.exception('Error during the calculation')
             return None
 
     def _calculation_done(self, future):
@@ -252,9 +234,6 @@ class Application(HasStrictTraits):
 
         if result is not None:
             self.openfoam_wrapper, self.liggghts_wrapper = result
-        else:
-            err_mess = CustomErrorMessage()
-            err_mess.show()
 
         self.calculation_running = False
 
@@ -268,6 +247,9 @@ class Application(HasStrictTraits):
             The progress of the calculation (Integer in the range [0, 100])
         """
         GUI.invoke_later(self.progress_dialog.update, progress)
+
+    def _logger_default(self):
+        return logging.getLogger(self.__class__.__name__)
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
@@ -290,5 +272,6 @@ class Application(HasStrictTraits):
 
 
 if __name__ == '__main__':
+    logging.basicConfig()
     ui = Application()
     ui.configure_traits()
