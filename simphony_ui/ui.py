@@ -72,7 +72,7 @@ class Application(HasStrictTraits):
     mlab_model = Instance(MlabSceneModel, ())
 
     #: Event object which will be useful for error dialog
-    event = Event()
+    calculation_error_event = Event()
 
     #: Logger for error prints
     logger = Instance(logging.Logger)
@@ -104,7 +104,7 @@ class Application(HasStrictTraits):
         height=1.0
     )
 
-    @on_trait_change('event', dispatch='ui')
+    @on_trait_change('calculation_error_event', dispatch='ui')
     def show_error(self, msg):
         error(None, 'Oups ! Something went bad:\n{}'.format(msg), 'Error')
 
@@ -207,7 +207,7 @@ class Application(HasStrictTraits):
                 self.update_progress_bar
             )
         except Exception as e:
-            self.event = str(e)
+            self.calculation_error_event = str(e)
             self.logger.exception('Error during the calculation')
             return None
 
