@@ -1,5 +1,5 @@
-from ..ui import Application
 import logging
+from ..ui import Application
 
 
 def main():
