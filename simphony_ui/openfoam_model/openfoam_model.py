@@ -105,7 +105,7 @@ class OpenfoamModel(HasStrictTraits):
     )
 
     @on_trait_change('input_file')
-    def is_valid(self):
+    def update_valid(self):
         self.valid = self.input_file != ''
 
     def _boundary_conditions_default(self):

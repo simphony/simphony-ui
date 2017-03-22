@@ -181,7 +181,7 @@ class LiggghtsModel(HasStrictTraits):
     )
 
     @on_trait_change('input_file')
-    def is_valid(self):
+    def update_valid(self):
         self.valid = self.input_file != ''
 
     def _y_wall_boundary_condition_default(self):
