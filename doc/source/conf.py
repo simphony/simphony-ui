@@ -27,12 +27,13 @@ def mock_modules():
 
     from mock import MagicMock
 
-    """try:
-        import tables
-    except ImportError:
-        MOCK_MODULES = ['tables']
-    else:
-        MOCK_MODULES = []"""
+    # Example of module import (with mock if import failed):
+    # try:
+    #     import tables
+    # except ImportError:
+    #     MOCK_MODULES = ['tables']
+    # else:
+    #     MOCK_MODULES = []"""
 
     class Mock(MagicMock):
 
