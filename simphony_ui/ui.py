@@ -1,5 +1,6 @@
 from concurrent import futures
 from pyface.gui import GUI
+from pyface.timer.api import do_after
 
 import mayavi.tools.mlab_scene_model
 from simphony_mayavi.sources.api import CUDSSource
@@ -10,8 +11,9 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool)
-from traitsui.api import View, UItem, Tabbed, VGroup, HSplit, message
+                        on_trait_change, Bool, Str, Float)
+from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit,
+                          HGroup, Item, spring)
 
 from pyface.api import ProgressDialog
 
@@ -25,6 +27,34 @@ MlabSceneModel = mayavi.tools.mlab_scene_model.MlabSceneModel
 
 def dataset2cudssource(dataset):
     return CUDSSource(cuds=dataset)
+
+
+class CustomErrorMessage(HasStrictTraits):
+
+    # The message to be shown:
+    message = Str('Oups ! Something went wrong...')
+
+    # The time (in seconds) to show the message:
+    time = Float(20)
+
+    def show(self):
+        """ Display the error message for a limited duration.
+        """
+        view = View(
+            HGroup(
+                spring,
+                Item('message',
+                     show_label=False,
+                     style='readonly'
+                     ),
+                spring
+            ),
+            buttons=['OK'],
+            title='Error'
+        )
+
+        do_after(int(1000.0 * self.time),
+                 self.edit_traits(view=view).dispose)
 
 
 class Application(HasStrictTraits):
@@ -223,7 +253,8 @@ class Application(HasStrictTraits):
         if result is not None:
             self.openfoam_wrapper, self.liggghts_wrapper = result
         else:
-            message('Oups ! Something went wrong...', 'Error')
+            err_mess = CustomErrorMessage()
+            err_mess.show()
 
         self.calculation_running = False
 
