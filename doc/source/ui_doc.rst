@@ -16,8 +16,8 @@ examples of input files in the simphony_ui/tests/fixtures directory.
 Run the calculation
 -------------------
 
-Once input parameters correctly set, you'll be able to run the calculation with
-the "Run" button at the bottom of the dialog. A progress bar dialog should appears.
+Once input parameters are correctly set, you'll be able to run the calculation with
+the "Run" button at the bottom of the dialog. A progress bar dialog should appear.
 It can take a few minutes for large number of iterations.
 
 Visualize result
