@@ -1,5 +1,5 @@
 import numpy as np
-from traits.api import HasStrictTraits, Float, Enum, Instance, Array, Str
+from traits.api import HasStrictTraits, Float, Enum, Instance, Array
 from traitsui.api import View, Item, Tabbed, UItem, VGroup, HGroup
 
 
