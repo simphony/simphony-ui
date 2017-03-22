@@ -95,7 +95,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         def mock_msg(*args, **kwargs):
             return
 
-        with mock.patch('simphony_ui.ui.message') as mock_message:
+        with mock.patch('simphony_ui.ui.error') as mock_message:
             mock_message.side_effect = mock_msg
 
             # Those methods are not supposed to be called

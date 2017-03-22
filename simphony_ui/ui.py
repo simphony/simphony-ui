@@ -1,6 +1,7 @@
 from concurrent import futures
 import logging
 from pyface.gui import GUI
+from pyface.api import error
 
 import mayavi.tools.mlab_scene_model
 from simphony_mayavi.sources.api import CUDSSource
@@ -12,8 +13,7 @@ from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool, Event)
-from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit,
-                          message)
+from traitsui.api import View, UItem, Tabbed, VGroup, HSplit
 
 from pyface.api import ProgressDialog
 
@@ -103,7 +103,7 @@ class Application(HasStrictTraits):
 
     @on_trait_change('event', dispatch='ui')
     def show_error(self, msg):
-        message('Oups ! Something went bad:\n{}'.format(msg), 'Error')
+        error(None, 'Oups ! Something went bad:\n{}'.format(msg), 'Error')
 
     @on_trait_change('run_button')
     def run_calc(self):
