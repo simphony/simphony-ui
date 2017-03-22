@@ -68,10 +68,13 @@ class Application(HasStrictTraits):
     # or not
     calculation_running = Bool(False)
 
+    #: The Mayavi traits model which contains the scene and engine
     mlab_model = Instance(MlabSceneModel, ())
 
+    #: Event object which will be useful for error dialog
     event = Event()
 
+    #: Logger for error prints
     logger = Instance(logging.Logger)
 
     # Private traits.
