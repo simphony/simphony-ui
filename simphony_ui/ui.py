@@ -102,7 +102,7 @@ class Application(HasStrictTraits):
 
     @on_trait_change('openfoam_settings:valid,'
                      'liggghts_settings:valid')
-    def is_valid(self):
+    def update_valid(self):
         self.valid = (self.openfoam_settings.valid and
                       self.liggghts_settings.valid)
 

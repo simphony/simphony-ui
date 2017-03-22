@@ -90,7 +90,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
             self.assertEqual(dataset2cudssource(36), 36)
 
-    def test_is_valid(self):
+    def test_update_valid(self):
         self.assertFalse(self.application.valid)
         self.application.openfoam_settings.valid = True
         self.assertFalse(self.application.valid)
