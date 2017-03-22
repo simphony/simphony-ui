@@ -272,9 +272,3 @@ class Application(HasStrictTraits):
 
     def _openfoam_settings_default(self):
         return OpenfoamModel()
-
-
-if __name__ == '__main__':
-    logging.basicConfig()
-    ui = Application()
-    ui.configure_traits()
