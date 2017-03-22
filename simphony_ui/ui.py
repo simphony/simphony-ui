@@ -12,7 +12,7 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool, Event)
+                        on_trait_change, Bool, Event, Str)
 from traitsui.api import View, UItem, Tabbed, VGroup, HSplit
 
 from pyface.api import ProgressDialog
@@ -72,7 +72,7 @@ class Application(HasStrictTraits):
     mlab_model = Instance(MlabSceneModel, ())
 
     #: Event object which will be useful for error dialog
-    calculation_error_event = Event()
+    calculation_error_event = Event(Str)
 
     #: Logger for error prints
     logger = Instance(logging.Logger)
