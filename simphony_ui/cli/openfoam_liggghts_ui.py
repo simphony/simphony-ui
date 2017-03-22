@@ -1,4 +1,5 @@
-from ..ui import Application, logging
+from ..ui import Application
+import logging
 
 
 def main():
