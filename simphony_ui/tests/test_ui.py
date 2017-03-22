@@ -89,3 +89,10 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
             mock_cuds.side_effect = mock_cudssource
 
             self.assertEqual(dataset2cudssource(36), 36)
+
+    def test_report_failure(self):
+        # Those methods are not supposed to be called
+        self.assertIsNone(self.application._run_calc_threaded())
+
+        self.application._update_result(None)
+        self.assertIsNone(self.application.openfoam_wrapper)
