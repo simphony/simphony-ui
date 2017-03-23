@@ -1,6 +1,6 @@
 import numpy as np
 from traits.api import HasStrictTraits, Float, Enum, Instance, Array
-from traitsui.api import View, Item, Tabbed, UItem, VGroup
+from traitsui.api import View, Item, Tabbed, UItem, VGroup, HGroup
 
 
 class BoundaryConditionModel(HasStrictTraits):
@@ -12,17 +12,18 @@ class BoundaryConditionModel(HasStrictTraits):
     fixed_gradient = Array(np.float, (1, 3))
 
     traits_view = View(
-        VGroup(
+        HGroup(
             'type',
             Item(
                 name='fixed_gradient',
+                label='Value',
                 visible_when='type == "fixedGradient"',
             ),
             Item(
                 name='fixed_value',
+                label='Value',
                 visible_when='type == "fixedValue"',
             ),
-            show_border=True,
         )
     )
 
@@ -48,8 +49,11 @@ class SurfaceModel(HasStrictTraits):
     pressure_boundary_condition = Instance(PressureBoundaryConditionModel)
 
     traits_view = View(
-        Item(name='velocity_boundary_condition', style='custom'),
-        Item(name='pressure_boundary_condition', style='custom'),
+        VGroup(
+            Item(name='velocity_boundary_condition', style='custom'),
+            Item(name='pressure_boundary_condition', style='custom'),
+            show_border=True
+        )
     )
 
     def _velocity_boundary_condition_default(self):

@@ -77,6 +77,8 @@ class Application(HasStrictTraits):
     #: Logger for error prints
     logger = Instance(logging.Logger)
 
+    valid = Bool(False)
+
     # Private traits.
     #: Executor for the threaded action.
     _executor = Instance(futures.ThreadPoolExecutor)
@@ -87,9 +89,12 @@ class Application(HasStrictTraits):
                 Tabbed(
                     UItem('global_settings'),
                     UItem('liggghts_settings'),
-                    UItem('openfoam_settings'),
+                    UItem('openfoam_settings', label='OpenFOAM settings'),
                 ),
-                UItem(name='run_button'),
+                UItem(
+                    name='run_button',
+                    enabled_when='valid'
+                ),
                 enabled_when='calculation_running == False',
             ),
             UItem(
@@ -107,6 +112,12 @@ class Application(HasStrictTraits):
     @on_trait_change('calculation_error_event', dispatch='ui')
     def show_error(self, msg):
         error(None, 'Oups ! Something went bad:\n{}'.format(msg), 'Error')
+
+    @on_trait_change('openfoam_settings:valid,'
+                     'liggghts_settings:valid')
+    def update_valid(self):
+        self.valid = (self.openfoam_settings.valid and
+                      self.liggghts_settings.valid)
 
     @on_trait_change('run_button')
     def run_calc(self):

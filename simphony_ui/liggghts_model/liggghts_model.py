@@ -1,4 +1,5 @@
-from traits.api import HasStrictTraits, Int, Float, Enum, File, Bool
+from traits.api import (HasStrictTraits, Int, Float, Enum, File, Bool,
+                        on_trait_change)
 from traitsui.api import View, Item, VGroup, HGroup
 
 
@@ -48,14 +49,16 @@ class LiggghtsModel(HasStrictTraits):
 
     wall_pair_potentials = Enum('repulsion', 'cohesion')
 
+    valid = Bool(False)
+
     traits_view = View(
         VGroup(
             VGroup(
-                Item(name='timestep'),
+                Item(name='timestep', label='Timestep (s)'),
                 Item(name='num_iterations', label='Number of iterations'),
                 '_',
                 Item(name='input_file'),
-                label='Computational method parameters',
+                label='Computational Method Parameters',
                 show_border=True
             ),
             VGroup(
@@ -73,17 +76,16 @@ class LiggghtsModel(HasStrictTraits):
                         label='Z Wall'
                     ),
                 ),
-                '_',
-                Item(name='flow_particles_fixed'),
-                Item(name='wall_particles_fixed'),
-                label='Boundary conditions',
+                Item(name='flow_particles_fixed', label='Fix flow particles'),
+                Item(name='wall_particles_fixed', label='Fix wall particles'),
+                label='Boundary Conditions',
                 show_border=True
             ),
-            VGroup(
+            HGroup(
                 VGroup(
                     Item(
                         name='flow_young_modulus',
-                        label='Young\'s modulus'
+                        label='Young\'s modulus (Pa)'
                     ),
                     Item(
                         name='flow_poisson_ratio',
@@ -120,16 +122,16 @@ class LiggghtsModel(HasStrictTraits):
                             name='flow_cohesion_energy_density_wall',
                             label='with wall particles'
                         ),
-                        label='Cohesion energy density'
+                        label='Cohesion energy density (J/m^3)'
                     ),
                     Item(name='flow_pair_potentials'),
-                    label='Flow particles parameters',
+                    label='Flow Particles Parameters',
                     show_border=True
                 ),
                 VGroup(
                     Item(
                         name='wall_young_modulus',
-                        label='Young\'s modulus'
+                        label='Young\'s modulus (Pa)'
                     ),
                     Item(
                         name='wall_poisson_ratio',
@@ -137,46 +139,50 @@ class LiggghtsModel(HasStrictTraits):
                     ),
                     VGroup(
                         Item(
-                            name='wall_restitution_coefficient_wall',
-                            label='with wall particles'
-                        ),
-                        Item(
                             name='wall_restitution_coefficient_flow',
                             label='with flow particles'
+                        ),
+                        Item(
+                            name='wall_restitution_coefficient_wall',
+                            label='with wall particles'
                         ),
                         label='Restitution Coefficient'
                     ),
                     VGroup(
                         Item(
-                            name='wall_friction_coefficient_wall',
-                            label='with wall particles'
-                        ),
-                        Item(
                             name='wall_friction_coefficient_flow',
                             label='with flow particles'
+                        ),
+                        Item(
+                            name='wall_friction_coefficient_wall',
+                            label='with wall particles'
                         ),
                         label='Friction Coefficient'
                     ),
                     VGroup(
                         Item(
-                            name='wall_cohesion_energy_density_wall',
-                            label='with wall particles'
-                        ),
-                        Item(
                             name='wall_cohesion_energy_density_flow',
                             label='with flow particles'
                         ),
-                        label='Cohesion energy density'
+                        Item(
+                            name='wall_cohesion_energy_density_wall',
+                            label='with wall particles'
+                        ),
+                        label='Cohesion energy density (J/m^3)'
                     ),
                     Item(name='wall_pair_potentials'),
-                    label='Wall particles parameters',
+                    label='Wall Particles Parameters',
                     show_border=True
                 ),
-                label='System parameters/ conditions',
+                label='System Parameters / Conditions',
                 show_border=True
             )
         )
     )
+
+    @on_trait_change('input_file')
+    def update_valid(self):
+        self.valid = self.input_file != ''
 
     def _y_wall_boundary_condition_default(self):
         return 'fixed'

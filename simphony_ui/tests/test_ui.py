@@ -103,3 +103,10 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
             self.application._update_result(None)
             self.assertIsNone(self.application.openfoam_wrapper)
+
+    def test_update_valid(self):
+        self.assertFalse(self.application.valid)
+        self.application.openfoam_settings.valid = True
+        self.assertFalse(self.application.valid)
+        self.application.liggghts_settings.valid = True
+        self.assertTrue(self.application.valid)

@@ -1,8 +1,9 @@
 import os
 
 from traits.api import (HasStrictTraits, Enum, Str, Directory,
-                        File, Instance)
-from traitsui.api import View, Item, VGroup, HGroup, Spring
+                        File, Instance, Bool, on_trait_change)
+from traitsui.api import (View, Item, VGroup, HGroup, Spring, UItem, VGrid,
+                          Label)
 
 from simphony_ui.local_traits import PositiveFloat, PositiveInt
 from simphony_ui.openfoam_model.openfoam_boundary_conditions import (
@@ -14,7 +15,7 @@ class OpenfoamModel(HasStrictTraits):
 
     # Computational method parameters
     #: The input file used for OpenFoam.
-    input_file = File()
+    input_file = File(auto_set=True)
 
     #: The mode of computation used with Openfoam.
     mode = Enum('internal', 'io')
@@ -55,50 +56,57 @@ class OpenfoamModel(HasStrictTraits):
     num_grid_y = PositiveInt(40)
     num_grid_z = PositiveInt(1)
 
+    valid = Bool(False)
+
     traits_view = View(
         VGroup(
             VGroup(
-                Item(name='timestep'),
+                Item(name='timestep', label='Timestep (s)'),
                 Item(name='num_iterations', label='Number of iterations'),
                 '_',
                 Item(name='input_file'),
                 '_',
-                Item(name='mode', style='custom'),
+                Item(name='mode'),
                 '_',
                 Item(name='mesh_name'),
                 Item(name='mesh_type'),
                 '_',
                 Item(name='output_path'),
-                label='Computational method parameters',
+                label='Computational Method Parameters',
                 show_border=True,
             ),
             VGroup(
-                Item(name='boundary_conditions', style='custom'),
+                UItem(name='boundary_conditions', style='custom'),
+                label='Boundary Conditions',
                 show_border=True
             ),
-            VGroup(
-                Item(name='viscosity'),
-                Item(name='density'),
+            VGrid(
+                Label('Viscosity (Pa.s)'),
+                UItem(name='viscosity'),
+                Label('Density (kg/m^3)'),
+                UItem(name='density'),
+                Label('Channel size (m)'),
                 HGroup(
                     Item(name='channel_size_x', label='x'),
                     Item(name='channel_size_y', label='y'),
                     Item(name='channel_size_z', label='z'),
-                    label='Channel size',
-                    show_border=True,
                 ),
+                Label('Number Of Elements'),
                 HGroup(
                     Item(name='num_grid_x', label='x'),
                     Item(name='num_grid_y', label='y'),
                     Item(name='num_grid_z', label='z'),
-                    label='Number of elements in channel directions',
-                    show_border=True,
                 ),
-                label='System parameters/ conditions',
+                label='System Parameters / Conditions',
                 show_border=True,
             ),
             Spring(),
         )
     )
+
+    @on_trait_change('input_file')
+    def update_valid(self):
+        self.valid = self.input_file != ''
 
     def _boundary_conditions_default(self):
         return BoundaryConditionsModel()
