@@ -1,5 +1,6 @@
 from concurrent import futures
 import logging
+import traceback
 from pyface.gui import GUI
 from pyface.api import error
 
@@ -117,8 +118,12 @@ class Application(HasStrictTraits):
     )
 
     @on_trait_change('calculation_error_event', dispatch='ui')
-    def show_error(self, msg):
-        error(None, 'Oups ! Something went bad:\n{}'.format(msg), 'Error')
+    def show_error(self, error_message):
+        error(
+            None,
+            'Oups ! Something went bad...\n\n{}'.format(error_message),
+            'Error'
+        )
 
     @on_trait_change('openfoam_settings:valid,'
                      'liggghts_settings:valid')
@@ -224,8 +229,8 @@ class Application(HasStrictTraits):
                 self.liggghts_settings,
                 self.update_progress_bar
             )
-        except Exception as e:
-            self.calculation_error_event = str(e)
+        except Exception:
+            self.calculation_error_event = traceback.format_exc()
             log.exception('Error during the calculation')
             return None
 
