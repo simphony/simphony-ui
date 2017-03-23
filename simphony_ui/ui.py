@@ -1,5 +1,6 @@
 from concurrent import futures
 import logging
+import traceback
 from pyface.gui import GUI
 from pyface.api import error
 
@@ -12,7 +13,7 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool, Event, Str)
+                        on_trait_change, Bool, Event, Tuple)
 from traitsui.api import View, UItem, Tabbed, VGroup, HSplit
 
 from pyface.api import ProgressDialog
@@ -72,7 +73,7 @@ class Application(HasStrictTraits):
     mlab_model = Instance(MlabSceneModel, ())
 
     #: Event object which will be useful for error dialog
-    calculation_error_event = Event(Str)
+    calculation_error_event = Event(Tuple)
 
     #: Logger for error prints
     logger = Instance(logging.Logger)
@@ -111,8 +112,16 @@ class Application(HasStrictTraits):
     )
 
     @on_trait_change('calculation_error_event', dispatch='ui')
-    def show_error(self, msg):
-        error(None, 'Oups ! Something went bad:\n{}'.format(msg), 'Error')
+    def show_error(self, messages):
+        error_msg, tb_msg = messages
+        error(
+            None,
+            'Oups ! Something went bad:\n{}\n\nDetails:\n{}'.format(
+                error_msg,
+                tb_msg
+            ),
+            'Error'
+        )
 
     @on_trait_change('openfoam_settings:valid,'
                      'liggghts_settings:valid')
@@ -219,7 +228,8 @@ class Application(HasStrictTraits):
                 self.update_progress_bar
             )
         except Exception as e:
-            self.calculation_error_event = str(e)
+            tb = traceback.format_exc().splitlines()
+            self.calculation_error_event = str(e), '\n'.join(tb)
             self.logger.exception('Error during the calculation')
             return None
 
