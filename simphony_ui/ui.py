@@ -5,6 +5,8 @@ from pyface.gui import GUI
 from pyface.api import error
 
 import mayavi.tools.mlab_scene_model
+from mayavi.modules.api import Surface
+
 from simphony_mayavi.sources.api import CUDSSource
 from tvtk.pyface.scene_editor import SceneEditor
 from simphony_mayavi.modules.default_module import default_module
@@ -166,14 +168,11 @@ class Application(HasStrictTraits):
             self.openfoam_wrapper.get_dataset_names()[0])
         self.openfoam_source = dataset2cudssource(openfoam_dataset)
 
-        modules = default_module(self.openfoam_source)
-
         # Add Openfoam source
         mayavi_engine.add_source(self.openfoam_source)
 
-        # Add default Openfoam modules
-        for module in modules:
-            mayavi_engine.add_module(module)
+        # Add surface module to Openfoam source
+        mayavi_engine.add_module(Surface())
 
     @on_trait_change('liggghts_wrapper')
     def show_liggghts_result(self):
