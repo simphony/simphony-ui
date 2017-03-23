@@ -80,6 +80,7 @@ class Application(HasStrictTraits):
     #: True if the calculation can be safely run, False otherwise
     valid = Bool(False)
 
+    #: Dictionary of the namespace associated to the shell editor
     shell = Dict()
 
     # Private traits.
