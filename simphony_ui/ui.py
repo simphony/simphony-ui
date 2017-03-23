@@ -77,6 +77,7 @@ class Application(HasStrictTraits):
     #: Logger for error prints
     logger = Instance(logging.Logger)
 
+    #: True if the calculation can be safely run, False otherwise
     valid = Bool(False)
 
     # Private traits.
