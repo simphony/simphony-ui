@@ -12,8 +12,9 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool, Event, Str)
-from traitsui.api import View, UItem, Tabbed, VGroup, HSplit
+                        on_trait_change, Bool, Event, Str, Dict)
+from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
+                          ShellEditor)
 
 from pyface.api import ProgressDialog
 
@@ -79,23 +80,28 @@ class Application(HasStrictTraits):
     #: True if the calculation can be safely run, False otherwise
     valid = Bool(False)
 
+    shell = Dict()
+
     # Private traits.
     #: Executor for the threaded action.
     _executor = Instance(futures.ThreadPoolExecutor)
 
     traits_view = View(
         HSplit(
-            VGroup(
-                Tabbed(
-                    UItem('global_settings'),
-                    UItem('liggghts_settings'),
-                    UItem('openfoam_settings', label='OpenFOAM settings'),
+            VSplit(
+                VGroup(
+                    Tabbed(
+                        UItem('global_settings'),
+                        UItem('liggghts_settings'),
+                        UItem('openfoam_settings', label='OpenFOAM settings'),
+                    ),
+                    UItem(
+                        name='run_button',
+                        enabled_when='valid'
+                    ),
+                    enabled_when='calculation_running == False',
                 ),
-                UItem(
-                    name='run_button',
-                    enabled_when='valid'
-                ),
-                enabled_when='calculation_running == False',
+                UItem('shell', editor=ShellEditor())
             ),
             UItem(
                 name='mlab_model',
