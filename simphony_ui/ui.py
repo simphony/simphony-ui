@@ -264,7 +264,7 @@ class Application(HasStrictTraits):
         GUI.invoke_later(self.progress_dialog.update, progress)
 
     def _logger_default(self):
-        return logging.getLogger(self.__class__.__name__)
+        return logging.getLogger('{}.{}'.format(self.__class__.__module__.__name__, self.__class__.__name__))
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
