@@ -25,6 +25,8 @@ from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
 
 MlabSceneModel = mayavi.tools.mlab_scene_model.MlabSceneModel
 
+log = logging.getLogger(__name__)
+
 
 def dataset2cudssource(dataset):
     return CUDSSource(cuds=dataset)
@@ -74,9 +76,6 @@ class Application(HasStrictTraits):
 
     #: Event object which will be useful for error dialog
     calculation_error_event = Event(Tuple)
-
-    #: Logger for error prints
-    logger = Instance(logging.Logger)
 
     #: True if the calculation can be safely run, False otherwise
     valid = Bool(False)
@@ -230,7 +229,7 @@ class Application(HasStrictTraits):
         except Exception as e:
             tb = traceback.format_exc().splitlines()
             self.calculation_error_event = str(e), '\n'.join(tb)
-            self.logger.exception('Error during the calculation')
+            log.exception('Error during the calculation')
             return None
 
     def _calculation_done(self, future):
@@ -272,12 +271,6 @@ class Application(HasStrictTraits):
             The progress of the calculation (Integer in the range [0, 100])
         """
         GUI.invoke_later(self.progress_dialog.update, progress)
-
-    def _logger_default(self):
-        return logging.getLogger('{}.{}'.format(
-            self.__class__.__module__,
-            self.__class__.__name__)
-        )
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
