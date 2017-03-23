@@ -1,5 +1,7 @@
 from concurrent import futures
+import logging
 from pyface.gui import GUI
+from pyface.api import error
 
 import mayavi.tools.mlab_scene_model
 from simphony_mayavi.sources.api import CUDSSource
@@ -10,7 +12,7 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool)
+                        on_trait_change, Bool, Event, Str)
 from traitsui.api import View, UItem, Tabbed, VGroup, HSplit
 
 from pyface.api import ProgressDialog
@@ -21,6 +23,8 @@ from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
 from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
 
 MlabSceneModel = mayavi.tools.mlab_scene_model.MlabSceneModel
+
+log = logging.getLogger(__name__)
 
 
 def dataset2cudssource(dataset):
@@ -66,8 +70,13 @@ class Application(HasStrictTraits):
     # or not
     calculation_running = Bool(False)
 
+    #: The Mayavi traits model which contains the scene and engine
     mlab_model = Instance(MlabSceneModel, ())
 
+    #: Event object which will be useful for error dialog
+    calculation_error_event = Event(Str)
+
+    #: True if the calculation can be safely run, False otherwise
     valid = Bool(False)
 
     # Private traits.
@@ -99,6 +108,10 @@ class Application(HasStrictTraits):
         width=1.0,
         height=1.0
     )
+
+    @on_trait_change('calculation_error_event', dispatch='ui')
+    def show_error(self, msg):
+        error(None, 'Oups ! Something went bad:\n{}'.format(msg), 'Error')
 
     @on_trait_change('openfoam_settings:valid,'
                      'liggghts_settings:valid')
@@ -197,12 +210,17 @@ class Application(HasStrictTraits):
         """ Function which will run the calculation. This function
         is only run by the secondary thread
         """
-        return run_calc(
-            self.global_settings,
-            self.openfoam_settings,
-            self.liggghts_settings,
-            self.update_progress_bar
-        )
+        try:
+            return run_calc(
+                self.global_settings,
+                self.openfoam_settings,
+                self.liggghts_settings,
+                self.update_progress_bar
+            )
+        except Exception as e:
+            self.calculation_error_event = str(e)
+            log.exception('Error during the calculation')
+            return None
 
     def _calculation_done(self, future):
         """ Function which will return the result of the computation to
@@ -225,9 +243,13 @@ class Application(HasStrictTraits):
             The result of the calculation, it is a tuple containing the
             Openfoam wrapper and the Liggghts wrapper
         """
-        self.openfoam_wrapper, self.liggghts_wrapper = result
-        self.calculation_running = False
+        # Close progress dialog
         self.progress_dialog.update(100)
+
+        if result is not None:
+            self.openfoam_wrapper, self.liggghts_wrapper = result
+
+        self.calculation_running = False
 
     def update_progress_bar(self, progress):
         """ Function called in the secondary thread. It will transfer the
@@ -258,8 +280,3 @@ class Application(HasStrictTraits):
 
     def _openfoam_settings_default(self):
         return OpenfoamModel()
-
-
-if __name__ == '__main__':
-    ui = Application()
-    ui.configure_traits()

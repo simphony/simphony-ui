@@ -140,6 +140,3 @@ class BoundaryConditionsModel(HasStrictTraits):
         front_and_back_bc.pressure_boundary_condition.type = 'empty'
 
         return front_and_back_bc
-
-if __name__ == '__main__':
-    SurfaceModel().configure_traits()

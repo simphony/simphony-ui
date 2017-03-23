@@ -90,6 +90,20 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
             self.assertEqual(dataset2cudssource(36), 36)
 
+    def test_report_failure(self):
+
+        def mock_msg(*args, **kwargs):
+            return
+
+        with mock.patch('simphony_ui.ui.error') as mock_message:
+            mock_message.side_effect = mock_msg
+
+            # Those methods are not supposed to be called
+            self.assertIsNone(self.application._run_calc_threaded())
+
+            self.application._update_result(None)
+            self.assertIsNone(self.application.openfoam_wrapper)
+
     def test_update_valid(self):
         self.assertFalse(self.application.valid)
         self.application.openfoam_settings.valid = True
