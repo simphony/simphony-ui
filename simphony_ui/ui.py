@@ -13,7 +13,7 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool, Event, Tuple)
+                        on_trait_change, Bool, Event, Str)
 from traitsui.api import View, UItem, Tabbed, VGroup, HSplit
 
 from pyface.api import ProgressDialog
@@ -75,7 +75,7 @@ class Application(HasStrictTraits):
     mlab_model = Instance(MlabSceneModel, ())
 
     #: Event object which will be useful for error dialog
-    calculation_error_event = Event(Tuple)
+    calculation_error_event = Event(Str)
 
     #: True if the calculation can be safely run, False otherwise
     valid = Bool(False)
@@ -111,14 +111,10 @@ class Application(HasStrictTraits):
     )
 
     @on_trait_change('calculation_error_event', dispatch='ui')
-    def show_error(self, messages):
-        error_msg, tb_msg = messages
+    def show_error(self, error_message):
         error(
             None,
-            'Oups ! Something went bad:\n{}\n\nDetails:\n{}'.format(
-                error_msg,
-                tb_msg
-            ),
+            'Oups ! Something went bad...\n\n{}'.format(error_message),
             'Error'
         )
 
@@ -226,9 +222,8 @@ class Application(HasStrictTraits):
                 self.liggghts_settings,
                 self.update_progress_bar
             )
-        except Exception as e:
-            tb = traceback.format_exc().splitlines()
-            self.calculation_error_event = str(e), '\n'.join(tb)
+        except Exception:
+            self.calculation_error_event = traceback.format_exc()
             log.exception('Error during the calculation')
             return None
 
