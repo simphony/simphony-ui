@@ -228,9 +228,9 @@ class Application(HasStrictTraits):
         sphere_glyph_module.glyph.glyph_source.glyph_source = \
             SphereSource()
         sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
-        sphere_glyph_module.glyph.glyph.range = [0, 1]
+        sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
         sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
-            1
+            1.0
 
         # Create Arrow glyph
         # Get maximum particle velocity
@@ -259,7 +259,7 @@ class Application(HasStrictTraits):
 
             arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
             arrow_glyph_module.glyph.color_mode = 'color_by_vector'
-            arrow_glyph_module.glyph.glyph.range = [0, 1]
+            arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
             arrow_glyph_module.glyph.glyph.scale_factor = arrow_scale_factor
 
     def _run_calc_threaded(self):
