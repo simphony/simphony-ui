@@ -193,8 +193,6 @@ class Application(HasStrictTraits):
         except ValueError:
             pass
 
-        mayavi_engine = self.mlab_model.engine
-
         # Get Liggghts datasets
         liggghts_flow_dataset = self.liggghts_wrapper.get_dataset(
             'flow_particles')
@@ -204,51 +202,33 @@ class Application(HasStrictTraits):
         self.liggghts_flow_source = dataset2cudssource(liggghts_flow_dataset)
         self.liggghts_wall_source = dataset2cudssource(liggghts_wall_dataset)
 
-        flow_modules = []
-        wall_modules = []
+        self._add_liggghts_source_to_scene(
+            liggghts_flow_dataset,
+            self.liggghts_flow_source
+        )
+        self._add_liggghts_source_to_scene(
+            liggghts_wall_dataset,
+            self.liggghts_wall_source
+        )
 
-        # Get maximum particle radius
-        flow_particles = liggghts_flow_dataset.iter_particles()
-        flow_particle_radius = numpy.max(numpy.array(
-            [particle.data[CUBA.RADIUS] for particle in flow_particles]
-        ))
-        wall_particles = liggghts_flow_dataset.iter_particles()
-        wall_particle_radius = numpy.max(numpy.array(
-            [particle.data[CUBA.RADIUS] for particle in wall_particles]
-        ))
+    def _add_liggghts_source_to_scene(self, dataset, source):
+        mayavi_engine = self.mlab_model.engine
 
         # Create glyph module which represents particles as spheres
-        flow_sphere_glyph_module = Glyph()
-        wall_sphere_glyph_module = Glyph()
-
-        flow_modules.append(flow_sphere_glyph_module)
-        wall_modules.append(wall_sphere_glyph_module)
+        sphere_glyph_module = Glyph()
 
         # Add Liggghts sources
-        mayavi_engine.add_source(self.liggghts_flow_source)
+        mayavi_engine.add_source(source)
 
-        # Add default Liggghts modules
-        for module in flow_modules:
-            mayavi_engine.add_module(module)
+        # Add sphere glyph module
+        mayavi_engine.add_module(sphere_glyph_module)
 
-        mayavi_engine.add_source(self.liggghts_wall_source)
-
-        flow_sphere_glyph_module.glyph.glyph_source.glyph_source = \
+        sphere_glyph_module.glyph.glyph_source.glyph_source = \
             SphereSource()
-        flow_sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
-        flow_sphere_glyph_module.glyph.glyph.range = [0, flow_particle_radius]
-        flow_sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
-            flow_particle_radius
-
-        for module in wall_modules:
-            mayavi_engine.add_module(module)
-
-        wall_sphere_glyph_module.glyph.glyph_source.glyph_source = \
-            SphereSource()
-        wall_sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
-        wall_sphere_glyph_module.glyph.glyph.range = [0, wall_particle_radius]
-        wall_sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
-            wall_particle_radius
+        sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
+        sphere_glyph_module.glyph.glyph.range = [0, 1]
+        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
+            1
 
     def _run_calc_threaded(self):
         """ Function which will run the calculation. This function
