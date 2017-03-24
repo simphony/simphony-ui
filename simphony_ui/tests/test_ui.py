@@ -18,6 +18,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         liggghts_wrapper = mock.Mock(spec=ABCModelingEngine)
 
         openfoam_wrapper.get_dataset_names = mock.MagicMock()
+        liggghts_wrapper.get_dataset = mock.MagicMock()
 
         run_calc_target = 'simphony_ui.ui.run_calc'
 
@@ -32,12 +33,12 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         dataset2cudssource_target = 'simphony_ui.ui.dataset2cudssource'
 
         def mock_dataset2cudssource(*args, **kwargs):
-            return CUDSSource()
+            return mock.MagicMock(spec=CUDSSource())
 
-        default_module_target = 'simphony_ui.ui.default_module'
+        numpy_max_target = 'simphony_ui.ui.numpy.max'
 
-        def mock_default_module(*args, **kwargs):
-            return [1]
+        def mock_numpy_max(*args, **kwargs):
+            return 36
 
         add_module_target = \
             'simphony_ui.ui.mayavi.tools.mlab_scene_model.Engine.add_module'
@@ -47,12 +48,12 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
         with mock.patch(run_calc_target) as mock_run, \
                 mock.patch(dataset2cudssource_target) as mock_cuds, \
-                mock.patch(default_module_target) as mock_def, \
+                mock.patch(numpy_max_target) as mock_max, \
                 mock.patch(add_module_target) as mock_add:
 
             mock_run.side_effect = mock_run_calc
             mock_cuds.side_effect = mock_dataset2cudssource
-            mock_def.side_effect = mock_default_module
+            mock_max.side_effect = mock_numpy_max
             mock_add.side_effect = mock_add_module
 
             self.assertIsNone(self.application.openfoam_wrapper)
