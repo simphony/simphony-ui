@@ -38,7 +38,10 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         numpy_max_target = 'simphony_ui.ui.numpy.max'
 
         def mock_numpy_max(*args, **kwargs):
-            return 36
+            return 36.0
+
+        def mock_numpy_max_null(*args, **kwargs):
+            return 0.0
 
         add_module_target = \
             'simphony_ui.ui.mayavi.tools.mlab_scene_model.Engine.add_module'
@@ -74,6 +77,15 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 self.application.liggghts_wrapper,
                 liggghts_wrapper
             )
+
+            mock_max.side_effect = mock_numpy_max_null
+
+            with self.event_loop_until_condition(
+                    lambda: (self.application.openfoam_wrapper
+                             is not None),
+                    timeout=20
+            ):
+                self.application.run_calc()
 
     def test_double_run(self):
         # Simulate the calculation running
