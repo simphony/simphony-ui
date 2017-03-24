@@ -243,15 +243,8 @@ class Application(HasStrictTraits):
 
         # If the max velocity is not 0, we create the arrow glyph
         if max_velocity != 0:
-            # Compute max size of particles
-            max_radius = numpy.max(numpy.array(
-                [particle.data[CUBA.RADIUS]
-                 for particle
-                 in dataset.iter_particles()]
-            ))
-
-            # Compute scale factor of arrows
-            arrow_scale_factor = 20.0 * max_radius/max_velocity
+            # Set scale factor of arrows
+            arrow_scale_factor = 50000.0
 
             arrow_glyph_module = Glyph()
 
