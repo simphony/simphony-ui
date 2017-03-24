@@ -214,11 +214,13 @@ class Application(HasStrictTraits):
     def _add_liggghts_source_to_scene(self, dataset, source):
         mayavi_engine = self.mlab_model.engine
 
-        # Create glyph module which represents particles as spheres
+        # Create Sphere glyph
         sphere_glyph_module = Glyph()
 
         # Add Liggghts sources
         mayavi_engine.add_source(source)
+
+        source.point_vectors_name = 'VELOCITY'
 
         # Add sphere glyph module
         mayavi_engine.add_module(sphere_glyph_module)
@@ -229,6 +231,36 @@ class Application(HasStrictTraits):
         sphere_glyph_module.glyph.glyph.range = [0, 1]
         sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
             1
+
+        # Create Arrow glyph
+        # Get maximum particle velocity
+        velocities = numpy.array(
+            [numpy.linalg.norm(particle.data[CUBA.VELOCITY])
+             for particle
+             in dataset.iter_particles()]
+        )
+        max_velocity = numpy.max(velocities)
+
+        # If the max velocity is not 0, we create the arrow glyph
+        if max_velocity != 0:
+            # Compute max size of particles
+            max_radius = numpy.max(numpy.array(
+                [particle.data[CUBA.RADIUS]
+                 for particle
+                 in dataset.iter_particles()]
+            ))
+
+            # Compute scale factor of arrows
+            arrow_scale_factor = 20.0 * max_radius/max_velocity
+
+            arrow_glyph_module = Glyph()
+
+            mayavi_engine.add_module(arrow_glyph_module)
+
+            arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
+            arrow_glyph_module.glyph.color_mode = 'color_by_vector'
+            arrow_glyph_module.glyph.glyph.range = [0, 1]
+            arrow_glyph_module.glyph.glyph.scale_factor = arrow_scale_factor
 
     def _run_calc_threaded(self):
         """ Function which will run the calculation. This function
