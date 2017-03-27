@@ -220,6 +220,15 @@ class Application(HasStrictTraits):
         )
 
     def _add_liggghts_source_to_scene(self, dataset, source):
+        """ Function which add to liggghts source to the Mayavi scene
+
+        Parameters
+        ----------
+        dataset :
+            The dataset containing particles
+        source :
+            The mayavi source linked to the dataset
+        """
         mayavi_engine = self.mlab_model.engine
 
         # Create Sphere glyph
@@ -320,6 +329,8 @@ class Application(HasStrictTraits):
         GUI.invoke_later(self.progress_dialog.update, progress)
 
     def reset(self):
+        """ Function which reset the Mayavi scene
+        """
         # Clear scene
         self._clear_openfoam_source()
         self._clear_liggghts_sources()
@@ -329,6 +340,8 @@ class Application(HasStrictTraits):
         self.liggghts_wrapper = None
 
     def _clear_openfoam_source(self):
+        """ Function which reset the openfoam source
+        """
         try:
             self.mlab_model.mayavi_scene.remove_child(self.openfoam_source)
         except ValueError:
@@ -336,6 +349,8 @@ class Application(HasStrictTraits):
         self.openfoam_source = None
 
     def _clear_liggghts_sources(self):
+        """ Function which reset the liggghts sources
+        """
         try:
             self.mlab_model.mayavi_scene.remove_child(
                 self.liggghts_flow_source)
