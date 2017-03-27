@@ -1,13 +1,17 @@
 from concurrent import futures
 import logging
 import traceback
+import numpy
 from pyface.gui import GUI
 from pyface.api import error
 
 import mayavi.tools.mlab_scene_model
+from mayavi.modules.api import Surface, Glyph
+from tvtk.tvtk_classes.sphere_source import SphereSource
+
 from simphony_mayavi.sources.api import CUDSSource
+from simphony.core.cuba import CUBA
 from tvtk.pyface.scene_editor import SceneEditor
-from simphony_mayavi.modules.default_module import default_module
 from mayavi.core.ui.mayavi_scene import MayaviScene
 
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
@@ -153,11 +157,10 @@ class Application(HasStrictTraits):
         """ Function which add the Openfoam dataset to the
         mayavi scene
         """
-        # Clear the scene
-        try:
-            self.mlab_model.mayavi_scene.remove_child(self.openfoam_source)
-        except ValueError:
-            pass
+        self._clear_openfoam_source()
+
+        if self.openfoam_wrapper is None:
+            return
 
         mayavi_engine = self.mlab_model.engine
 
@@ -166,33 +169,21 @@ class Application(HasStrictTraits):
             self.openfoam_wrapper.get_dataset_names()[0])
         self.openfoam_source = dataset2cudssource(openfoam_dataset)
 
-        modules = default_module(self.openfoam_source)
-
         # Add Openfoam source
         mayavi_engine.add_source(self.openfoam_source)
 
-        # Add default Openfoam modules
-        for module in modules:
-            mayavi_engine.add_module(module)
+        # Add surface module to Openfoam source
+        mayavi_engine.add_module(Surface())
 
     @on_trait_change('liggghts_wrapper')
     def show_liggghts_result(self):
         """ Function which add the Liggghts datasets to the
         mayavi scene
         """
-        # Clear the scene
-        try:
-            self.mlab_model.mayavi_scene.remove_child(
-                self.liggghts_flow_source)
-        except ValueError:
-            pass
-        try:
-            self.mlab_model.mayavi_scene.remove_child(
-                self.liggghts_wall_source)
-        except ValueError:
-            pass
+        self._clear_liggghts_sources()
 
-        mayavi_engine = self.mlab_model.engine
+        if self.liggghts_wrapper is None:
+            return
 
         # Get Liggghts datasets
         liggghts_flow_dataset = self.liggghts_wrapper.get_dataset(
@@ -203,20 +194,68 @@ class Application(HasStrictTraits):
         self.liggghts_flow_source = dataset2cudssource(liggghts_flow_dataset)
         self.liggghts_wall_source = dataset2cudssource(liggghts_wall_dataset)
 
-        flow_modules = default_module(self.liggghts_flow_source)
-        wall_modules = default_module(self.liggghts_wall_source)
+        self._add_liggghts_source_to_scene(
+            liggghts_flow_dataset,
+            self.liggghts_flow_source
+        )
+        self._add_liggghts_source_to_scene(
+            liggghts_wall_dataset,
+            self.liggghts_wall_source
+        )
+
+    def _add_liggghts_source_to_scene(self, dataset, source):
+        """ Function which add to liggghts source to the Mayavi scene
+
+        Parameters
+        ----------
+        dataset :
+            The dataset containing particles
+        source :
+            The mayavi source linked to the dataset
+        """
+        mayavi_engine = self.mlab_model.engine
+
+        # Create Sphere glyph
+        sphere_glyph_module = Glyph()
 
         # Add Liggghts sources
-        mayavi_engine.add_source(self.liggghts_flow_source)
+        mayavi_engine.add_source(source)
 
-        # Add default Liggghts modules
-        for module in flow_modules:
-            mayavi_engine.add_module(module)
+        source.point_vectors_name = 'VELOCITY'
 
-        mayavi_engine.add_source(self.liggghts_wall_source)
+        # Add sphere glyph module
+        mayavi_engine.add_module(sphere_glyph_module)
 
-        for module in wall_modules:
-            mayavi_engine.add_module(module)
+        sphere_glyph_module.glyph.glyph_source.glyph_source = \
+            SphereSource()
+        sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
+        sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
+        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
+            1.0
+
+        # Create Arrow glyph
+        # Get maximum particle velocity
+        velocities = numpy.array(
+            [numpy.linalg.norm(particle.data[CUBA.VELOCITY])
+             for particle
+             in dataset.iter_particles()]
+        )
+        max_velocity = numpy.max(velocities)
+
+        # If the max velocity is not 0, we create the arrow glyph
+        if max_velocity != 0:
+            # Velocities are in meter/second, this scale factor makes
+            # 1 graphical unit = 1 micrometer/sec
+            arrow_scale_factor = 1.0e6
+
+            arrow_glyph_module = Glyph()
+
+            mayavi_engine.add_module(arrow_glyph_module)
+
+            arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
+            arrow_glyph_module.glyph.color_mode = 'color_by_vector'
+            arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
+            arrow_glyph_module.glyph.glyph.scale_factor = arrow_scale_factor
 
     def _run_calc_threaded(self):
         """ Function which will run the calculation. This function
@@ -273,6 +312,42 @@ class Application(HasStrictTraits):
             The progress of the calculation (Integer in the range [0, 100])
         """
         GUI.invoke_later(self.progress_dialog.update, progress)
+
+    def reset(self):
+        """ Function which reset the Mayavi scene.
+        """
+        # Clear scene
+        self._clear_openfoam_source()
+        self._clear_liggghts_sources()
+
+        # Clear wrappers
+        self.openfoam_wrapper = None
+        self.liggghts_wrapper = None
+
+    def _clear_openfoam_source(self):
+        """ Function which reset the openfoam source
+        """
+        try:
+            self.mlab_model.mayavi_scene.remove_child(self.openfoam_source)
+        except ValueError:
+            pass
+        self.openfoam_source = None
+
+    def _clear_liggghts_sources(self):
+        """ Function which reset the liggghts sources
+        """
+        try:
+            self.mlab_model.mayavi_scene.remove_child(
+                self.liggghts_flow_source)
+        except ValueError:
+            pass
+        try:
+            self.mlab_model.mayavi_scene.remove_child(
+                self.liggghts_wall_source)
+        except ValueError:
+            pass
+        self.liggghts_flow_source = None
+        self.liggghts_wall_source = None
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
