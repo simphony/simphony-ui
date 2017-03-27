@@ -3,3 +3,4 @@ simphony_ui.egg-info/
 *.pyc
 travis.log
 .coverage
+doc/build
