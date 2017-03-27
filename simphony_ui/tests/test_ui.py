@@ -2,6 +2,7 @@ import unittest
 import mock
 import time
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
+from tvtk.tvtk_classes.sphere_source import SphereSource
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 from simphony_ui.ui import Application, dataset2cudssource
 from simphony_mayavi.sources.api import CUDSSource
@@ -18,6 +19,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         liggghts_wrapper = mock.Mock(spec=ABCModelingEngine)
 
         openfoam_wrapper.get_dataset_names = mock.MagicMock()
+        liggghts_wrapper.get_dataset = mock.MagicMock()
 
         run_calc_target = 'simphony_ui.ui.run_calc'
 
@@ -32,12 +34,15 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         dataset2cudssource_target = 'simphony_ui.ui.dataset2cudssource'
 
         def mock_dataset2cudssource(*args, **kwargs):
-            return CUDSSource()
+            return mock.MagicMock(spec=CUDSSource())
 
-        default_module_target = 'simphony_ui.ui.default_module'
+        numpy_max_target = 'simphony_ui.ui.numpy.max'
 
-        def mock_default_module(*args, **kwargs):
-            return [1]
+        def mock_numpy_max(*args, **kwargs):
+            return 36.0
+
+        def mock_numpy_max_null(*args, **kwargs):
+            return 0.0
 
         add_module_target = \
             'simphony_ui.ui.mayavi.tools.mlab_scene_model.Engine.add_module'
@@ -47,16 +52,19 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
         with mock.patch(run_calc_target) as mock_run, \
                 mock.patch(dataset2cudssource_target) as mock_cuds, \
-                mock.patch(default_module_target) as mock_def, \
+                mock.patch(numpy_max_target) as mock_max, \
                 mock.patch(add_module_target) as mock_add:
 
             mock_run.side_effect = mock_run_calc
             mock_cuds.side_effect = mock_dataset2cudssource
-            mock_def.side_effect = mock_default_module
+            mock_max.side_effect = mock_numpy_max
             mock_add.side_effect = mock_add_module
 
             self.assertIsNone(self.application.openfoam_wrapper)
             self.assertIsNone(self.application.liggghts_wrapper)
+
+            # Fix coverage
+            self.application.reset()
 
             with self.event_loop_until_condition(
                     lambda: (self.application.openfoam_wrapper
@@ -73,6 +81,39 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 self.application.liggghts_wrapper,
                 liggghts_wrapper
             )
+
+            # Last added module was the arrow_module
+            arrow_module = mock_add.call_args[0][0]
+            self.assertEqual(arrow_module.glyph.glyph.scale_factor, 1.0e6)
+            self.assertListEqual(
+                arrow_module.glyph.glyph.range.tolist(),
+                [0.0, 1.0]
+            )
+            self.assertEqual(arrow_module.glyph.scale_mode, 'scale_by_vector')
+            self.assertEqual(arrow_module.glyph.color_mode, 'color_by_vector')
+
+            mock_max.side_effect = mock_numpy_max_null
+
+            self.application.reset()
+
+            with self.event_loop_until_condition(
+                    lambda: (self.application.openfoam_wrapper
+                             is not None),
+                    timeout=20
+            ):
+                self.application.run_calc()
+
+            # Last added module was the sphere module
+            sphere_module = mock_add.call_args[0][0]
+            self.assertIsInstance(
+                sphere_module.glyph.glyph_source.glyph_source, SphereSource)
+            self.assertEqual(
+                sphere_module.glyph.glyph_source.glyph_source.radius, 1.0)
+            self.assertListEqual(
+                sphere_module.glyph.glyph.range.tolist(),
+                [0.0, 1.0]
+            )
+            self.assertEqual(sphere_module.glyph.scale_mode, 'scale_by_scalar')
 
     def test_double_run(self):
         # Simulate the calculation running
