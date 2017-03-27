@@ -63,6 +63,9 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
             self.assertIsNone(self.application.openfoam_wrapper)
             self.assertIsNone(self.application.liggghts_wrapper)
 
+            # Fix coverage
+            self.application.reset()
+
             with self.event_loop_until_condition(
                     lambda: (self.application.openfoam_wrapper
                              is not None),
