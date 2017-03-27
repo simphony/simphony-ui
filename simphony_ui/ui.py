@@ -157,15 +157,10 @@ class Application(HasStrictTraits):
         """ Function which add the Openfoam dataset to the
         mayavi scene
         """
-        if self.openfoam_wrapper is None:
-            self._clear_openfoam_source()
-            return
+        self._clear_openfoam_source()
 
-        # Clear the scene
-        try:
-            self.mlab_model.mayavi_scene.remove_child(self.openfoam_source)
-        except ValueError:
-            pass
+        if self.openfoam_wrapper is None:
+            return
 
         mayavi_engine = self.mlab_model.engine
 
@@ -185,21 +180,10 @@ class Application(HasStrictTraits):
         """ Function which add the Liggghts datasets to the
         mayavi scene
         """
-        if self.liggghts_wrapper is None:
-            self._clear_liggghts_sources()
-            return
+        self._clear_liggghts_sources()
 
-        # Clear the scene
-        try:
-            self.mlab_model.mayavi_scene.remove_child(
-                self.liggghts_flow_source)
-        except ValueError:
-            pass
-        try:
-            self.mlab_model.mayavi_scene.remove_child(
-                self.liggghts_wall_source)
-        except ValueError:
-            pass
+        if self.liggghts_wrapper is None:
+            return
 
         # Get Liggghts datasets
         liggghts_flow_dataset = self.liggghts_wrapper.get_dataset(
@@ -262,7 +246,7 @@ class Application(HasStrictTraits):
         if max_velocity != 0:
             # Velocities are in meter/second, this scale factor makes
             # 1 graphical unit = 1 micrometer/sec
-            arrow_scale_factor = 100000.0
+            arrow_scale_factor = 1.0e6
 
             arrow_glyph_module = Glyph()
 
@@ -330,7 +314,7 @@ class Application(HasStrictTraits):
         GUI.invoke_later(self.progress_dialog.update, progress)
 
     def reset(self):
-        """ Function which reset the Mayavi scene
+        """ Function which reset the Mayavi scene.
         """
         # Clear scene
         self._clear_openfoam_source()
