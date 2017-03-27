@@ -20,6 +20,7 @@ Requirements
 ------------
 
 - futures
+- simphony-framework == 0.3.1
 
 Optional requirements
 ~~~~~~~~~~~~~~~~~~~~~
