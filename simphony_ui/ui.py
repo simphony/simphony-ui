@@ -318,10 +318,22 @@ class Application(HasStrictTraits):
         GUI.invoke_later(self.progress_dialog.update, progress)
 
     def reset(self):
+        # Clear scene
+        self._clear_openfoam_source()
+        self._clear_liggghts_sources()
+
+        # Clear wrappers
+        self.openfoam_wrapper = None
+        self.liggghts_wrapper = None
+
+    def _clear_openfoam_source(self):
         try:
             self.mlab_model.mayavi_scene.remove_child(self.openfoam_source)
         except ValueError:
             pass
+        self.openfoam_source = None
+
+    def _clear_liggghts_sources(self):
         try:
             self.mlab_model.mayavi_scene.remove_child(
                 self.liggghts_flow_source)
@@ -332,11 +344,6 @@ class Application(HasStrictTraits):
                 self.liggghts_wall_source)
         except ValueError:
             pass
-
-        self.openfoam_wrapper = None
-        self.openfoam_source = None
-
-        self.liggghts_wrapper = None
         self.liggghts_flow_source = None
         self.liggghts_wall_source = None
 
