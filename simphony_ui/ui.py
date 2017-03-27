@@ -158,6 +158,7 @@ class Application(HasStrictTraits):
         mayavi scene
         """
         if self.openfoam_wrapper is None:
+            self._clear_openfoam_source()
             return
 
         # Clear the scene
@@ -185,6 +186,7 @@ class Application(HasStrictTraits):
         mayavi scene
         """
         if self.liggghts_wrapper is None:
+            self._clear_liggghts_sources()
             return
 
         # Clear the scene
