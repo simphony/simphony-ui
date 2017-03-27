@@ -260,8 +260,9 @@ class Application(HasStrictTraits):
 
         # If the max velocity is not 0, we create the arrow glyph
         if max_velocity != 0:
-            # Set scale factor of arrows
-            arrow_scale_factor = 50000.0
+            # Velocities are in meter/second, this scale factor makes
+            # 1 graphical unit = 1 micrometer/sec
+            arrow_scale_factor = 100000.0
 
             arrow_glyph_module = Glyph()
 

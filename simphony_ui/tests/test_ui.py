@@ -84,7 +84,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
             # Last added module was the arrow_module
             arrow_module = mock_add.call_args[0][0]
-            self.assertEqual(arrow_module.glyph.glyph.scale_factor, 50000.0)
+            self.assertEqual(arrow_module.glyph.glyph.scale_factor, 100000.0)
             self.assertListEqual(
                 arrow_module.glyph.glyph.range.tolist(),
                 [0.0, 1.0]
