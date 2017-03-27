@@ -157,6 +157,9 @@ class Application(HasStrictTraits):
         """ Function which add the Openfoam dataset to the
         mayavi scene
         """
+        if self.openfoam_wrapper is None:
+            return
+
         # Clear the scene
         try:
             self.mlab_model.mayavi_scene.remove_child(self.openfoam_source)
@@ -181,6 +184,9 @@ class Application(HasStrictTraits):
         """ Function which add the Liggghts datasets to the
         mayavi scene
         """
+        if self.liggghts_wrapper is None:
+            return
+
         # Clear the scene
         try:
             self.mlab_model.mayavi_scene.remove_child(
@@ -310,6 +316,29 @@ class Application(HasStrictTraits):
             The progress of the calculation (Integer in the range [0, 100])
         """
         GUI.invoke_later(self.progress_dialog.update, progress)
+
+    def reset(self):
+        try:
+            self.mlab_model.mayavi_scene.remove_child(self.openfoam_source)
+        except ValueError:
+            pass
+        try:
+            self.mlab_model.mayavi_scene.remove_child(
+                self.liggghts_flow_source)
+        except ValueError:
+            pass
+        try:
+            self.mlab_model.mayavi_scene.remove_child(
+                self.liggghts_wall_source)
+        except ValueError:
+            pass
+
+        self.openfoam_wrapper = None
+        self.openfoam_source = None
+
+        self.liggghts_wrapper = None
+        self.liggghts_flow_source = None
+        self.liggghts_wall_source = None
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)

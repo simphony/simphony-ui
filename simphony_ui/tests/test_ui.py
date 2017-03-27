@@ -2,6 +2,7 @@ import unittest
 import mock
 import time
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
+from tvtk.tvtk_classes.sphere_source import SphereSource
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 from simphony_ui.ui import Application, dataset2cudssource
 from simphony_mayavi.sources.api import CUDSSource
@@ -78,7 +79,19 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 liggghts_wrapper
             )
 
+            # Last added module was the arrow_module
+            arrow_module = mock_add.call_args[0][0]
+            self.assertEqual(arrow_module.glyph.glyph.scale_factor, 50000.0)
+            self.assertListEqual(
+                arrow_module.glyph.glyph.range.tolist(),
+                [0.0, 1.0]
+            )
+            self.assertEqual(arrow_module.glyph.scale_mode, 'scale_by_vector')
+            self.assertEqual(arrow_module.glyph.color_mode, 'color_by_vector')
+
             mock_max.side_effect = mock_numpy_max_null
+
+            self.application.reset()
 
             with self.event_loop_until_condition(
                     lambda: (self.application.openfoam_wrapper
@@ -86,6 +99,18 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                     timeout=20
             ):
                 self.application.run_calc()
+
+            # Last added module was the sphere module
+            sphere_module = mock_add.call_args[0][0]
+            self.assertIsInstance(
+                sphere_module.glyph.glyph_source.glyph_source, SphereSource)
+            self.assertEqual(
+                sphere_module.glyph.glyph_source.glyph_source.radius, 1.0)
+            self.assertListEqual(
+                sphere_module.glyph.glyph.range.tolist(),
+                [0.0, 1.0]
+            )
+            self.assertEqual(sphere_module.glyph.scale_mode, 'scale_by_scalar')
 
     def test_double_run(self):
         # Simulate the calculation running
