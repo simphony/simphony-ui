@@ -7,7 +7,6 @@ from pyface.api import error
 
 import mayavi.tools.mlab_scene_model
 from mayavi.modules.api import Surface, Glyph
-from simphony.cuds.abc_dataset import ABCDataset
 from traits.trait_types import Tuple, Either
 from tvtk.tvtk_classes.sphere_source import SphereSource
 
@@ -19,7 +18,7 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool, Event, Str, Dict)
+                        on_trait_change, Bool, Event, Str, Dict, Any)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
                           ShellEditor)
 
@@ -55,10 +54,7 @@ class Application(HasStrictTraits):
 
     #: The datasets of the current frame. Order is important, and
     # maps as follows: openfoam, liggghts flow, liggghts wall
-    datasets = Either(None,
-                      Tuple(Instance(ABCDataset),
-                            Instance(ABCDataset),
-                            Instance(ABCDataset)))
+    datasets = Either(None, Tuple(Any, Any, Any))
 
     # The mayavi sources, associated to the above datasets. Order is
     # the same as above.
@@ -165,13 +161,15 @@ class Application(HasStrictTraits):
         if self.datasets is None:
             return
 
-
         # Get Openfoam dataset
-        self.sources = map(dataset2cudssource, self.datasets)
+        self.sources = tuple(map(dataset2cudssource, self.datasets))
 
     @on_trait_change('sources')
     def show_sources(self):
         # Add Openfoam source
+        if self.sources is None:
+            return
+
         mayavi_engine = self.mlab_model.engine
         mayavi_engine.add_source(self.sources[0])
 
@@ -303,6 +301,9 @@ class Application(HasStrictTraits):
     def _clear_sources(self):
         """ Function which reset the sources
         """
+        if self.sources is None:
+            return
+
         for source in self.sources:
             try:
                 self.mlab_model.mayavi_scene.remove_child(source)
