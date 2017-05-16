@@ -7,6 +7,8 @@ from pyface.api import error
 
 import mayavi.tools.mlab_scene_model
 from mayavi.modules.api import Surface, Glyph
+from simphony.cuds.abc_dataset import ABCDataset
+from traits.trait_types import Tuple, Either
 from tvtk.tvtk_classes.sphere_source import SphereSource
 
 from simphony_mayavi.sources.api import CUDSSource
@@ -51,18 +53,19 @@ class Application(HasStrictTraits):
     #: The Openfoam settings for the calculation
     openfoam_settings = Instance(OpenfoamModel)
 
-    #: The Openfoam wrapper containing the mesh
-    # dataset at the end of the documentation
-    openfoam_wrapper = Instance(ABCModelingEngine)
+    #: The datasets of the current frame. Order is important, and
+    # maps as follows: openfoam, liggghts flow, liggghts wall
+    datasets = Either(None,
+                      Tuple(Instance(ABCDataset),
+                            Instance(ABCDataset),
+                            Instance(ABCDataset)))
 
-    #: The Liggghts wrapper containing the particles datasets
-    # at the end of the documentation
-    liggghts_wrapper = Instance(ABCModelingEngine)
-
-    openfoam_source = Instance(CUDSSource)
-
-    liggghts_flow_source = Instance(CUDSSource)
-    liggghts_wall_source = Instance(CUDSSource)
+    # The mayavi sources, associated to the above datasets. Order is
+    # the same as above.
+    sources = Either(None,
+                     Tuple(Instance(CUDSSource),
+                           Instance(CUDSSource),
+                           Instance(CUDSSource)))
 
     #: The button on which the user will click to run the
     # calculation
@@ -152,56 +155,31 @@ class Application(HasStrictTraits):
         future = self._executor.submit(self._run_calc_threaded)
         future.add_done_callback(self._calculation_done)
 
-    @on_trait_change('openfoam_wrapper')
-    def show_openfoam_result(self):
+    @on_trait_change('datasets')
+    def update_sources(self):
         """ Function which add the Openfoam dataset to the
         mayavi scene
         """
-        self._clear_openfoam_source()
+        self._clear_sources()
 
-        if self.openfoam_wrapper is None:
+        if self.datasets is None:
             return
 
-        mayavi_engine = self.mlab_model.engine
 
         # Get Openfoam dataset
-        openfoam_dataset = self.openfoam_wrapper.get_dataset(
-            self.openfoam_wrapper.get_dataset_names()[0])
-        self.openfoam_source = dataset2cudssource(openfoam_dataset)
+        self.sources = map(dataset2cudssource, self.datasets)
 
+    @on_trait_change('sources')
+    def show_sources(self):
         # Add Openfoam source
-        mayavi_engine.add_source(self.openfoam_source)
+        mayavi_engine = self.mlab_model.engine
+        mayavi_engine.add_source(self.sources[0])
 
         # Add surface module to Openfoam source
         mayavi_engine.add_module(Surface())
 
-    @on_trait_change('liggghts_wrapper')
-    def show_liggghts_result(self):
-        """ Function which add the Liggghts datasets to the
-        mayavi scene
-        """
-        self._clear_liggghts_sources()
-
-        if self.liggghts_wrapper is None:
-            return
-
-        # Get Liggghts datasets
-        liggghts_flow_dataset = self.liggghts_wrapper.get_dataset(
-            'flow_particles')
-        liggghts_wall_dataset = self.liggghts_wrapper.get_dataset(
-            'wall_particles')
-
-        self.liggghts_flow_source = dataset2cudssource(liggghts_flow_dataset)
-        self.liggghts_wall_source = dataset2cudssource(liggghts_wall_dataset)
-
-        self._add_liggghts_source_to_scene(
-            liggghts_flow_dataset,
-            self.liggghts_flow_source
-        )
-        self._add_liggghts_source_to_scene(
-            liggghts_wall_dataset,
-            self.liggghts_wall_source
-        )
+        self._add_liggghts_source_to_scene(self.datasets[1], self.sources[1])
+        self._add_liggghts_source_to_scene(self.datasets[2], self.sources[2])
 
     def _add_liggghts_source_to_scene(self, dataset, source):
         """ Function which add to liggghts source to the Mayavi scene
@@ -298,7 +276,7 @@ class Application(HasStrictTraits):
         self.progress_dialog.update(100)
 
         if result is not None:
-            self.openfoam_wrapper, self.liggghts_wrapper = result
+            self.datasets = result
 
         self.calculation_running = False
 
@@ -317,37 +295,20 @@ class Application(HasStrictTraits):
         """ Function which reset the Mayavi scene.
         """
         # Clear scene
-        self._clear_openfoam_source()
-        self._clear_liggghts_sources()
+        self._clear_sources()
 
         # Clear wrappers
-        self.openfoam_wrapper = None
-        self.liggghts_wrapper = None
+        self.datasets = None
 
-    def _clear_openfoam_source(self):
-        """ Function which reset the openfoam source
+    def _clear_sources(self):
+        """ Function which reset the sources
         """
-        try:
-            self.mlab_model.mayavi_scene.remove_child(self.openfoam_source)
-        except ValueError:
-            pass
-        self.openfoam_source = None
-
-    def _clear_liggghts_sources(self):
-        """ Function which reset the liggghts sources
-        """
-        try:
-            self.mlab_model.mayavi_scene.remove_child(
-                self.liggghts_flow_source)
-        except ValueError:
-            pass
-        try:
-            self.mlab_model.mayavi_scene.remove_child(
-                self.liggghts_wall_source)
-        except ValueError:
-            pass
-        self.liggghts_flow_source = None
-        self.liggghts_wall_source = None
+        for source in self.sources:
+            try:
+                self.mlab_model.mayavi_scene.remove_child(source)
+            except ValueError:
+                pass
+        self.sources = None
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
