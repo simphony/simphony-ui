@@ -3,7 +3,6 @@ import mock
 import time
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from tvtk.tvtk_classes.sphere_source import SphereSource
-from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 from simphony_ui.ui import Application, dataset2cudssource
 from simphony_mayavi.sources.api import CUDSSource
 

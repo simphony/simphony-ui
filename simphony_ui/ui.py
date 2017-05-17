@@ -15,8 +15,6 @@ from simphony.core.cuba import CUBA
 from tvtk.pyface.scene_editor import SceneEditor
 from mayavi.core.ui.mayavi_scene import MayaviScene
 
-from simphony.cuds.abc_modeling_engine import ABCModelingEngine
-
 from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool, Event, Str, Dict, Any)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
@@ -153,27 +151,24 @@ class Application(HasStrictTraits):
 
     @on_trait_change('datasets')
     def update_sources(self):
-        """ Function which add the Openfoam dataset to the
-        mayavi scene
+        """ Function that converts the datasets into CUDSSources
         """
         self._clear_sources()
 
         if self.datasets is None:
             return
 
-        # Get Openfoam dataset
         self.sources = tuple(map(dataset2cudssource, self.datasets))
 
     @on_trait_change('sources')
     def show_sources(self):
-        # Add Openfoam source
+        """Plots the available sources in mayavi"""
         if self.sources is None:
             return
 
         mayavi_engine = self.mlab_model.engine
         mayavi_engine.add_source(self.sources[0])
 
-        # Add surface module to Openfoam source
         mayavi_engine.add_module(Surface())
 
         self._add_liggghts_source_to_scene(self.datasets[1], self.sources[1])
@@ -268,7 +263,9 @@ class Application(HasStrictTraits):
         ----------
         result
             The result of the calculation, it is a tuple containing the
-            Openfoam wrapper and the Liggghts wrapper
+            Openfoam dataset and the Liggghts datasets,
+            in the following configuration:
+            (openfoam, liggghts flow, liggghts wall)
         """
         # Close progress dialog
         self.progress_dialog.update(100)
@@ -295,7 +292,7 @@ class Application(HasStrictTraits):
         # Clear scene
         self._clear_sources()
 
-        # Clear wrappers
+        # Clear datasets
         self.datasets = None
 
     def _clear_sources(self):
