@@ -34,7 +34,7 @@ def create_openfoam_wrapper(openfoam_settings):
         openfoam_cuba_ext.LAMINAR_MODEL
     )
 
-    openfoam_wrapper.CM[CUBA.NAME] = openfoam_settings.mesh_name
+    openfoam_wrapper.CM[CUBA.NAME] = 'mesh'
 
     # Set system parameters/ conditions
     openfoam_wrapper.SP[CUBA.TIME_STEP] = openfoam_settings.timestep
@@ -143,11 +143,11 @@ def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
             input_mesh = input_file.read()
 
         openfoam_file_io.create_block_mesh(
-            path, openfoam_settings.mesh_name, openfoam_wrapper,
+            path, 'mesh', openfoam_wrapper,
             input_mesh
         )
 
-        return openfoam_wrapper.get_dataset(openfoam_settings.mesh_name)
+        return openfoam_wrapper.get_dataset('mesh')
     elif openfoam_settings.mesh_type == 'quad':
         size_x = openfoam_settings.channel_size_x
         size_y = openfoam_settings.channel_size_y
@@ -165,7 +165,7 @@ def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
 
         openfoam_file_io.create_quad_mesh(
             openfoam_settings.output_path,
-            openfoam_settings.mesh_name,
+            'mesh',
             openfoam_wrapper,
             corner_points,
             openfoam_settings.num_grid_x,
@@ -173,7 +173,7 @@ def create_openfoam_mesh(openfoam_wrapper, openfoam_settings):
             openfoam_settings.num_grid_z
         )
 
-        return openfoam_wrapper.get_dataset(openfoam_settings.mesh_name)
+        return openfoam_wrapper.get_dataset('mesh')
 
     raise ValueError(
         '{} is not a supported mesh type'.format(openfoam_settings.mesh_type))
