@@ -89,11 +89,10 @@ def run_calc(global_settings, openfoam_settings,
 
     # Main loop
 
+    datasets = None
     # Repeating OF calculation several times with modified pressure drop last
     # result from previous iteration as input for new iteration
     for numrun in xrange(global_settings.num_iterations):
-        progress_callback(numrun/global_settings.num_iterations*100)
-
         # Perform Openfoam calculations
         openfoam_wrapper.run()
 
@@ -134,13 +133,15 @@ def run_calc(global_settings, openfoam_settings,
         # Perform Liggghts calculations
         liggghts_wrapper.run()
 
-    openfoam_dataset = openfoam_wrapper.get_dataset(
-        openfoam_wrapper.get_dataset_names()[0])
+        datasets = (
+            openfoam_wrapper.get_dataset('mesh'),
+            liggghts_wrapper.get_dataset('flow_particles'),
+            liggghts_wrapper.get_dataset('wall_particles'))
 
-    liggghts_flow_dataset = liggghts_wrapper.get_dataset('flow_particles')
-    liggghts_wall_dataset = liggghts_wrapper.get_dataset('wall_particles')
+        if (numrun % global_settings.update_frequency == 0):
+            progress_callback(datasets, numrun, global_settings.num_iterations)
 
-    return openfoam_dataset, liggghts_flow_dataset, liggghts_wall_dataset
+    return datasets
 
 
 def compute_drag_force(force_type, radius, rel_velo, viscosity, density):
