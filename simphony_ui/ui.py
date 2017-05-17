@@ -15,8 +15,6 @@ from simphony.core.cuba import CUBA
 from tvtk.pyface.scene_editor import SceneEditor
 from mayavi.core.ui.mayavi_scene import MayaviScene
 
-from simphony.cuds.abc_modeling_engine import ABCModelingEngine
-
 from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool, Event, Str, Dict, Any)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
