@@ -20,11 +20,8 @@ class OpenfoamModel(HasStrictTraits):
     #: The mode of computation used with Openfoam.
     mode = Enum('internal', 'io')
 
-    #: The name of the output mesh.
-    mesh_name = Str('mesh')
-
     #: The type of the mesh.
-    mesh_type = Enum('block', 'quad')
+    mesh_type = Enum('quad',  'block')
 
     #: The directory where to put output files.
     output_path = Directory(os.path.abspath(os.path.curdir))
@@ -52,7 +49,7 @@ class OpenfoamModel(HasStrictTraits):
     channel_size_z = PositiveFloat(2.0e-3)
 
     #: The number of elements in all channel-directions.
-    num_grid_x = PositiveInt(400)
+    num_grid_x = PositiveInt(40)
     num_grid_y = PositiveInt(40)
     num_grid_z = PositiveInt(1)
 
@@ -68,7 +65,6 @@ class OpenfoamModel(HasStrictTraits):
                 '_',
                 Item(name='mode'),
                 '_',
-                Item(name='mesh_name'),
                 Item(name='mesh_type'),
                 '_',
                 Item(name='output_path'),
