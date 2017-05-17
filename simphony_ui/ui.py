@@ -57,9 +57,10 @@ class Application(HasStrictTraits):
 
     # The mayavi sources, associated to the above datasets. Order is
     # the same as above.
-    sources = Tuple(Instance(CUDSSource),
-                    Instance(CUDSSource),
-                    Instance(CUDSSource))
+    sources = Either(None,
+                     Tuple(Instance(CUDSSource),
+                           Instance(CUDSSource),
+                           Instance(CUDSSource)))
 
     #: The button on which the user will click to run the
     # calculation
@@ -291,11 +292,15 @@ class Application(HasStrictTraits):
     def _clear_sources(self):
         """ Function which reset the sources
         """
+        if self.sources is None:
+            return
+
         for source in self.sources:
             try:
                 self.mlab_model.mayavi_scene.remove_child(source)
             except ValueError:
                 pass
+        self.sources = None
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
@@ -315,6 +320,3 @@ class Application(HasStrictTraits):
 
     def _openfoam_settings_default(self):
         return OpenfoamModel()
-
-    def _sources_default(self):
-        return CUDSSource(), CUDSSource(), CUDSSource()
