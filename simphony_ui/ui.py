@@ -1,27 +1,29 @@
 from __future__ import division
+
+import threading
+
 from concurrent import futures
 import logging
 import traceback
 import numpy
-import contextlib
-import os
 from pyface.gui import GUI
 from pyface.api import error
 
 import mayavi.tools.mlab_scene_model
 from mayavi.modules.api import Surface, Glyph
-from simphony.io.h5_cuds import H5CUDS
-from traits.trait_types import Tuple, Either
+from simphony_mayavi.cuds.vtk_mesh import VTKMesh
+from simphony_mayavi.cuds.vtk_particles import VTKParticles
+from traits.trait_types import Int
 from tvtk.tvtk_classes.sphere_source import SphereSource
 
 from simphony_mayavi.sources.api import CUDSSource
-from simphony.core.cuba import CUBA
 
 from tvtk.pyface.scene_editor import SceneEditor
 from mayavi.core.ui.mayavi_scene import MayaviScene
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool, Event, Str, Dict, Any)
+                        on_trait_change, Bool, Event, Str, Dict, List, Tuple,
+                        Either)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
                           ShellEditor)
 
@@ -55,12 +57,26 @@ class Application(HasStrictTraits):
     #: The Openfoam settings for the calculation
     openfoam_settings = Instance(OpenfoamModel)
 
-    # The mayavi sources, associated to the above datasets. Order is
-    # the same as above.
-    sources = Either(None,
-                     Tuple(Instance(CUDSSource),
-                           Instance(CUDSSource),
-                           Instance(CUDSSource)))
+    # The mayavi sources, associated to the following datasets:
+    # first element is the openfoam mesh, second and third are
+    # the flow and walls particles, respectively.
+    # It is an invariant. The cuds gets changed as we select different
+    # frames.
+    sources = Tuple(Instance(CUDSSource),
+                    Instance(CUDSSource),
+                    Instance(CUDSSource))
+
+    # All the frames resulting from the execution of our computation.
+    frames = List(Tuple(VTKMesh, VTKParticles, VTKParticles))
+
+    # The frame to visualize
+    current_frame_index = Int()
+
+    # The physical current frame, for practicality
+    _current_frame = Either(
+        None,
+        Tuple(VTKMesh, VTKParticles, VTKParticles)
+    )
 
     #: The button on which the user will click to run the
     # calculation
@@ -89,6 +105,13 @@ class Application(HasStrictTraits):
     # Private traits.
     #: Executor for the threaded action.
     _executor = Instance(futures.ThreadPoolExecutor)
+
+    # Lock to synchronize the execution loop and the storage of the Datasets
+    # from application specific cuds to VTK Datasets. We need to do so because
+    # the computational engine can change the datasets, so we need to hold
+    # the computational engine until we are done "copying and storing" each
+    # frame
+    _event_lock = Instance(threading.Event, ())
 
     traits_view = View(
         HSplit(
@@ -150,71 +173,57 @@ class Application(HasStrictTraits):
         future = self._executor.submit(self._run_calc_threaded)
         future.add_done_callback(self._calculation_done)
 
-    @on_trait_change('sources')
-    def show_sources(self):
-        """Plots the available sources in mayavi"""
-        if self.sources is None:
-            return
-
-        mayavi_engine = self.mlab_model.engine
-        mayavi_engine.add_source(self.sources[0])
-
-        mayavi_engine.add_module(Surface())
-
-        self._add_liggghts_source_to_scene(self.sources[1])
-        self._add_liggghts_source_to_scene(self.sources[2])
-
-    def _add_liggghts_source_to_scene(self, source):
-        """ Function which add to liggghts source to the Mayavi scene
-
-        Parameters
-        ----------
-        source :
-            The mayavi source linked to the dataset
-        """
-        mayavi_engine = self.mlab_model.engine
-
-        # Create Sphere glyph
-        sphere_glyph_module = Glyph()
-
-        # Add Liggghts sources
-        mayavi_engine.add_source(source)
-
-        source.point_vectors_name = 'VELOCITY'
-
-        # Add sphere glyph module
-        mayavi_engine.add_module(sphere_glyph_module)
-
-        sphere_glyph_module.glyph.glyph_source.glyph_source = \
-            SphereSource()
-        sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
-        sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
-        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
-            1.0
-
-        # Create Arrow glyph
-        # Get maximum particle velocity
-        velocities = numpy.array(
-            [numpy.linalg.norm(particle.data[CUBA.VELOCITY])
-             for particle
-             in source._vtk_cuds.iter_particles()]
-        )
-        max_velocity = numpy.max(velocities)
-
-        # If the max velocity is not 0, we create the arrow glyph
-        if max_velocity != 0:
-            # Velocities are in meter/second, this scale factor makes
-            # 1 graphical unit = 1 micrometer/sec
-            arrow_scale_factor = 1.0e6
-
-            arrow_glyph_module = Glyph()
-
-            mayavi_engine.add_module(arrow_glyph_module)
-
-            arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
-            arrow_glyph_module.glyph.color_mode = 'color_by_vector'
-            arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
-            arrow_glyph_module.glyph.glyph.scale_factor = arrow_scale_factor
+    # def _add_liggghts_source_to_scene(self, source):
+    #     """ Function which add to liggghts source to the Mayavi scene
+    #
+    #     Parameters
+    #     ----------
+    #     source :
+    #         The mayavi source linked to the dataset
+    #     """
+    #     mayavi_engine = self.mlab_model.engine
+    #
+    #     # Create Sphere glyph
+    #     sphere_glyph_module = Glyph()
+    #
+    #     # Add Liggghts sources
+    #     mayavi_engine.add_source(source)
+    #
+    #     source.point_vectors_name = 'VELOCITY'
+    #
+    #     # Add sphere glyph module
+    #     mayavi_engine.add_module(sphere_glyph_module)
+    #
+    #     sphere_glyph_module.glyph.glyph_source.glyph_source = \
+    #         SphereSource()
+    #     sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
+    #     sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
+    #     sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
+    #         1.0
+    #
+    #     # Create Arrow glyph
+    #     # Get maximum particle velocity
+    #     velocities = numpy.array(
+    #         [numpy.linalg.norm(particle.data[CUBA.VELOCITY])
+    #          for particle
+    #          in source._vtk_cuds.iter_particles()]
+    #     )
+    #     max_velocity = numpy.max(velocities)
+    #
+    #     # If the max velocity is not 0, we create the arrow glyph
+    #     if max_velocity != 0:
+    #         # Velocities are in meter/second, this scale factor makes
+    #         # 1 graphical unit = 1 millimeter/sec
+    #         arrow_scale_factor = 1.0e3
+    #
+    #         arrow_glyph_module = Glyph()
+    #
+    #         mayavi_engine.add_module(arrow_glyph_module)
+    #
+    #         arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
+    #         arrow_glyph_module.glyph.color_mode = 'color_by_vector'
+    #         arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
+    #         arrow_glyph_module.glyph.glyph.scale_factor = arrow_scale_factor
 
     def _run_calc_threaded(self):
         """ Function which will run the calculation. This function
@@ -225,7 +234,8 @@ class Application(HasStrictTraits):
                 self.global_settings,
                 self.openfoam_settings,
                 self.liggghts_settings,
-                self.progress_callback
+                self.progress_callback,
+                self._event_lock
             )
         except Exception:
             self.calculation_error_event = traceback.format_exc()
@@ -241,35 +251,39 @@ class Application(HasStrictTraits):
         future
             Object containing the result of the calculation
         """
-        GUI.invoke_later(self._show_final_result, future.result())
+        GUI.invoke_later(self._computation_done, future.result())
 
-    def _show_final_result(self, datasets):
+    def _computation_done(self, datasets):
         self.progress_dialog.update(100)
-        self._show_datasets(datasets, None)
+        self._append_frame(datasets)
         self.calculation_running = False
 
-    def _show_datasets(self, datasets, event_lock):
-        """ Function called in the main thread to get the result of the
-        calculation from the secondary thread
+    def _append_frame(self, datasets):
+        self.frames.append(
+            (
+                VTKMesh.from_mesh(datasets[0]),
+                VTKParticles.from_particles(datasets[1]),
+                VTKParticles.from_particles(datasets[2])
+            )
+        )
 
-        Parameters
-        ----------
-        result
-            The result of the calculation, it is a tuple containing the
-            Openfoam dataset and the Liggghts datasets,
-            in the following configuration:
-            (openfoam, liggghts flow, liggghts wall)
-        """
+    @on_trait_change("current_frame_index,frames[]")
+    def _sync_current_frame(self):
+        try:
+            self._current_frame = self.frames[self.current_frame_index]
+        except IndexError:
+            self._current_frame = None
+            return
 
-        self._clear_sources()
-        if datasets is not None:
-            self.sources = tuple(map(dataset2cudssource, datasets))
+    @on_trait_change("_current_frame")
+    def _update_sources_with_current_frame(self):
+        if self._current_frame is None:
+            self._clear_sources()
+        else:
+            for i in xrange(len(self._current_frame)):
+                self.sources[i].cuds = self._current_frame[i]
 
-        if event_lock is not None:
-            event_lock.set()
-
-    def progress_callback(self, datasets, current_iteration,
-                          total_iterations, event_lock):
+    def progress_callback(self, datasets, current_iteration, total_iterations):
         """ Function called in the secondary thread. It will transfer the
         progress status of the calculation to the main thread
 
@@ -280,8 +294,13 @@ class Application(HasStrictTraits):
         """
         progress = current_iteration/total_iterations*100
 
+        GUI.invoke_later(self._append_frame_and_continue, datasets)
         GUI.invoke_later(self.progress_dialog.update, progress)
-        GUI.invoke_later(self._show_datasets, datasets, event_lock)
+
+    def _append_frame_and_continue(self, datasets):
+        self._append_frame(datasets)
+        self.current_frame_index = len(self.frames) - 1
+        self._event_lock.set()
 
     def reset(self):
         """ Function which reset the Mayavi scene.
@@ -292,15 +311,8 @@ class Application(HasStrictTraits):
     def _clear_sources(self):
         """ Function which reset the sources
         """
-        if self.sources is None:
-            return
-
         for source in self.sources:
-            try:
-                self.mlab_model.mayavi_scene.remove_child(source)
-            except ValueError:
-                pass
-        self.sources = None
+            source.cuds = None
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
@@ -311,6 +323,50 @@ class Application(HasStrictTraits):
             max=100,
             title='Calculation running...'
         )
+
+    def _sources_default(self):
+        sources = CUDSSource(VTKMesh('mesh')), \
+                  CUDSSource(VTKParticles('flow_particles')), \
+                  CUDSSource(VTKParticles('wall_particles'))
+        mayavi_engine = self.mlab_model.engine
+        mayavi_engine.add_source(sources[0])
+
+        mayavi_engine.add_module(Surface())
+
+        self._add_liggghts_source_to_scene(sources[1])
+        self._add_liggghts_source_to_scene(sources[2])
+
+        return sources
+
+    def _add_liggghts_source_to_scene(self, source):
+        """ Function which add to liggghts source to the Mayavi scene
+
+        Parameters
+        ----------
+        source :
+            The mayavi source linked to the dataset
+        """
+        mayavi_engine = self.mlab_model.engine
+
+        # Add Liggghts sources
+        mayavi_engine.add_source(source)
+
+        #source.point_vectors_name = 'VELOCITY'
+
+        # Add sphere glyph module
+        sphere_glyph_module = Glyph()
+        sphere_glyph_module.glyph.glyph_source.glyph_source = SphereSource()
+        sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
+        sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
+        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = 1.0
+        mayavi_engine.add_module(sphere_glyph_module)
+
+        arrow_glyph_module = Glyph()
+        arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
+        arrow_glyph_module.glyph.color_mode = 'color_by_vector'
+        arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
+        arrow_glyph_module.glyph.glyph.scale_factor = 1.0e3
+        mayavi_engine.add_module(arrow_glyph_module)
 
     def _global_settings_default(self):
         return GlobalParametersModel()

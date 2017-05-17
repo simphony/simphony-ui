@@ -12,7 +12,7 @@ from simphony_ui.openfoam_model.openfoam_wrapper_creation import (
 
 
 def run_calc(global_settings, openfoam_settings,
-             liggghts_settings, progress_callback):
+             liggghts_settings, progress_callback, event_lock):
     """ Main routine which creates the wrappers and run the calculation
 
     Parameters
@@ -33,7 +33,6 @@ def run_calc(global_settings, openfoam_settings,
     openfoam_wrapper, liggghts_wrapper:
         A tuple containing the wrapper of Openfoam and the wrapper of Liggghts
     """
-    event_lock = threading.Event()
     # Create Openfoam wrapper
     openfoam_wrapper = create_openfoam_wrapper(openfoam_settings)
 
@@ -143,8 +142,7 @@ def run_calc(global_settings, openfoam_settings,
         if (numrun % global_settings.update_frequency == 0):
             progress_callback(datasets,
                               numrun,
-                              global_settings.num_iterations,
-                              event_lock)
+                              global_settings.num_iterations)
             print("Waiting")
             event_lock.wait()
             print("Done")
