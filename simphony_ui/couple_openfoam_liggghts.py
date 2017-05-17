@@ -1,5 +1,6 @@
 from __future__ import division
 import math
+import threading
 
 import numpy as np
 from simphony.core.cuba import CUBA
@@ -32,6 +33,7 @@ def run_calc(global_settings, openfoam_settings,
     openfoam_wrapper, liggghts_wrapper:
         A tuple containing the wrapper of Openfoam and the wrapper of Liggghts
     """
+    event_lock = threading.Event()
     # Create Openfoam wrapper
     openfoam_wrapper = create_openfoam_wrapper(openfoam_settings)
 
@@ -139,7 +141,14 @@ def run_calc(global_settings, openfoam_settings,
             liggghts_wrapper.get_dataset('wall_particles'))
 
         if (numrun % global_settings.update_frequency == 0):
-            progress_callback(datasets, numrun, global_settings.num_iterations)
+            progress_callback(datasets,
+                              numrun,
+                              global_settings.num_iterations,
+                              event_lock)
+            print("Waiting")
+            event_lock.wait()
+            print("Done")
+            event_lock.clear()
 
     return datasets
 

@@ -1,17 +1,22 @@
+from __future__ import division
 from concurrent import futures
 import logging
 import traceback
 import numpy
+import contextlib
+import os
 from pyface.gui import GUI
 from pyface.api import error
 
 import mayavi.tools.mlab_scene_model
 from mayavi.modules.api import Surface, Glyph
+from simphony.io.h5_cuds import H5CUDS
 from traits.trait_types import Tuple, Either
 from tvtk.tvtk_classes.sphere_source import SphereSource
 
 from simphony_mayavi.sources.api import CUDSSource
 from simphony.core.cuba import CUBA
+
 from tvtk.pyface.scene_editor import SceneEditor
 from mayavi.core.ui.mayavi_scene import MayaviScene
 
@@ -50,16 +55,11 @@ class Application(HasStrictTraits):
     #: The Openfoam settings for the calculation
     openfoam_settings = Instance(OpenfoamModel)
 
-    #: The datasets of the current frame. Order is important, and
-    # maps as follows: openfoam, liggghts flow, liggghts wall
-    datasets = Either(None, Tuple(Any, Any, Any))
-
     # The mayavi sources, associated to the above datasets. Order is
     # the same as above.
-    sources = Either(None,
-                     Tuple(Instance(CUDSSource),
-                           Instance(CUDSSource),
-                           Instance(CUDSSource)))
+    sources = Tuple(Instance(CUDSSource),
+                    Instance(CUDSSource),
+                    Instance(CUDSSource))
 
     #: The button on which the user will click to run the
     # calculation
@@ -149,17 +149,6 @@ class Application(HasStrictTraits):
         future = self._executor.submit(self._run_calc_threaded)
         future.add_done_callback(self._calculation_done)
 
-    @on_trait_change('datasets')
-    def update_sources(self):
-        """ Function that converts the datasets into CUDSSources
-        """
-        self._clear_sources()
-
-        if self.datasets is None:
-            return
-
-        self.sources = tuple(map(dataset2cudssource, self.datasets))
-
     @on_trait_change('sources')
     def show_sources(self):
         """Plots the available sources in mayavi"""
@@ -171,16 +160,14 @@ class Application(HasStrictTraits):
 
         mayavi_engine.add_module(Surface())
 
-        self._add_liggghts_source_to_scene(self.datasets[1], self.sources[1])
-        self._add_liggghts_source_to_scene(self.datasets[2], self.sources[2])
+        self._add_liggghts_source_to_scene(self.sources[1])
+        self._add_liggghts_source_to_scene(self.sources[2])
 
-    def _add_liggghts_source_to_scene(self, dataset, source):
+    def _add_liggghts_source_to_scene(self, source):
         """ Function which add to liggghts source to the Mayavi scene
 
         Parameters
         ----------
-        dataset :
-            The dataset containing particles
         source :
             The mayavi source linked to the dataset
         """
@@ -209,7 +196,7 @@ class Application(HasStrictTraits):
         velocities = numpy.array(
             [numpy.linalg.norm(particle.data[CUBA.VELOCITY])
              for particle
-             in dataset.iter_particles()]
+             in source._vtk_cuds.iter_particles()]
         )
         max_velocity = numpy.max(velocities)
 
@@ -237,7 +224,7 @@ class Application(HasStrictTraits):
                 self.global_settings,
                 self.openfoam_settings,
                 self.liggghts_settings,
-                self.update_progress_bar
+                self.progress_callback
             )
         except Exception:
             self.calculation_error_event = traceback.format_exc()
@@ -253,9 +240,14 @@ class Application(HasStrictTraits):
         future
             Object containing the result of the calculation
         """
-        GUI.invoke_later(self._update_result, future.result())
+        GUI.invoke_later(self._show_final_result, future.result())
 
-    def _update_result(self, result):
+    def _show_final_result(self, datasets):
+        self.progress_dialog.update(100)
+        self._show_datasets(datasets, None)
+        self.calculation_running = False
+
+    def _show_datasets(self, datasets, event_lock):
         """ Function called in the main thread to get the result of the
         calculation from the secondary thread
 
@@ -267,15 +259,16 @@ class Application(HasStrictTraits):
             in the following configuration:
             (openfoam, liggghts flow, liggghts wall)
         """
-        # Close progress dialog
-        self.progress_dialog.update(100)
 
-        if result is not None:
-            self.datasets = result
+        self._clear_sources()
+        if datasets is not None:
+            self.sources = tuple(map(dataset2cudssource, datasets))
 
-        self.calculation_running = False
+        if event_lock is not None:
+            event_lock.set()
 
-    def update_progress_bar(self, progress):
+    def progress_callback(self, datasets, current_iteration,
+                          total_iterations, event_lock):
         """ Function called in the secondary thread. It will transfer the
         progress status of the calculation to the main thread
 
@@ -284,7 +277,10 @@ class Application(HasStrictTraits):
         progress
             The progress of the calculation (Integer in the range [0, 100])
         """
+        progress = current_iteration/total_iterations*100
+
         GUI.invoke_later(self.progress_dialog.update, progress)
+        GUI.invoke_later(self._show_datasets, datasets, event_lock)
 
     def reset(self):
         """ Function which reset the Mayavi scene.
@@ -292,21 +288,14 @@ class Application(HasStrictTraits):
         # Clear scene
         self._clear_sources()
 
-        # Clear datasets
-        self.datasets = None
-
     def _clear_sources(self):
         """ Function which reset the sources
         """
-        if self.sources is None:
-            return
-
         for source in self.sources:
             try:
                 self.mlab_model.mayavi_scene.remove_child(source)
             except ValueError:
                 pass
-        self.sources = None
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
@@ -326,3 +315,6 @@ class Application(HasStrictTraits):
 
     def _openfoam_settings_default(self):
         return OpenfoamModel()
+
+    def _sources_default(self):
+        return CUDSSource(), CUDSSource(), CUDSSource()
