@@ -173,57 +173,63 @@ class Application(HasStrictTraits):
         future = self._executor.submit(self._run_calc_threaded)
         future.add_done_callback(self._calculation_done)
 
-    # def _add_liggghts_source_to_scene(self, source):
-    #     """ Function which add to liggghts source to the Mayavi scene
-    #
-    #     Parameters
-    #     ----------
-    #     source :
-    #         The mayavi source linked to the dataset
-    #     """
-    #     mayavi_engine = self.mlab_model.engine
-    #
-    #     # Create Sphere glyph
-    #     sphere_glyph_module = Glyph()
-    #
-    #     # Add Liggghts sources
-    #     mayavi_engine.add_source(source)
-    #
-    #     source.point_vectors_name = 'VELOCITY'
-    #
-    #     # Add sphere glyph module
-    #     mayavi_engine.add_module(sphere_glyph_module)
-    #
-    #     sphere_glyph_module.glyph.glyph_source.glyph_source = \
-    #         SphereSource()
-    #     sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
-    #     sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
-    #     sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
-    #         1.0
-    #
-    #     # Create Arrow glyph
-    #     # Get maximum particle velocity
-    #     velocities = numpy.array(
-    #         [numpy.linalg.norm(particle.data[CUBA.VELOCITY])
-    #          for particle
-    #          in source._vtk_cuds.iter_particles()]
-    #     )
-    #     max_velocity = numpy.max(velocities)
-    #
-    #     # If the max velocity is not 0, we create the arrow glyph
-    #     if max_velocity != 0:
-    #         # Velocities are in meter/second, this scale factor makes
-    #         # 1 graphical unit = 1 millimeter/sec
-    #         arrow_scale_factor = 1.0e3
-    #
-    #         arrow_glyph_module = Glyph()
-    #
-    #         mayavi_engine.add_module(arrow_glyph_module)
-    #
-    #         arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
-    #         arrow_glyph_module.glyph.color_mode = 'color_by_vector'
-    #         arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
-    #         arrow_glyph_module.glyph.glyph.scale_factor = arrow_scale_factor
+    def _add_sources_to_scene(self):
+        mayavi_engine = self.mlab_model.engine
+        mayavi_engine.add_source(self.sources[0])
+
+        mayavi_engine.add_module(Surface())
+
+        self._add_liggghts_source_to_scene(self.sources[1])
+        self._add_liggghts_source_to_scene(self.sources[2])
+
+    def _add_liggghts_source_to_scene(self, source):
+        """ Function which add to liggghts source to the Mayavi scene
+
+        Parameters
+        ----------
+        source :
+            The mayavi source linked to the dataset
+        """
+
+        mayavi_engine = self.mlab_model.engine
+
+        # Create Sphere glyph
+        sphere_glyph_module = Glyph()
+
+        # Add Liggghts sources
+        mayavi_engine.add_source(source)
+
+        source.point_vectors_name = 'VELOCITY'
+
+        # Add sphere glyph module
+        mayavi_engine.add_module(sphere_glyph_module)
+
+        sphere_glyph_module.glyph.glyph_source.glyph_source = \
+                   SphereSource()
+        sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
+        sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
+        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
+                   1.0
+
+        # Velocities are in meter/second, this scale factor makes
+        # 1 graphical unit = 1 millimeter/sec
+        arrow_scale_factor = 1.0
+
+        arrow_glyph_module = Glyph()
+
+        mayavi_engine.add_module(arrow_glyph_module)
+
+        arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
+        arrow_glyph_module.glyph.color_mode = 'color_by_vector'
+        arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
+        arrow_glyph_module.glyph.glyph.scale_factor = arrow_scale_factor
+
+    def _remove_sources_from_scene(self):
+        for source in self.sources:
+            try:
+                self.mlab_model.mayavi_scene.remove_child(source)
+            except ValueError:
+                pass
 
     def _run_calc_threaded(self):
         """ Function which will run the calculation. This function
@@ -276,12 +282,15 @@ class Application(HasStrictTraits):
             return
 
     @on_trait_change("_current_frame")
-    def _update_sources_with_current_frame(self):
-        if self._current_frame is None:
+    def _update_sources_with_current_frame(self, object, name, old, new):
+        print(old, new)
+        if new is None:
             self._clear_sources()
         else:
+            self._remove_sources_from_scene()
             for i in xrange(len(self._current_frame)):
                 self.sources[i].cuds = self._current_frame[i]
+            self._add_sources_to_scene()
 
     def progress_callback(self, datasets, current_iteration, total_iterations):
         """ Function called in the secondary thread. It will transfer the
@@ -299,8 +308,8 @@ class Application(HasStrictTraits):
 
     def _append_frame_and_continue(self, datasets):
         self._append_frame(datasets)
-        self.current_frame_index = len(self.frames) - 1
         self._event_lock.set()
+        self.current_frame_index = len(self.frames) - 1
 
     def reset(self):
         """ Function which reset the Mayavi scene.
@@ -311,6 +320,7 @@ class Application(HasStrictTraits):
     def _clear_sources(self):
         """ Function which reset the sources
         """
+        self._remove_sources_from_scene()
         for source in self.sources:
             source.cuds = None
 
@@ -325,48 +335,7 @@ class Application(HasStrictTraits):
         )
 
     def _sources_default(self):
-        sources = CUDSSource(VTKMesh('mesh')), \
-                  CUDSSource(VTKParticles('flow_particles')), \
-                  CUDSSource(VTKParticles('wall_particles'))
-        mayavi_engine = self.mlab_model.engine
-        mayavi_engine.add_source(sources[0])
-
-        mayavi_engine.add_module(Surface())
-
-        self._add_liggghts_source_to_scene(sources[1])
-        self._add_liggghts_source_to_scene(sources[2])
-
-        return sources
-
-    def _add_liggghts_source_to_scene(self, source):
-        """ Function which add to liggghts source to the Mayavi scene
-
-        Parameters
-        ----------
-        source :
-            The mayavi source linked to the dataset
-        """
-        mayavi_engine = self.mlab_model.engine
-
-        # Add Liggghts sources
-        mayavi_engine.add_source(source)
-
-        #source.point_vectors_name = 'VELOCITY'
-
-        # Add sphere glyph module
-        sphere_glyph_module = Glyph()
-        sphere_glyph_module.glyph.glyph_source.glyph_source = SphereSource()
-        sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
-        sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
-        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = 1.0
-        mayavi_engine.add_module(sphere_glyph_module)
-
-        arrow_glyph_module = Glyph()
-        arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
-        arrow_glyph_module.glyph.color_mode = 'color_by_vector'
-        arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
-        arrow_glyph_module.glyph.glyph.scale_factor = 1.0e3
-        mayavi_engine.add_module(arrow_glyph_module)
+        return CUDSSource(), CUDSSource(), CUDSSource()
 
     def _global_settings_default(self):
         return GlobalParametersModel()
