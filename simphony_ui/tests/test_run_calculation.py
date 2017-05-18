@@ -45,7 +45,7 @@ class TestCalculation(unittest.TestCase):
 
             def callback(x): return x
 
-            cls.openfoam_wrapper, cls.liggghts_wrapper = run_calc(
+            cls.datasets = run_calc(
                 cls.global_settings,
                 cls.openfoam_settings,
                 cls.liggghts_settings,
@@ -61,21 +61,16 @@ class TestCalculation(unittest.TestCase):
         ))
 
     def test_nb_entities(self):
-        flow_dataset = self.liggghts_wrapper.get_dataset(
-            self.liggghts_wrapper.get_dataset_names()[0])
-        self.assertEqual(flow_dataset.count_of(CUDSItem.PARTICLE), 200)
-        self.assertEqual(flow_dataset.count_of(CUDSItem.BOND), 0)
+        self.assertEqual(self.datasets[1].count_of(CUDSItem.PARTICLE), 200)
+        self.assertEqual(self.datasets[1].count_of(CUDSItem.BOND), 0)
 
-        mesh_dataset = self.openfoam_wrapper.get_dataset(
-            self.openfoam_wrapper.get_dataset_names()[0])
-        self.assertEqual(mesh_dataset.count_of(CUDSItem.CELL), 15744)
-        self.assertEqual(mesh_dataset.count_of(CUDSItem.FACE), 63448)
-        self.assertEqual(mesh_dataset.count_of(CUDSItem.EDGE), 0)
-        self.assertEqual(mesh_dataset.count_of(CUDSItem.POINT), 32432)
+        self.assertEqual(self.datasets[0].count_of(CUDSItem.CELL), 15744)
+        self.assertEqual(self.datasets[0].count_of(CUDSItem.FACE), 63448)
+        self.assertEqual(self.datasets[0].count_of(CUDSItem.EDGE), 0)
+        self.assertEqual(self.datasets[0].count_of(CUDSItem.POINT), 32432)
 
     def test_velocity(self):
-        mesh_dataset = self.openfoam_wrapper.get_dataset(
-            self.openfoam_wrapper.get_dataset_names()[0])
+        mesh_dataset = self.datasets[0]
         avg_velo = 0.0
         for cell in mesh_dataset.iter_cells():
             avg_velo += cell.data[CUBA.VELOCITY][0]

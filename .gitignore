@@ -4,3 +4,8 @@ simphony_ui.egg-info/
 travis.log
 .coverage
 doc/build
+build
+dist
+mesh
+simphony_ui/mesh
+simphony_ui/version.py
