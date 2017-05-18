@@ -12,7 +12,6 @@ import mayavi.tools.mlab_scene_model
 from mayavi.modules.api import Surface, Glyph
 from simphony_mayavi.cuds.vtk_mesh import VTKMesh
 from simphony_mayavi.cuds.vtk_particles import VTKParticles
-from traits.trait_types import Int
 from tvtk.tvtk_classes.sphere_source import SphereSource
 
 from simphony_mayavi.sources.api import CUDSSource
@@ -22,9 +21,9 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 
 from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool, Event, Str, Dict, List, Tuple,
-                        Either)
+                        Either, Int)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
-                          ShellEditor, HGroup, Item)
+                          ShellEditor, HGroup, Item, ButtonEditor)
 
 from pyface.api import ProgressDialog
 
@@ -83,7 +82,8 @@ class Application(HasStrictTraits):
 
     first_button = Button("First")
     previous_button = Button("Previous")
-    play_stop_button = Button("Play")
+    play_stop_button = Button()
+    play_stop_label = Str("Play")
     next_button = Button("Next")
 
     play_timer = Instance(Timer)
@@ -124,9 +124,9 @@ class Application(HasStrictTraits):
             VSplit(
                 VGroup(
                     Tabbed(
-                        UItem('global_settings'),
-                        UItem('liggghts_settings'),
-                        UItem('openfoam_settings', label='OpenFOAM settings'),
+                        UItem('global_settings', style='custom'),
+                        UItem('liggghts_settings', style='custom'),
+                        UItem('openfoam_settings', label='OpenFOAM settings', style="custom"),
                     ),
                     UItem(
                         name='run_button',
@@ -144,17 +144,18 @@ class Application(HasStrictTraits):
                 HGroup(
                     UItem(
                         name="first_button",
-                        enabled_when="current_frame_index > 0",
+                        enabled_when="current_frame_index > 0 and play_timer is None",
                     ),
                     UItem(
                         name="previous_button",
+                        enabled_when="current_frame_index > 0 and play_timer is None",
                     ),
                     UItem(
-                        name="play_stop_button",
+                        name="play_stop_button", editor=ButtonEditor(label_value="play_stop_label")
                     ),
                     UItem(
                         name="next_button",
-                        enabled_when="current_frame_index < len(frames)",
+                        enabled_when="current_frame_index < len(frames) and play_timer is None",
                     ),
                     Item(name="current_frame_index", style="readonly"),
                     enabled_when='calculation_running == False and len(frames) > 0'
@@ -163,7 +164,6 @@ class Application(HasStrictTraits):
         ),
         title='Simphony UI',
         resizable=True,
-        style='custom',
         width=1.0,
         height=1.0
     )
@@ -366,6 +366,10 @@ class Application(HasStrictTraits):
         else:
             self.play_timer.Stop()
             self.play_timer = None
+
+    @on_trait_change('play_timer')
+    def _change_play_button_label(self):
+        self.play_stop_label = "Stop" if self.play_timer else "Start"
 
     def _next_frame_looped(self):
         if len(self.frames) == 0:
