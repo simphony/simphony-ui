@@ -8,6 +8,7 @@ import traceback
 import numpy
 from pyface.gui import GUI
 from pyface.api import error
+from pyface.timer.api import Timer
 
 import mayavi.tools.mlab_scene_model
 from mayavi.modules.api import Surface, Glyph
@@ -25,7 +26,7 @@ from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool, Event, Str, Dict, List, Tuple,
                         Either)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
-                          ShellEditor)
+                          ShellEditor, HGroup, Item)
 
 from pyface.api import ProgressDialog
 
@@ -82,6 +83,13 @@ class Application(HasStrictTraits):
     # calculation
     run_button = Button("Run")
 
+    first_button = Button("First")
+    back_button = Button("Back")
+    play_stop_button = Button("Play")
+    forward_button = Button("Next")
+
+    play_timer = Instance(Timer)
+
     #: The pop up dialog which will show the status of the
     # calculation
     progress_dialog = Instance(ProgressDialog)
@@ -130,10 +138,30 @@ class Application(HasStrictTraits):
                 ),
                 UItem('shell', editor=ShellEditor())
             ),
-            UItem(
-                name='mlab_model',
-                editor=SceneEditor(scene_class=MayaviScene)
-            )
+            VGroup(
+                UItem(
+                    name='mlab_model',
+                    editor=SceneEditor(scene_class=MayaviScene)
+                ),
+                HGroup(
+                    UItem(
+                        name="first_button",
+                        enabled_when="current_frame_index > 0",
+                    ),
+                    UItem(
+                        name="back_button",
+                    ),
+                    UItem(
+                        name="play_stop_button",
+                    ),
+                    UItem(
+                        name="forward_button",
+                        enabled_when="current_frame_index < len(frames)",
+                    ),
+                    Item(name="current_frame_index", style="readonly"),
+                    enabled_when='calculation_running == False and len(frames) > 0'
+                )
+            ),
         ),
         title='Simphony UI',
         resizable=True,
@@ -168,6 +196,7 @@ class Application(HasStrictTraits):
         """
         if self.calculation_running:
             raise RuntimeError('Calculation already running...')
+        self.frames = []
         self.calculation_running = True
         self.progress_dialog.open()
         future = self._executor.submit(self._run_calc_threaded)
@@ -316,6 +345,40 @@ class Application(HasStrictTraits):
         """
         # Clear scene
         self._clear_sources()
+
+    @on_trait_change('first_button')
+    def _to_first_frame(self):
+        self.current_frame_index = 0
+
+    @on_trait_change('back_button')
+    def _to_prev_frame(self):
+        frame = self.current_frame_index - 1
+        if frame < 0:
+            frame = 0
+        self.current_frame_index = frame
+
+    @on_trait_change('next_button')
+    def _to_next_frame(self):
+        frame = self.current_frame_index + 1
+        if frame >= len(self.frames):
+            frame = len(self.frames) - 1
+        self.current_frame_index = frame
+
+    @on_trait_change('play_stop_button')
+    def _start_video(self):
+        if self.play_timer is None:
+            self.play_timer = Timer(500, self._next_frame_looped)
+        else:
+            self.play_timer.Stop()
+            self.play_timer = None
+
+    def _next_frame_looped(self):
+        if len(self.frames) == 0:
+            self.current_frame_index = 0
+
+        self.current_frame_index = (
+            self.current_frame_index + 1
+            ) % len(self.frames)
 
     def _clear_sources(self):
         """ Function which reset the sources
