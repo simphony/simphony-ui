@@ -1,11 +1,9 @@
 from __future__ import division
 
 import threading
-
 from concurrent import futures
 import logging
 import traceback
-import numpy
 from pyface.gui import GUI
 from pyface.api import error
 from pyface.timer.api import Timer
@@ -84,9 +82,9 @@ class Application(HasStrictTraits):
     run_button = Button("Run")
 
     first_button = Button("First")
-    back_button = Button("Back")
+    previous_button = Button("Previous")
     play_stop_button = Button("Play")
-    forward_button = Button("Next")
+    next_button = Button("Next")
 
     play_timer = Instance(Timer)
 
@@ -149,13 +147,13 @@ class Application(HasStrictTraits):
                         enabled_when="current_frame_index > 0",
                     ),
                     UItem(
-                        name="back_button",
+                        name="previous_button",
                     ),
                     UItem(
                         name="play_stop_button",
                     ),
                     UItem(
-                        name="forward_button",
+                        name="next_button",
                         enabled_when="current_frame_index < len(frames)",
                     ),
                     Item(name="current_frame_index", style="readonly"),
@@ -207,7 +205,6 @@ class Application(HasStrictTraits):
         mayavi_engine.add_source(self.sources[0])
 
         mayavi_engine.add_module(Surface())
-
         self._add_liggghts_source_to_scene(self.sources[1])
         self._add_liggghts_source_to_scene(self.sources[2])
 
@@ -219,7 +216,6 @@ class Application(HasStrictTraits):
         source :
             The mayavi source linked to the dataset
         """
-
         mayavi_engine = self.mlab_model.engine
 
         # Create Sphere glyph
@@ -312,7 +308,6 @@ class Application(HasStrictTraits):
 
     @on_trait_change("_current_frame")
     def _update_sources_with_current_frame(self, object, name, old, new):
-        print(old, new)
         if new is None:
             self._clear_sources()
         else:
@@ -350,7 +345,7 @@ class Application(HasStrictTraits):
     def _to_first_frame(self):
         self.current_frame_index = 0
 
-    @on_trait_change('back_button')
+    @on_trait_change('previous_button')
     def _to_prev_frame(self):
         frame = self.current_frame_index - 1
         if frame < 0:
