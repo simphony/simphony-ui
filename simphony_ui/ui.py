@@ -126,7 +126,9 @@ class Application(HasStrictTraits):
                     Tabbed(
                         UItem('global_settings', style='custom'),
                         UItem('liggghts_settings', style='custom'),
-                        UItem('openfoam_settings', label='OpenFOAM settings', style="custom"),
+                        UItem('openfoam_settings',
+                              label='OpenFOAM settings',
+                              style="custom"),
                     ),
                     UItem(
                         name='run_button',
@@ -144,21 +146,27 @@ class Application(HasStrictTraits):
                 HGroup(
                     UItem(
                         name="first_button",
-                        enabled_when="current_frame_index > 0 and play_timer is None",
+                        enabled_when=(
+                            "current_frame_index > 0 and play_timer is None"),
                     ),
                     UItem(
                         name="previous_button",
-                        enabled_when="current_frame_index > 0 and play_timer is None",
+                        enabled_when=(
+                            "current_frame_index > 0 and play_timer is None"),
                     ),
                     UItem(
-                        name="play_stop_button", editor=ButtonEditor(label_value="play_stop_label")
+                        name="play_stop_button",
+                        editor=ButtonEditor(label_value="play_stop_label")
                     ),
                     UItem(
                         name="next_button",
-                        enabled_when="current_frame_index < len(frames) and play_timer is None",
+                        enabled_when=(
+                            "current_frame_index < len(frames) "
+                            "and play_timer is None"),
                     ),
                     Item(name="current_frame_index", style="readonly"),
-                    enabled_when='calculation_running == False and len(frames) > 0'
+                    enabled_when=(
+                        'calculation_running == False and len(frames) > 0')
                 )
             ),
         ),
@@ -233,8 +241,7 @@ class Application(HasStrictTraits):
                    SphereSource()
         sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
         sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
-        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
-                   1.0
+        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = 1.0
 
         # Velocities are in meter/second, this scale factor makes
         # 1 graphical unit = 1 millimeter/sec

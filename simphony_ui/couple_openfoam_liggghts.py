@@ -1,6 +1,5 @@
 from __future__ import division
 import math
-import threading
 
 import numpy as np
 from simphony.core.cuba import CUBA

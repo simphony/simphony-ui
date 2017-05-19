@@ -1,6 +1,6 @@
 import os
 
-from traits.api import (HasStrictTraits, Enum, Str, Directory,
+from traits.api import (HasStrictTraits, Enum, Directory,
                         File, Instance, Bool, on_trait_change)
 from traitsui.api import (View, Item, VGroup, HGroup, Spring, UItem, VGrid,
                           Label)
@@ -21,7 +21,7 @@ class OpenfoamModel(HasStrictTraits):
     mode = Enum('internal', 'io')
 
     #: The type of the mesh.
-    mesh_type = Enum('quad',  'block')
+    mesh_type = Enum('block',  'quad')
 
     #: The directory where to put output files.
     output_path = Directory(os.path.abspath(os.path.curdir))
