@@ -12,10 +12,6 @@ class GlobalParametersModel(HasStrictTraits):
     #: How often we should consider the current state for plotting/saving
     update_frequency = Int(1)
 
-    #: The directory where to save the datasets
-    output_directory = Directory(os.path.join(
-        os.path.abspath(os.path.curdir), "output"))
-
     #: The type of the force used during the simulation.
     force_type = Enum('Stokes', 'Coul', 'Dala')
 
@@ -23,7 +19,6 @@ class GlobalParametersModel(HasStrictTraits):
         VGroup(
             Item(name='num_iterations', label='Number of iterations'),
             Item(name='update_frequency', label='Update frequency'),
-            Item(name='output_directory', label='Output directory'),
             Item(name='force_type'),
             show_border=True
         )
