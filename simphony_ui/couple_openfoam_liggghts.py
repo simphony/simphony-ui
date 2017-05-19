@@ -11,7 +11,7 @@ from simphony_ui.openfoam_model.openfoam_wrapper_creation import (
 
 
 def run_calc(global_settings, openfoam_settings,
-             liggghts_settings, progress_callback, event_lock):
+             liggghts_settings, progress_callback, event_lock=None):
     """ Main routine which creates the wrappers and run the calculation
 
     Parameters
@@ -142,10 +142,9 @@ def run_calc(global_settings, openfoam_settings,
             progress_callback(datasets,
                               numrun,
                               global_settings.num_iterations)
-            print("Waiting")
-            event_lock.wait()
-            print("Done")
-            event_lock.clear()
+            if event_lock is not None:
+                event_lock.wait()
+                event_lock.clear()
 
     return datasets
 

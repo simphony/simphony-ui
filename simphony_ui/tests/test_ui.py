@@ -1,10 +1,7 @@
 import unittest
 import mock
-import os
 import time
-import contextlib
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
-from simphony.io.h5_cuds import H5CUDS
 from tvtk.tvtk_classes.sphere_source import SphereSource
 from simphony_ui.ui import Application, dataset2cudssource
 from simphony_mayavi.sources.api import CUDSSource
@@ -119,18 +116,6 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
             self.assertEqual(dataset2cudssource(36), 36)
 
-    def test_dataset2cudssource_for_hdf_file(self):
-        filename = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'fixtures', "step-0.h5")
-
-        with contextlib.closing(H5CUDS.open(filename, "r")) as f:
-            datasets = (f.get_dataset("mesh"),
-                        f.get_dataset("flow_particles"),
-                        f.get_dataset("wall_particles"))
-
-            print(dataset2cudssource(datasets[0]))
-
     def test_report_failure(self):
 
         def mock_msg(*args, **kwargs):
@@ -141,9 +126,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
             # Those methods are not supposed to be called
             self.assertIsNone(self.application._run_calc_threaded())
-
-            self.application._update_result(None)
-            self.assertIsNone(self.application.datasets)
+            self.assertEquals(len(self.application.frames), 0)
 
     def test_update_valid(self):
         self.assertFalse(self.application.valid)

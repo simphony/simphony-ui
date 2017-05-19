@@ -293,7 +293,8 @@ class Application(HasStrictTraits):
 
     def _computation_done(self, datasets):
         self.progress_dialog.update(100)
-        self._append_frame(datasets)
+        if datasets is not None:
+            self._append_frame(datasets)
         self.calculation_running = False
 
     def _append_frame(self, datasets):
