@@ -1,9 +1,13 @@
 from __future__ import division
 
 import threading
+import os
 from concurrent import futures
 import logging
 import traceback
+
+from pyface.constant import OK
+from pyface.directory_dialog import DirectoryDialog
 from pyface.gui import GUI
 from pyface.api import error
 from pyface.timer.api import Timer
@@ -85,6 +89,7 @@ class Application(HasStrictTraits):
     play_stop_button = Button()
     play_stop_label = Str("Play")
     next_button = Button("Next")
+    save_button = Button("Save...")
 
     play_timer = Instance(Timer)
 
@@ -92,9 +97,9 @@ class Application(HasStrictTraits):
     # calculation
     progress_dialog = Instance(ProgressDialog)
 
-    #: Boolean representing if the calculation is running
-    # or not
-    calculation_running = Bool(False)
+    #: Boolean representing if the application should allow
+    # operations or not
+    interactive = Bool(True)
 
     #: The Mayavi traits model which contains the scene and engine
     mlab_model = Instance(MlabSceneModel, ())
@@ -134,7 +139,7 @@ class Application(HasStrictTraits):
                         name='run_button',
                         enabled_when='valid'
                     ),
-                    enabled_when='calculation_running == False',
+                    enabled_when='interactive',
                 ),
                 UItem('shell', editor=ShellEditor())
             ),
@@ -165,8 +170,9 @@ class Application(HasStrictTraits):
                             "and play_timer is None"),
                     ),
                     Item(name="current_frame_index", style="readonly"),
+                    UItem(name="save_button"),
                     enabled_when=(
-                        'calculation_running == False and len(frames) > 0')
+                        'interactive and len(frames) > 0')
                 )
             ),
         ),
@@ -200,10 +206,11 @@ class Application(HasStrictTraits):
         RuntimeError
             If the calculation is already running
         """
-        if self.calculation_running:
+        if not self.interactive:
             raise RuntimeError('Calculation already running...')
         self.frames = []
-        self.calculation_running = True
+        self.interactive = False
+        self.progress_dialog.title = 'Calculation running...'
         self.progress_dialog.open()
         future = self._executor.submit(self._run_calc_threaded)
         future.add_done_callback(self._calculation_done)
@@ -289,12 +296,12 @@ class Application(HasStrictTraits):
             Object containing the result of the calculation
         """
         GUI.invoke_later(self._computation_done, future.result())
-
+o
     def _computation_done(self, datasets):
         self.progress_dialog.update(100)
         if datasets is not None:
             self._append_frame(datasets)
-        self.calculation_running = False
+        self.interactive = True
 
     def _append_frame(self, datasets):
         self.frames.append(
@@ -377,6 +384,28 @@ class Application(HasStrictTraits):
         else:
             self.play_timer.Stop()
             self.play_timer = None
+    @on_trait_change("save_button")
+    def _save_images(self):
+        dialog = DirectoryDialog()
+        if dialog.open() != OK:
+            return
+
+        self.interactive = False
+        self.progress_dialog.title = 'Saving images...'
+        self.progress_dialog.open()
+
+        dirpath = dialog.path
+        for frame_index in xrange(len(self.frames)):
+            self.current_frame_index = frame_index
+            mayavi.mlab.savefig(os.path.join(
+                dirpath, "frame-{}.png".format(frame_index)
+            ))
+            progress = 100*frame_index/len(self.frames)
+            print("progress ", progress)
+            self.progress_dialog.update(progress)
+
+        self.progress_dialog.update(100)
+        self.interactive = True
 
     @on_trait_change('play_timer')
     def _change_play_button_label(self):
@@ -404,7 +433,6 @@ class Application(HasStrictTraits):
         return ProgressDialog(
             min=0,
             max=100,
-            title='Calculation running...'
         )
 
     def _sources_default(self):
