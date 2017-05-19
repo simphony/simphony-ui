@@ -237,8 +237,7 @@ class Application(HasStrictTraits):
         # Add sphere glyph module
         mayavi_engine.add_module(sphere_glyph_module)
 
-        sphere_glyph_module.glyph.glyph_source.glyph_source = \
-                   SphereSource()
+        sphere_glyph_module.glyph.glyph_source.glyph_source = SphereSource()
         sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
         sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
         sphere_glyph_module.glyph.glyph_source.glyph_source.radius = 1.0
@@ -312,10 +311,12 @@ class Application(HasStrictTraits):
             self._current_frame = self.frames[self.current_frame_index]
         except IndexError:
             self._current_frame = None
-            return
 
     @on_trait_change("_current_frame")
     def _update_sources_with_current_frame(self, object, name, old, new):
+        scene = self.mlab_model.mayavi_scene
+        scene.scene.disable_render = True
+
         if new is None:
             self._clear_sources()
         else:
@@ -323,6 +324,8 @@ class Application(HasStrictTraits):
             for i in xrange(len(self._current_frame)):
                 self.sources[i].cuds = self._current_frame[i]
             self._add_sources_to_scene()
+
+        scene.scene.disable_render = False
 
     def progress_callback(self, datasets, current_iteration, total_iterations):
         """ Function called in the secondary thread. It will transfer the
