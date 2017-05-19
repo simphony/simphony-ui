@@ -43,7 +43,8 @@ class TestCalculation(unittest.TestCase):
         with cleanup_garbage(temp_dir):
             cls.openfoam_settings.output_path = temp_dir
 
-            def callback(x): return x
+            def callback(*args):
+                pass
 
             cls.datasets = run_calc(
                 cls.global_settings,
