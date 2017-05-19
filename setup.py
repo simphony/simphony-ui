@@ -28,7 +28,8 @@ write_version_py()
 requirements = [
     "simliggghts>=0.1",
     "foam-wrappers>=0.2",
-    "futures"
+    "futures",
+    "numpy>=1.12"
 ]
 
 setup(
