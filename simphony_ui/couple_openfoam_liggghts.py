@@ -134,7 +134,13 @@ def run_calc(global_settings, openfoam_settings,
         # Perform Liggghts calculations
         liggghts_wrapper.run()
 
-    return openfoam_wrapper, liggghts_wrapper
+    openfoam_dataset = openfoam_wrapper.get_dataset(
+        openfoam_wrapper.get_dataset_names()[0])
+
+    liggghts_flow_dataset = liggghts_wrapper.get_dataset('flow_particles')
+    liggghts_wall_dataset = liggghts_wrapper.get_dataset('wall_particles')
+
+    return openfoam_dataset, liggghts_flow_dataset, liggghts_wall_dataset
 
 
 def compute_drag_force(force_type, radius, rel_velo, viscosity, density):

@@ -3,7 +3,6 @@ import mock
 import time
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from tvtk.tvtk_classes.sphere_source import SphereSource
-from simphony.cuds.abc_modeling_engine import ABCModelingEngine
 from simphony_ui.ui import Application, dataset2cudssource
 from simphony_mayavi.sources.api import CUDSSource
 
@@ -15,12 +14,6 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         self.application = Application()
 
     def test_multi_thread(self):
-        openfoam_wrapper = mock.Mock(spec=ABCModelingEngine)
-        liggghts_wrapper = mock.Mock(spec=ABCModelingEngine)
-
-        openfoam_wrapper.get_dataset_names = mock.MagicMock()
-        liggghts_wrapper.get_dataset = mock.MagicMock()
-
         run_calc_target = 'simphony_ui.ui.run_calc'
 
         def mock_run_calc(global_settings, openfoam_settings,
@@ -29,7 +22,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
             progress_callback(50)
             time.sleep(5)
             progress_callback(100)
-            return openfoam_wrapper, liggghts_wrapper
+            return mock.MagicMock(), mock.MagicMock(), mock.MagicMock()
 
         dataset2cudssource_target = 'simphony_ui.ui.dataset2cudssource'
 
@@ -60,27 +53,19 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
             mock_max.side_effect = mock_numpy_max
             mock_add.side_effect = mock_add_module
 
-            self.assertIsNone(self.application.openfoam_wrapper)
-            self.assertIsNone(self.application.liggghts_wrapper)
+            self.assertIsNone(self.application.datasets)
 
             # Fix coverage
             self.application.reset()
 
             with self.event_loop_until_condition(
-                    lambda: (self.application.openfoam_wrapper
+                    lambda: (self.application.datasets
                              is not None),
                     timeout=20
             ):
                 self.application.run_calc()
 
-            self.assertEqual(
-                self.application.openfoam_wrapper,
-                openfoam_wrapper
-            )
-            self.assertEqual(
-                self.application.liggghts_wrapper,
-                liggghts_wrapper
-            )
+            self.assertEqual(len(self.application.datasets), 3)
 
             # Last added module was the arrow_module
             arrow_module = mock_add.call_args[0][0]
@@ -97,7 +82,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
             self.application.reset()
 
             with self.event_loop_until_condition(
-                    lambda: (self.application.openfoam_wrapper
+                    lambda: (self.application.datasets
                              is not None),
                     timeout=20
             ):
@@ -143,7 +128,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
             self.assertIsNone(self.application._run_calc_threaded())
 
             self.application._update_result(None)
-            self.assertIsNone(self.application.openfoam_wrapper)
+            self.assertIsNone(self.application.datasets)
 
     def test_update_valid(self):
         self.assertFalse(self.application.valid)
