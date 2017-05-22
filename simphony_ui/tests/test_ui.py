@@ -193,9 +193,20 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         app._to_prev_frame()
         self.assertEqual(app.current_frame_index, 1)
         self.assertEqual(app._current_frame, app.frames[1])
+
         app._to_first_frame()
         self.assertEqual(app.current_frame_index, 0)
         self.assertEqual(app._current_frame, app.frames[0])
+        app._to_prev_frame()
+        self.assertEqual(app.current_frame_index, 0)
+        self.assertEqual(app._current_frame, app.frames[1])
+
+        app._to_last_frame()
+        self.assertEqual(app.current_frame_index, len(app.frames())-1)
+        self.assertEqual(app._current_frame, app.frames[-1])
+        app._to_next_frame()
+        self.assertEqual(app.current_frame_index, len(app.frames())-1)
+        self.assertEqual(app._current_frame, app.frames[-1])
 
         self.assertIsNone(app.play_timer)
         app._start_stop_video()
