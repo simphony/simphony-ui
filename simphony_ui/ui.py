@@ -16,6 +16,7 @@ import mayavi.tools.mlab_scene_model
 from mayavi.modules.api import Surface, Glyph
 from simphony_mayavi.cuds.vtk_mesh import VTKMesh
 from simphony_mayavi.cuds.vtk_particles import VTKParticles
+from traits.trait_errors import TraitError
 from tvtk.tvtk_classes.sphere_source import SphereSource
 
 from simphony_mayavi.sources.api import CUDSSource
@@ -241,7 +242,12 @@ class Application(HasStrictTraits):
         # Add Liggghts sources
         mayavi_engine.add_source(source)
 
-        source.point_vectors_name = 'VELOCITY'
+        try:
+            source.point_vectors_name = 'VELOCITY'
+        except TraitError:
+            # The data is not available in the dataset for some reason.
+            # Add the modules anyway, but don't select it.
+            pass
 
         # Add sphere glyph module
         mayavi_engine.add_module(sphere_glyph_module)

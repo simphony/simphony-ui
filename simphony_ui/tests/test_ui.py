@@ -52,7 +52,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 pass
 
             with self.event_loop_until_condition(
-                    lambda: not app.calculation_running,
+                    lambda: app.interactive,
                     timeout=30
             ):
                 pass
@@ -82,7 +82,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 pass
 
             with self.event_loop_until_condition(
-                    lambda: not app.calculation_running,
+                    lambda: app.interactive,
                     timeout=30
             ):
                 pass
@@ -132,7 +132,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
     def test_double_run(self):
         # Simulate the calculation running
-        self.application.calculation_running = True
+        self.application.interactive = False
         with self.assertRaises(RuntimeError):
             self.application.run_calc()
 
