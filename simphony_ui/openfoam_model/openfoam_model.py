@@ -1,6 +1,6 @@
 import os
 
-from traits.api import (HasStrictTraits, Enum, Str, Directory,
+from traits.api import (HasStrictTraits, Enum, Directory,
                         File, Instance, Bool, on_trait_change)
 from traitsui.api import (View, Item, VGroup, HGroup, Spring, UItem, VGrid,
                           Label)
@@ -19,9 +19,6 @@ class OpenfoamModel(HasStrictTraits):
 
     #: The mode of computation used with Openfoam.
     mode = Enum('internal', 'io')
-
-    #: The name of the output mesh.
-    mesh_name = Str('mesh')
 
     #: The type of the mesh.
     mesh_type = Enum('block', 'quad')
@@ -68,7 +65,6 @@ class OpenfoamModel(HasStrictTraits):
                 '_',
                 Item(name='mode'),
                 '_',
-                Item(name='mesh_name'),
                 Item(name='mesh_type'),
                 '_',
                 Item(name='output_path'),

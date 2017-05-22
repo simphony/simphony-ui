@@ -11,7 +11,7 @@ from simphony_ui.openfoam_model.openfoam_wrapper_creation import (
 
 
 def run_calc(global_settings, openfoam_settings,
-             liggghts_settings, progress_callback):
+             liggghts_settings, progress_callback, event_lock=None):
     """ Main routine which creates the wrappers and run the calculation
 
     Parameters
@@ -26,11 +26,18 @@ def run_calc(global_settings, openfoam_settings,
         A callback function which will return the progress of the computation
         which will be called with the progress state of the calculation as an
         integer in the range [0, 100]
+    event_lock: threading.Event
+        An event to trigger the continuation of the calculation so that
+        the callback routine has a chance for copying the datasets.
+        The callback routine must .set() the event, otherwise the
+        calculation will be suspended and eventually timeout.
+        The default None disables the check and let the evaluation continues
+        to the end.
 
     Returns
     -------
-    openfoam_wrapper, liggghts_wrapper:
-        A tuple containing the wrapper of Openfoam and the wrapper of Liggghts
+    datasets:
+        A tuple containing the datasets from openfoam and ligghts.
     """
     # Create Openfoam wrapper
     openfoam_wrapper = create_openfoam_wrapper(openfoam_settings)
@@ -89,11 +96,10 @@ def run_calc(global_settings, openfoam_settings,
 
     # Main loop
 
+    datasets = None
     # Repeating OF calculation several times with modified pressure drop last
     # result from previous iteration as input for new iteration
     for numrun in xrange(global_settings.num_iterations):
-        progress_callback(numrun/global_settings.num_iterations*100)
-
         # Perform Openfoam calculations
         openfoam_wrapper.run()
 
@@ -134,13 +140,25 @@ def run_calc(global_settings, openfoam_settings,
         # Perform Liggghts calculations
         liggghts_wrapper.run()
 
-    openfoam_dataset = openfoam_wrapper.get_dataset(
-        openfoam_wrapper.get_dataset_names()[0])
+        datasets = (
+            openfoam_wrapper.get_dataset('mesh'),
+            liggghts_wrapper.get_dataset('flow_particles'),
+            liggghts_wrapper.get_dataset('wall_particles'))
 
-    liggghts_flow_dataset = liggghts_wrapper.get_dataset('flow_particles')
-    liggghts_wall_dataset = liggghts_wrapper.get_dataset('wall_particles')
+        if numrun % global_settings.update_frequency == 0:
+            progress_callback(datasets,
+                              numrun,
+                              global_settings.num_iterations)
+            if event_lock is not None:
+                # We wait 10 seconds for the UI to give us the chance
+                # to continue. The operation should actually be fast
+                # (we just copy the datasets). If we timeout, it's likely
+                # that the UI is stuck, so we want to quit.
+                if not event_lock.wait(10.0):
+                    return None
+                event_lock.clear()
 
-    return openfoam_dataset, liggghts_flow_dataset, liggghts_wall_dataset
+    return datasets
 
 
 def compute_drag_force(force_type, radius, rel_velo, viscosity, density):

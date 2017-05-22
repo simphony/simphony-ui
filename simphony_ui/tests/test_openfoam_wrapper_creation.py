@@ -45,13 +45,6 @@ class TestOpenfoamWrapperCreation(unittest.TestCase):
             openfoam_file_io.Wrapper
         )
 
-    def test_mesh_name(self):
-        self.openfoam_model.mesh_name = 'coucou'
-        self.assertEqual(
-            create_openfoam_wrapper(self.openfoam_model).CM[CUBA.NAME],
-            'coucou'
-        )
-
     def test_timestep(self):
         self.openfoam_model.timestep = 1.02e-5
         self.assertEqual(
@@ -168,7 +161,6 @@ class TestOpenfoamMeshCreation(unittest.TestCase):
         with cleanup_garbage(self.temp_dir):
             self.openfoam_model = CustomOpenfoamModel()
             self.openfoam_model.output_path = self.temp_dir
-            self.openfoam_model.mesh_name = 'test_mesh'
             self.openfoam_model.input_file = os.path.join(os.path.join(
                 os.path.dirname(os.path.abspath(__file__)), 'fixtures'),
                 'openfoam_input.txt'

@@ -1,24 +1,29 @@
+from __future__ import division
+
+import threading
 from concurrent import futures
 import logging
 import traceback
-import numpy
 from pyface.gui import GUI
 from pyface.api import error
+from pyface.timer.api import Timer
 
 import mayavi.tools.mlab_scene_model
 from mayavi.modules.api import Surface, Glyph
-from traits.trait_types import Tuple, Either
+from simphony_mayavi.cuds.vtk_mesh import VTKMesh
+from simphony_mayavi.cuds.vtk_particles import VTKParticles
 from tvtk.tvtk_classes.sphere_source import SphereSource
 
 from simphony_mayavi.sources.api import CUDSSource
-from simphony.core.cuba import CUBA
+
 from tvtk.pyface.scene_editor import SceneEditor
 from mayavi.core.ui.mayavi_scene import MayaviScene
 
 from traits.api import (HasStrictTraits, Instance, Button,
-                        on_trait_change, Bool, Event, Str, Dict, Any)
+                        on_trait_change, Bool, Event, Str, Dict, List, Tuple,
+                        Either, Int)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
-                          ShellEditor)
+                          ShellEditor, HGroup, Item, ButtonEditor)
 
 from pyface.api import ProgressDialog
 
@@ -50,20 +55,38 @@ class Application(HasStrictTraits):
     #: The Openfoam settings for the calculation
     openfoam_settings = Instance(OpenfoamModel)
 
-    #: The datasets of the current frame. Order is important, and
-    # maps as follows: openfoam, liggghts flow, liggghts wall
-    datasets = Either(None, Tuple(Any, Any, Any))
+    # The mayavi sources, associated to the following datasets:
+    # first element is the openfoam mesh, second and third are
+    # the flow and walls particles, respectively.
+    # It is an invariant. The cuds gets changed as we select different
+    # frames.
+    sources = Tuple(Instance(CUDSSource),
+                    Instance(CUDSSource),
+                    Instance(CUDSSource))
 
-    # The mayavi sources, associated to the above datasets. Order is
-    # the same as above.
-    sources = Either(None,
-                     Tuple(Instance(CUDSSource),
-                           Instance(CUDSSource),
-                           Instance(CUDSSource)))
+    # All the frames resulting from the execution of our computation.
+    frames = List(Tuple(VTKMesh, VTKParticles, VTKParticles))
+
+    # The frame to visualize
+    current_frame_index = Int()
+
+    # The physical current frame, for practicality
+    _current_frame = Either(
+        None,
+        Tuple(VTKMesh, VTKParticles, VTKParticles)
+    )
 
     #: The button on which the user will click to run the
     # calculation
     run_button = Button("Run")
+
+    first_button = Button("First")
+    previous_button = Button("Previous")
+    play_stop_button = Button()
+    play_stop_label = Str("Play")
+    next_button = Button("Next")
+
+    play_timer = Instance(Timer)
 
     #: The pop up dialog which will show the status of the
     # calculation
@@ -89,14 +112,23 @@ class Application(HasStrictTraits):
     #: Executor for the threaded action.
     _executor = Instance(futures.ThreadPoolExecutor)
 
+    # Lock to synchronize the execution loop and the storage of the Datasets
+    # from application specific cuds to VTK Datasets. We need to do so because
+    # the computational engine can change the datasets, so we need to hold
+    # the computational engine until we are done "copying and storing" each
+    # frame
+    _event_lock = Instance(threading.Event, ())
+
     traits_view = View(
         HSplit(
             VSplit(
                 VGroup(
                     Tabbed(
-                        UItem('global_settings'),
-                        UItem('liggghts_settings'),
-                        UItem('openfoam_settings', label='OpenFOAM settings'),
+                        UItem('global_settings', style='custom'),
+                        UItem('liggghts_settings', style='custom'),
+                        UItem('openfoam_settings',
+                              label='OpenFOAM settings',
+                              style="custom"),
                     ),
                     UItem(
                         name='run_button',
@@ -106,14 +138,40 @@ class Application(HasStrictTraits):
                 ),
                 UItem('shell', editor=ShellEditor())
             ),
-            UItem(
-                name='mlab_model',
-                editor=SceneEditor(scene_class=MayaviScene)
-            )
+            VGroup(
+                UItem(
+                    name='mlab_model',
+                    editor=SceneEditor(scene_class=MayaviScene)
+                ),
+                HGroup(
+                    UItem(
+                        name="first_button",
+                        enabled_when=(
+                            "current_frame_index > 0 and play_timer is None"),
+                    ),
+                    UItem(
+                        name="previous_button",
+                        enabled_when=(
+                            "current_frame_index > 0 and play_timer is None"),
+                    ),
+                    UItem(
+                        name="play_stop_button",
+                        editor=ButtonEditor(label_value="play_stop_label")
+                    ),
+                    UItem(
+                        name="next_button",
+                        enabled_when=(
+                            "current_frame_index < len(frames) "
+                            "and play_timer is None"),
+                    ),
+                    Item(name="current_frame_index", style="readonly"),
+                    enabled_when=(
+                        'calculation_running == False and len(frames) > 0')
+                )
+            ),
         ),
         title='Simphony UI',
         resizable=True,
-        style='custom',
         width=1.0,
         height=1.0
     )
@@ -144,43 +202,26 @@ class Application(HasStrictTraits):
         """
         if self.calculation_running:
             raise RuntimeError('Calculation already running...')
+        self.frames = []
         self.calculation_running = True
         self.progress_dialog.open()
         future = self._executor.submit(self._run_calc_threaded)
         future.add_done_callback(self._calculation_done)
 
-    @on_trait_change('datasets')
-    def update_sources(self):
-        """ Function that converts the datasets into CUDSSources
-        """
-        self._clear_sources()
-
-        if self.datasets is None:
-            return
-
-        self.sources = tuple(map(dataset2cudssource, self.datasets))
-
-    @on_trait_change('sources')
-    def show_sources(self):
-        """Plots the available sources in mayavi"""
-        if self.sources is None:
-            return
-
+    def _add_sources_to_scene(self):
+        """Add the sources to the main scene."""
         mayavi_engine = self.mlab_model.engine
         mayavi_engine.add_source(self.sources[0])
 
         mayavi_engine.add_module(Surface())
+        self._add_liggghts_source_to_scene(self.sources[1])
+        self._add_liggghts_source_to_scene(self.sources[2])
 
-        self._add_liggghts_source_to_scene(self.datasets[1], self.sources[1])
-        self._add_liggghts_source_to_scene(self.datasets[2], self.sources[2])
-
-    def _add_liggghts_source_to_scene(self, dataset, source):
+    def _add_liggghts_source_to_scene(self, source):
         """ Function which add to liggghts source to the Mayavi scene
 
         Parameters
         ----------
-        dataset :
-            The dataset containing particles
         source :
             The mayavi source linked to the dataset
         """
@@ -197,36 +238,30 @@ class Application(HasStrictTraits):
         # Add sphere glyph module
         mayavi_engine.add_module(sphere_glyph_module)
 
-        sphere_glyph_module.glyph.glyph_source.glyph_source = \
-            SphereSource()
+        sphere_glyph_module.glyph.glyph_source.glyph_source = SphereSource()
         sphere_glyph_module.glyph.scale_mode = 'scale_by_scalar'
         sphere_glyph_module.glyph.glyph.range = [0.0, 1.0]
-        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = \
-            1.0
+        sphere_glyph_module.glyph.glyph_source.glyph_source.radius = 1.0
 
-        # Create Arrow glyph
-        # Get maximum particle velocity
-        velocities = numpy.array(
-            [numpy.linalg.norm(particle.data[CUBA.VELOCITY])
-             for particle
-             in dataset.iter_particles()]
-        )
-        max_velocity = numpy.max(velocities)
+        # Velocities are in meter/second, this scale factor makes
+        # 1 graphical unit = 1 millimeter/sec
+        arrow_scale_factor = 1.0
 
-        # If the max velocity is not 0, we create the arrow glyph
-        if max_velocity != 0:
-            # Velocities are in meter/second, this scale factor makes
-            # 1 graphical unit = 1 micrometer/sec
-            arrow_scale_factor = 1.0e6
+        arrow_glyph_module = Glyph()
 
-            arrow_glyph_module = Glyph()
+        mayavi_engine.add_module(arrow_glyph_module)
 
-            mayavi_engine.add_module(arrow_glyph_module)
+        arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
+        arrow_glyph_module.glyph.color_mode = 'color_by_vector'
+        arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
+        arrow_glyph_module.glyph.glyph.scale_factor = arrow_scale_factor
 
-            arrow_glyph_module.glyph.scale_mode = 'scale_by_vector'
-            arrow_glyph_module.glyph.color_mode = 'color_by_vector'
-            arrow_glyph_module.glyph.glyph.range = [0.0, 1.0]
-            arrow_glyph_module.glyph.glyph.scale_factor = arrow_scale_factor
+    def _remove_sources_from_scene(self):
+        for source in self.sources:
+            try:
+                self.mlab_model.mayavi_scene.remove_child(source)
+            except ValueError:
+                pass
 
     def _run_calc_threaded(self):
         """ Function which will run the calculation. This function
@@ -237,7 +272,8 @@ class Application(HasStrictTraits):
                 self.global_settings,
                 self.openfoam_settings,
                 self.liggghts_settings,
-                self.update_progress_bar
+                self.progress_callback,
+                self._event_lock
             )
         except Exception:
             self.calculation_error_event = traceback.format_exc()
@@ -253,29 +289,50 @@ class Application(HasStrictTraits):
         future
             Object containing the result of the calculation
         """
-        GUI.invoke_later(self._update_result, future.result())
+        GUI.invoke_later(self._computation_done, future.result())
 
-    def _update_result(self, result):
-        """ Function called in the main thread to get the result of the
-        calculation from the secondary thread
-
-        Parameters
-        ----------
-        result
-            The result of the calculation, it is a tuple containing the
-            Openfoam dataset and the Liggghts datasets,
-            in the following configuration:
-            (openfoam, liggghts flow, liggghts wall)
-        """
-        # Close progress dialog
+    def _computation_done(self, datasets):
         self.progress_dialog.update(100)
-
-        if result is not None:
-            self.datasets = result
-
+        if datasets is not None:
+            self._append_frame(datasets)
         self.calculation_running = False
 
-    def update_progress_bar(self, progress):
+    def _append_frame(self, datasets):
+        self.frames.append(
+            (
+                VTKMesh.from_mesh(datasets[0]),
+                VTKParticles.from_particles(datasets[1]),
+                VTKParticles.from_particles(datasets[2])
+            )
+        )
+
+    @on_trait_change("current_frame_index,frames[]")
+    def _sync_current_frame(self):
+        """Synchronizes the current frame with the index and the available
+        frames."""
+        try:
+            self._current_frame = self.frames[self.current_frame_index]
+        except IndexError:
+            self._current_frame = None
+
+    @on_trait_change("_current_frame")
+    def _update_sources_with_current_frame(self, object, name, old, new):
+        """Called when the current frame is changed, updates the sources
+        with the new data. Parameters are from traits interface."""
+        scene = self.mlab_model.mayavi_scene
+        scene.scene.disable_render = True
+
+        if new is None:
+            self._remove_sources_from_scene()
+        else:
+            self._remove_sources_from_scene()
+            for i in xrange(len(self._current_frame)):
+                self.sources[i].cuds = self._current_frame[i]
+            self._add_sources_to_scene()
+
+        scene.scene.disable_render = False
+
+    def progress_callback(self, datasets, current_iteration, total_iterations):
         """ Function called in the secondary thread. It will transfer the
         progress status of the calculation to the main thread
 
@@ -284,29 +341,65 @@ class Application(HasStrictTraits):
         progress
             The progress of the calculation (Integer in the range [0, 100])
         """
+        progress = current_iteration/total_iterations*100
+
+        GUI.invoke_later(self._append_frame_and_continue, datasets)
         GUI.invoke_later(self.progress_dialog.update, progress)
+
+    def _append_frame_and_continue(self, datasets):
+        self._append_frame(datasets)
+        self._event_lock.set()
+        self.current_frame_index = len(self.frames) - 1
 
     def reset(self):
         """ Function which reset the Mayavi scene.
         """
         # Clear scene
-        self._clear_sources()
+        self._remove_sources_from_scene()
 
-        # Clear datasets
-        self.datasets = None
+    @on_trait_change('first_button')
+    def _to_first_frame(self):
+        """Goes to the first frame"""
+        self.current_frame_index = 0
 
-    def _clear_sources(self):
-        """ Function which reset the sources
-        """
-        if self.sources is None:
-            return
+    @on_trait_change('previous_button')
+    def _to_prev_frame(self):
+        """Goes to the previous frame"""
+        frame = self.current_frame_index - 1
+        if frame < 0:
+            frame = 0
+        self.current_frame_index = frame
 
-        for source in self.sources:
-            try:
-                self.mlab_model.mayavi_scene.remove_child(source)
-            except ValueError:
-                pass
-        self.sources = None
+    @on_trait_change('next_button')
+    def _to_next_frame(self):
+        """Goes to the next frame"""
+        frame = self.current_frame_index + 1
+        if frame >= len(self.frames):
+            frame = len(self.frames) - 1
+        self.current_frame_index = frame
+
+    @on_trait_change('play_stop_button')
+    def _start_stop_video(self):
+        """Starts the video playing"""
+        if self.play_timer is None:
+            self.play_timer = Timer(500, self._next_frame_looped)
+        else:
+            self.play_timer.Stop()
+            self.play_timer = None
+
+    @on_trait_change('play_timer')
+    def _change_play_button_label(self):
+        """Changes the label from play to stop and vice-versa"""
+        self.play_stop_label = "Stop" if self.play_timer else "Start"
+
+    def _next_frame_looped(self):
+        """Goes to the next frame, but loop back to the first when over."""
+        if len(self.frames) == 0:
+            self.current_frame_index = 0
+
+        self.current_frame_index = (
+            self.current_frame_index + 1
+            ) % len(self.frames)
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)
@@ -317,6 +410,9 @@ class Application(HasStrictTraits):
             max=100,
             title='Calculation running...'
         )
+
+    def _sources_default(self):
+        return CUDSSource(), CUDSSource(), CUDSSource()
 
     def _global_settings_default(self):
         return GlobalParametersModel()
