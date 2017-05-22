@@ -209,6 +209,7 @@ class Application(HasStrictTraits):
         future.add_done_callback(self._calculation_done)
 
     def _add_sources_to_scene(self):
+        """Add the sources to the main scene."""
         mayavi_engine = self.mlab_model.engine
         mayavi_engine.add_source(self.sources[0])
 
@@ -307,6 +308,8 @@ class Application(HasStrictTraits):
 
     @on_trait_change("current_frame_index,frames[]")
     def _sync_current_frame(self):
+        """Synchronizes the current frame with the index and the available 
+        frames."""
         try:
             self._current_frame = self.frames[self.current_frame_index]
         except IndexError:
@@ -314,6 +317,8 @@ class Application(HasStrictTraits):
 
     @on_trait_change("_current_frame")
     def _update_sources_with_current_frame(self, object, name, old, new):
+        """Called when the current frame is changed, updates the sources
+        with the new data. Parameters are from traits interface."""
         scene = self.mlab_model.mayavi_scene
         scene.scene.disable_render = True
 
@@ -354,10 +359,12 @@ class Application(HasStrictTraits):
 
     @on_trait_change('first_button')
     def _to_first_frame(self):
+        """Goes to the first frame"""
         self.current_frame_index = 0
 
     @on_trait_change('previous_button')
     def _to_prev_frame(self):
+        """Goes to the previous frame"""
         frame = self.current_frame_index - 1
         if frame < 0:
             frame = 0
@@ -365,6 +372,7 @@ class Application(HasStrictTraits):
 
     @on_trait_change('next_button')
     def _to_next_frame(self):
+        """Goes to the next frame"""
         frame = self.current_frame_index + 1
         if frame >= len(self.frames):
             frame = len(self.frames) - 1
@@ -372,6 +380,7 @@ class Application(HasStrictTraits):
 
     @on_trait_change('play_stop_button')
     def _start_video(self):
+        """Starts the video playing"""
         if self.play_timer is None:
             self.play_timer = Timer(500, self._next_frame_looped)
         else:
@@ -380,9 +389,11 @@ class Application(HasStrictTraits):
 
     @on_trait_change('play_timer')
     def _change_play_button_label(self):
+        """Changes the label from play to stop and vice-versa"""
         self.play_stop_label = "Stop" if self.play_timer else "Start"
 
     def _next_frame_looped(self):
+        """Goes to the next frame, but loop back to the first when over."""
         if len(self.frames) == 0:
             self.current_frame_index = 0
 
