@@ -3,6 +3,8 @@ import mock
 import os
 import tempfile
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
+from simphony_mayavi.cuds.vtk_mesh import VTKMesh
+from simphony_mayavi.cuds.vtk_particles import VTKParticles
 
 from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.global_parameters_model import GlobalParametersModel
@@ -162,3 +164,55 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         self.assertFalse(self.application.valid)
         self.application.liggghts_settings.valid = True
         self.assertTrue(self.application.valid)
+
+    def test_movie_controls(self):
+        app = self.application
+        app.frames = [
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+        ]
+
+        self.assertEqual(app.current_frame_index, 0)
+        self.assertEqual(app._current_frame, app.frames[0])
+        app._to_next_frame()
+        self.assertEqual(app.current_frame_index, 1)
+        self.assertEqual(app._current_frame, app.frames[1])
+        app._to_next_frame()
+        self.assertEqual(app.current_frame_index, 2)
+        self.assertEqual(app._current_frame, app.frames[2])
+        app._to_next_frame()
+        self.assertEqual(app.current_frame_index, 2)
+        self.assertEqual(app._current_frame, app.frames[2])
+        app._to_prev_frame()
+        self.assertEqual(app.current_frame_index, 1)
+        self.assertEqual(app._current_frame, app.frames[1])
+        app._to_first_frame()
+        self.assertEqual(app.current_frame_index, 0)
+        self.assertEqual(app._current_frame, app.frames[0])
+
+        self.assertIsNone(app.play_timer)
+        app._start_stop_video()
+        self.assertIsNotNone(app.play_timer)
+
+        with self.event_loop_until_condition(
+                lambda: app.current_frame_index == 2,
+                timeout=30
+        ):
+            pass
+
+        # check if it rolls over
+        with self.event_loop_until_condition(
+                lambda: app.current_frame_index == 0,
+                timeout=30
+        ):
+            pass
+
+        app._start_stop_video()
+        self.assertIsNone(app.play_timer)

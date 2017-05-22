@@ -379,7 +379,7 @@ class Application(HasStrictTraits):
         self.current_frame_index = frame
 
     @on_trait_change('play_stop_button')
-    def _start_video(self):
+    def _start_stop_video(self):
         """Starts the video playing"""
         if self.play_timer is None:
             self.play_timer = Timer(500, self._next_frame_looped)
