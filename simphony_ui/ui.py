@@ -207,7 +207,8 @@ class Application(HasStrictTraits):
             If the calculation is already running
         """
         if not self.interactive:
-            raise RuntimeError('Calculation already running...')
+            raise RuntimeError('Unable to start calculation. Another '
+                               'operation is already in progress')
         self.frames = []
         self.interactive = False
         self.progress_dialog.title = 'Calculation running...'
@@ -297,7 +298,7 @@ class Application(HasStrictTraits):
             Object containing the result of the calculation
         """
         GUI.invoke_later(self._computation_done, future.result())
-o
+
     def _computation_done(self, datasets):
         self.progress_dialog.update(100)
         if datasets is not None:
@@ -393,28 +394,35 @@ o
         else:
             self.play_timer.Stop()
             self.play_timer = None
+
     @on_trait_change("save_button")
     def _save_images(self):
+        """Saves the current frames in individual images."""
         dialog = DirectoryDialog()
         if dialog.open() != OK:
             return
 
-        self.interactive = False
         self.progress_dialog.title = 'Saving images...'
         self.progress_dialog.open()
 
         dirpath = dialog.path
-        for frame_index in xrange(len(self.frames)):
-            self.current_frame_index = frame_index
-            mayavi.mlab.savefig(os.path.join(
-                dirpath, "frame-{}.png".format(frame_index)
-            ))
-            progress = 100*frame_index/len(self.frames)
-            print("progress ", progress)
-            self.progress_dialog.update(progress)
 
-        self.progress_dialog.update(100)
-        self.interactive = True
+        self.interactive = False
+        try:
+            for frame_index in xrange(len(self.frames)):
+                self.current_frame_index = frame_index
+                mayavi.mlab.savefig(os.path.join(
+                    dirpath, "frame-{}.png".format(frame_index)
+                ))
+                progress = 100*frame_index/len(self.frames)
+                self.progress_dialog.update(progress)
+
+            self.progress_dialog.update(100)
+        except Exception:
+            self.calculation_error_event = traceback.format_exc()
+            log.exception('Error while saving')
+        finally:
+            self.interactive = True
 
     @on_trait_change('play_timer')
     def _change_play_button_label(self):
