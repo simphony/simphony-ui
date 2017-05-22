@@ -1,10 +1,8 @@
 import unittest
-import threading
 import mock
 import os
 import tempfile
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
-from tvtk.tvtk_classes.sphere_source import SphereSource
 
 from simphony_ui.couple_openfoam_liggghts import run_calc
 from simphony_ui.global_parameters_model import GlobalParametersModel
@@ -98,7 +96,6 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 'color_by_vector')
 
     def test_ui_timeout(self):
-        app = self.application
         openfoam_settings = OpenfoamModel()
         openfoam_settings.input_file = os.path.join(
             os.path.join(
