@@ -233,7 +233,12 @@ class Application(HasStrictTraits):
         # Add Liggghts sources
         mayavi_engine.add_source(source)
 
-        source.point_vectors_name = 'VELOCITY'
+        try:
+            source.point_vectors_name = 'VELOCITY'
+        except TraitError:
+            # The data is not available in the dataset for some reason.
+            # Add the modules anyway, but don't select it.
+            pass
 
         # Add sphere glyph module
         mayavi_engine.add_module(sphere_glyph_module)
