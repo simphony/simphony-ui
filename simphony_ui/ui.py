@@ -308,7 +308,7 @@ class Application(HasStrictTraits):
 
     @on_trait_change("current_frame_index,frames[]")
     def _sync_current_frame(self):
-        """Synchronizes the current frame with the index and the available 
+        """Synchronizes the current frame with the index and the available
         frames."""
         try:
             self._current_frame = self.frames[self.current_frame_index]
