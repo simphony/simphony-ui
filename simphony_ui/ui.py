@@ -325,7 +325,7 @@ o
         scene.scene.disable_render = True
 
         if new is None:
-            self._clear_sources()
+            self._remove_sources_from_scene()
         else:
             self._remove_sources_from_scene()
             for i in xrange(len(self._current_frame)):
@@ -357,7 +357,7 @@ o
         """ Function which reset the Mayavi scene.
         """
         # Clear scene
-        self._clear_sources()
+        self._remove_sources_from_scene()
 
     @on_trait_change('first_button')
     def _to_first_frame(self):
@@ -418,13 +418,6 @@ o
         self.current_frame_index = (
             self.current_frame_index + 1
             ) % len(self.frames)
-
-    def _clear_sources(self):
-        """ Function which reset the sources
-        """
-        self._remove_sources_from_scene()
-        for source in self.sources:
-            source.cuds = None
 
     def __executor_default(self):
         return futures.ThreadPoolExecutor(max_workers=1)

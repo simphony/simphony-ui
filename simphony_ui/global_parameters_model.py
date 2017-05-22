@@ -1,5 +1,4 @@
-import os
-from traits.api import HasStrictTraits, Int, Enum, Directory
+from traits.api import HasStrictTraits, Int, Enum
 from traitsui.api import View, Item, VGroup
 
 

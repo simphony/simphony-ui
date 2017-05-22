@@ -1,2 +1,2 @@
 [flake8]
-exclude=doc/*
+exclude=doc/*,build/*
