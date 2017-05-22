@@ -138,12 +138,17 @@ def run_calc(global_settings, openfoam_settings,
             liggghts_wrapper.get_dataset('flow_particles'),
             liggghts_wrapper.get_dataset('wall_particles'))
 
-        if (numrun % global_settings.update_frequency == 0):
+        if numrun % global_settings.update_frequency == 0:
             progress_callback(datasets,
                               numrun,
                               global_settings.num_iterations)
             if event_lock is not None:
-                event_lock.wait()
+                # We wait 10 seconds for the UI to give us the chance
+                # to continue. The operation should actually be fast
+                # (we just copy the datasets). If we timeout, it's likely
+                # that the UI is stuck, so we want to quit.
+                if not event_lock.wait(10.0):
+                    return None
                 event_lock.clear()
 
     return datasets

@@ -5,6 +5,7 @@ Tests
 import os
 import tempfile
 import unittest
+from mock import Mock
 from simphony.core.cuds_item import CUDSItem
 from simphony.core.cuba import CUBA
 from simphony_ui.global_parameters_model import GlobalParametersModel
@@ -23,6 +24,9 @@ class TestCalculation(unittest.TestCase):
         cls.global_settings = GlobalParametersModel()
         cls.openfoam_settings = OpenfoamModel()
         cls.liggghts_settings = LiggghtsModel()
+        cls.event_lock = Mock()
+        cls.event_lock.wait = Mock()
+        cls.event_lock.clear = Mock()
 
         cls.openfoam_settings.input_file = os.path.join(
             os.path.join(
@@ -50,16 +54,21 @@ class TestCalculation(unittest.TestCase):
                 cls.global_settings,
                 cls.openfoam_settings,
                 cls.liggghts_settings,
-                callback
+                callback,
+                event_lock=cls.event_lock
             )
             super(TestCalculation, cls).setUpClass()
 
     def test_output(self):
         self.assertTrue(os.path.exists(
             os.path.join(
-                self.openfoam_settings.output_path,
-                self.openfoam_settings.mesh_name)
+                self.openfoam_settings.output_path, 'mesh'
+            )
         ))
+
+    def test_event_lock(self):
+        self.assertTrue(self.event_lock.wait.called)
+        self.assertTrue(self.event_lock.clear.called)
 
     def test_nb_entities(self):
         self.assertEqual(self.datasets[1].count_of(CUDSItem.PARTICLE), 200)

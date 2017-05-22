@@ -1,10 +1,17 @@
 import unittest
+import threading
 import mock
-import time
+import os
+import tempfile
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from tvtk.tvtk_classes.sphere_source import SphereSource
+
+from simphony_ui.couple_openfoam_liggghts import run_calc
+from simphony_ui.global_parameters_model import GlobalParametersModel
+from simphony_ui.liggghts_model.liggghts_model import LiggghtsModel
+from simphony_ui.openfoam_model.openfoam_model import OpenfoamModel
+from simphony_ui.tests.test_utils import cleanup_garbage
 from simphony_ui.ui import Application, dataset2cudssource
-from simphony_mayavi.sources.api import CUDSSource
 
 
 class TestUI(unittest.TestCase, GuiTestAssistant):
@@ -14,91 +21,115 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         self.application = Application()
 
     def test_multi_thread(self):
-        run_calc_target = 'simphony_ui.ui.run_calc'
+        app = self.application
+        app.openfoam_settings.input_file = os.path.join(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'fixtures'
+            ),
+            'openfoam_input.txt'
+        )
+        app.liggghts_settings.input_file = os.path.join(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'fixtures'
+            ),
+            'liggghts_input.dat'
+        )
+        app.global_settings.num_iterations = 2
+        temp_dir = tempfile.mkdtemp()
+        with cleanup_garbage(temp_dir):
+            app.openfoam_settings.output_path = temp_dir
 
-        def mock_run_calc(global_settings, openfoam_settings,
-                          liggghts_settings, progress_callback):
-            time.sleep(5)
-            progress_callback(50)
-            time.sleep(5)
-            progress_callback(100)
-            return mock.MagicMock(), mock.MagicMock(), mock.MagicMock()
+            self.assertEqual(len(app.frames), 0)
 
-        dataset2cudssource_target = 'simphony_ui.ui.dataset2cudssource'
-
-        def mock_dataset2cudssource(*args, **kwargs):
-            return mock.MagicMock(spec=CUDSSource())
-
-        numpy_max_target = 'simphony_ui.ui.numpy.max'
-
-        def mock_numpy_max(*args, **kwargs):
-            return 36.0
-
-        def mock_numpy_max_null(*args, **kwargs):
-            return 0.0
-
-        add_module_target = \
-            'simphony_ui.ui.mayavi.tools.mlab_scene_model.Engine.add_module'
-
-        def mock_add_module(module):
-            return module
-
-        with mock.patch(run_calc_target) as mock_run, \
-                mock.patch(dataset2cudssource_target) as mock_cuds, \
-                mock.patch(numpy_max_target) as mock_max, \
-                mock.patch(add_module_target) as mock_add:
-
-            mock_run.side_effect = mock_run_calc
-            mock_cuds.side_effect = mock_dataset2cudssource
-            mock_max.side_effect = mock_numpy_max
-            mock_add.side_effect = mock_add_module
-
-            self.assertIsNone(self.application.datasets)
-
-            # Fix coverage
-            self.application.reset()
+            app.run_calc()
 
             with self.event_loop_until_condition(
-                    lambda: (self.application.datasets
-                             is not None),
-                    timeout=20
+                    lambda: (len(app.frames) != 0),
+                    timeout=30
             ):
-                self.application.run_calc()
+                pass
 
-            self.assertEqual(len(self.application.datasets), 3)
+            with self.event_loop_until_condition(
+                    lambda: not app.calculation_running,
+                    timeout=30
+            ):
+                pass
+
+            self.assertNotEqual(len(app.frames), 0)
+            self.assertEqual(len(app.frames[0]), 3)
 
             # Last added module was the arrow_module
-            arrow_module = mock_add.call_args[0][0]
-            self.assertEqual(arrow_module.glyph.glyph.scale_factor, 1.0e6)
-            self.assertListEqual(
-                arrow_module.glyph.glyph.range.tolist(),
-                [0.0, 1.0]
-            )
-            self.assertEqual(arrow_module.glyph.scale_mode, 'scale_by_vector')
-            self.assertEqual(arrow_module.glyph.color_mode, 'color_by_vector')
+            self.assertEqual(
+                app.sources[1].children[0].children[0].glyph.scale_mode,
+                'scale_by_scalar')
+            self.assertEqual(
+                app.sources[1].children[0].children[1].glyph.scale_mode,
+                'scale_by_vector')
+            self.assertEqual(
+                app.sources[1].children[0].children[1].glyph.color_mode,
+                'color_by_vector')
 
-            mock_max.side_effect = mock_numpy_max_null
+            app.reset()
 
-            self.application.reset()
+            app.run_calc()
 
             with self.event_loop_until_condition(
-                    lambda: (self.application.datasets
-                             is not None),
-                    timeout=20
+                    lambda: (len(app.frames) != 0),
+                    timeout=30
             ):
-                self.application.run_calc()
+                pass
 
-            # Last added module was the sphere module
-            sphere_module = mock_add.call_args[0][0]
-            self.assertIsInstance(
-                sphere_module.glyph.glyph_source.glyph_source, SphereSource)
+            with self.event_loop_until_condition(
+                    lambda: not app.calculation_running,
+                    timeout=30
+            ):
+                pass
+
             self.assertEqual(
-                sphere_module.glyph.glyph_source.glyph_source.radius, 1.0)
-            self.assertListEqual(
-                sphere_module.glyph.glyph.range.tolist(),
-                [0.0, 1.0]
-            )
-            self.assertEqual(sphere_module.glyph.scale_mode, 'scale_by_scalar')
+                app.sources[1].children[0].children[0].glyph.scale_mode,
+                'scale_by_scalar')
+            self.assertEqual(
+                app.sources[1].children[0].children[1].glyph.scale_mode,
+                'scale_by_vector')
+            self.assertEqual(
+                app.sources[1].children[0].children[1].glyph.color_mode,
+                'color_by_vector')
+
+    def test_ui_timeout(self):
+        app = self.application
+        openfoam_settings = OpenfoamModel()
+        openfoam_settings.input_file = os.path.join(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'fixtures'
+            ),
+            'openfoam_input.txt')
+        liggghts_settings = LiggghtsModel()
+        liggghts_settings.input_file = os.path.join(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'fixtures'
+            ),
+            'liggghts_input.dat')
+
+        global_settings = GlobalParametersModel()
+
+        def progress_callback(*args, **kwargs):
+            pass
+
+        event_lock = mock.Mock()
+        event_lock.wait.return_value = False
+        temp_dir = tempfile.mkdtemp()
+        with cleanup_garbage(temp_dir):
+            self.assertIsNone(
+                run_calc(
+                    global_settings,
+                    openfoam_settings,
+                    liggghts_settings,
+                    progress_callback,
+                    event_lock))
 
     def test_double_run(self):
         # Simulate the calculation running
