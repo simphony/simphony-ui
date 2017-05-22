@@ -27,13 +27,13 @@ def run_calc(global_settings, openfoam_settings,
         which will be called with the progress state of the calculation as an
         integer in the range [0, 100]
     event_lock: threading.Event
-        An event to trigger the continuation of the calculation so that 
+        An event to trigger the continuation of the calculation so that
         the callback routine has a chance for copying the datasets.
         The callback routine must .set() the event, otherwise the
         calculation will be suspended and eventually timeout.
         The default None disables the check and let the evaluation continues
         to the end.
-        
+
     Returns
     -------
     datasets:
