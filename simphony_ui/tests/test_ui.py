@@ -3,7 +3,7 @@ import mock
 import os
 import tempfile
 
-from pyface.constant import OK
+from pyface.constant import OK, CANCEL
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from simphony_mayavi.cuds.vtk_mesh import VTKMesh
 from simphony_mayavi.cuds.vtk_particles import VTKParticles
@@ -249,9 +249,18 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 mock.patch("simphony_ui.ui.DirectoryDialog") as dialog_cls, \
                 mock.patch("mayavi.mlab") as mlab:
 
-            mlab.savefig = mock.Mock()
             dialog = mock.Mock()
             dialog_cls.return_value = dialog
+            dialog.open.return_value = CANCEL
+
+            app._save_images()
+            self.assertFalse(mlab.savefig.called)
+            mlab.savefig = mock.Mock(side_effect=Exception("Boom!"))
+
+            app._save_images()
+            self.assertTrue(app.interactive)
+
+            mlab.savefig = mock.Mock()
             dialog.open.return_value = OK
             dialog.path = temp_dir
 
