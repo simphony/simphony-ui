@@ -16,7 +16,6 @@ import mayavi.tools.mlab_scene_model
 from mayavi.modules.api import Surface, Glyph
 from simphony_mayavi.cuds.vtk_mesh import VTKMesh
 from simphony_mayavi.cuds.vtk_particles import VTKParticles
-from traits.trait_errors import TraitError
 from tvtk.tvtk_classes.sphere_source import SphereSource
 
 from simphony_mayavi.sources.api import CUDSSource
