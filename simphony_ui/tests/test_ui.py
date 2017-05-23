@@ -2,6 +2,8 @@ import unittest
 import mock
 import os
 import tempfile
+
+from pyface.constant import OK
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from simphony_mayavi.cuds.vtk_mesh import VTKMesh
 from simphony_mayavi.cuds.vtk_particles import VTKParticles
@@ -227,3 +229,36 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
         app._start_stop_video()
         self.assertIsNone(app.play_timer)
+
+    def test_save_images(self):
+        app = self.application
+        app.frames = [
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+        ]
+
+        temp_dir = tempfile.mkdtemp()
+        with cleanup_garbage(temp_dir), \
+                mock.patch("simphony_ui.ui.DirectoryDialog") as dialog_cls, \
+                mock.patch("mayavi.mlab") as mlab:
+
+            mlab.savefig = mock.Mock()
+            dialog = mock.Mock()
+            dialog_cls.return_value = dialog
+            dialog.open.return_value = OK
+            dialog.path = temp_dir
+
+            app._save_images()
+
+            self.assertEqual(mlab.savefig.call_count, 3)
+            for i in xrange(3):
+                self.assertEqual(
+                    mlab.savefig.call_args_list[i][0][0],
+                    os.path.join(temp_dir, "frame-{}.png".format(i)))
