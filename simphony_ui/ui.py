@@ -21,7 +21,7 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 
 from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool, Event, Str, Dict, List, Tuple,
-                        Either, Int)
+                        Either, Int, TraitError)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
                           ShellEditor, HGroup, Item, ButtonEditor)
 
@@ -233,7 +233,12 @@ class Application(HasStrictTraits):
         # Add Liggghts sources
         mayavi_engine.add_source(source)
 
-        source.point_vectors_name = 'VELOCITY'
+        try:
+            source.point_vectors_name = 'VELOCITY'
+        except TraitError:
+            # The data is not available in the dataset for some reason.
+            # Add the modules anyway, but don't select it.
+            pass
 
         # Add sphere glyph module
         mayavi_engine.add_module(sphere_glyph_module)
