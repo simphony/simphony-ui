@@ -2,6 +2,8 @@ import unittest
 import mock
 import os
 import tempfile
+
+from pyface.constant import OK, CANCEL
 from pyface.ui.qt4.util.gui_test_assistant import GuiTestAssistant
 from simphony_mayavi.cuds.vtk_mesh import VTKMesh
 from simphony_mayavi.cuds.vtk_particles import VTKParticles
@@ -52,7 +54,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 pass
 
             with self.event_loop_until_condition(
-                    lambda: not app.calculation_running,
+                    lambda: app.interactive,
                     timeout=30
             ):
                 pass
@@ -82,7 +84,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 pass
 
             with self.event_loop_until_condition(
-                    lambda: not app.calculation_running,
+                    lambda: app.interactive,
                     timeout=30
             ):
                 pass
@@ -132,7 +134,7 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
     def test_double_run(self):
         # Simulate the calculation running
-        self.application.calculation_running = True
+        self.application.interactive = False
         with self.assertRaises(RuntimeError):
             self.application.run_calc()
 
@@ -227,3 +229,76 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
 
         app._start_stop_video()
         self.assertIsNone(app.play_timer)
+
+    def test_save_images(self):
+        app = self.application
+        app.frames = [
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+        ]
+
+        temp_dir = tempfile.mkdtemp()
+        with cleanup_garbage(temp_dir), \
+                mock.patch("simphony_ui.ui.DirectoryDialog") as dialog_cls, \
+                mock.patch("simphony_ui.ui.mlab") as mlab:
+            dialog = mock.Mock()
+            dialog_cls.return_value = dialog
+            dialog.open.return_value = CANCEL
+            dialog.path = temp_dir
+            mlab.savefig = mock.Mock()
+
+            app._save_images()
+            self.assertFalse(mlab.savefig.called)
+
+            mlab.savefig.reset_mock()
+            dialog.open.return_value = OK
+
+            app._save_images()
+
+            self.assertEqual(mlab.savefig.call_count, 3)
+            for i in xrange(3):
+                self.assertEqual(
+                    mlab.savefig.call_args_list[i][0][0],
+                    os.path.join(temp_dir, "frame-{}.png".format(i)))
+
+    def test_save_images_exception(self):
+        app = self.application
+        app.frames = [
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+        ]
+
+        temp_dir = tempfile.mkdtemp()
+        with cleanup_garbage(temp_dir), \
+                mock.patch("simphony_ui.ui.DirectoryDialog") as dialog_cls, \
+                mock.patch('simphony_ui.ui.error') as mock_message, \
+                mock.patch("simphony_ui.ui.mlab") as mlab:
+
+            def mock_msg(*args, **kwargs):
+                return
+            mock_message.side_effect = mock_msg
+
+            dialog = mock.Mock()
+            dialog_cls.return_value = dialog
+            dialog.open.return_value = OK
+            dialog.path = temp_dir
+            savefig = mock.Mock(side_effect=Exception())
+            mlab.savefig = savefig
+
+            app._save_images()
+            self.assertTrue(app.interactive)
+            self.assertTrue(mock_message.called)
