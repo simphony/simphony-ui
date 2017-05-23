@@ -26,7 +26,7 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 
 from traits.api import (HasStrictTraits, Instance, Button,
                         on_trait_change, Bool, Event, Str, Dict, List, Tuple,
-                        Either, Int)
+                        Either, Int, TraitError)
 from traitsui.api import (View, UItem, Tabbed, VGroup, HSplit, VSplit,
                           ShellEditor, HGroup, Item, ButtonEditor)
 
