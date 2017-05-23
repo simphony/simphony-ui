@@ -247,22 +247,18 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
         temp_dir = tempfile.mkdtemp()
         with cleanup_garbage(temp_dir), \
                 mock.patch("simphony_ui.ui.DirectoryDialog") as dialog_cls, \
-                mock.patch("mayavi.mlab") as mlab:
-
+                mock.patch("simphony_ui.ui.mlab") as mlab:
             dialog = mock.Mock()
             dialog_cls.return_value = dialog
             dialog.open.return_value = CANCEL
+            dialog.path = temp_dir
+            mlab.savefig = mock.Mock()
 
             app._save_images()
             self.assertFalse(mlab.savefig.called)
-            mlab.savefig = mock.Mock(side_effect=Exception("Boom!"))
 
-            app._save_images()
-            self.assertTrue(app.interactive)
-
-            mlab.savefig = mock.Mock()
+            mlab.savefig.reset_mock()
             dialog.open.return_value = OK
-            dialog.path = temp_dir
 
             app._save_images()
 
@@ -271,3 +267,38 @@ class TestUI(unittest.TestCase, GuiTestAssistant):
                 self.assertEqual(
                     mlab.savefig.call_args_list[i][0][0],
                     os.path.join(temp_dir, "frame-{}.png".format(i)))
+
+    def test_save_images_exception(self):
+        app = self.application
+        app.frames = [
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+            (VTKMesh('mesh'),
+             VTKParticles("flow_particles"),
+             VTKParticles("wall_particles")),
+        ]
+
+        temp_dir = tempfile.mkdtemp()
+        with cleanup_garbage(temp_dir), \
+                mock.patch("simphony_ui.ui.DirectoryDialog") as dialog_cls, \
+                mock.patch('simphony_ui.ui.error') as mock_message, \
+                mock.patch("simphony_ui.ui.mlab") as mlab:
+
+            def mock_msg(*args, **kwargs):
+                return
+            mock_message.side_effect = mock_msg
+
+            dialog = mock.Mock()
+            dialog_cls.return_value = dialog
+            dialog.open.return_value = OK
+            dialog.path = temp_dir
+            savefig = mock.Mock(side_effect=Exception())
+            mlab.savefig = savefig
+
+            app._save_images()
+            self.assertTrue(app.interactive)
+            self.assertTrue(mock_message.called)

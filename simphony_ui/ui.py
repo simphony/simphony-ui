@@ -13,6 +13,7 @@ from pyface.api import error
 from pyface.timer.api import Timer
 
 import mayavi.tools.mlab_scene_model
+from mayavi import mlab
 from mayavi.modules.api import Surface, Glyph
 from simphony_mayavi.cuds.vtk_mesh import VTKMesh
 from simphony_mayavi.cuds.vtk_particles import VTKParticles
@@ -429,7 +430,7 @@ class Application(HasStrictTraits):
         try:
             for frame_index in xrange(len(self.frames)):
                 self.current_frame_index = frame_index
-                mayavi.mlab.savefig(os.path.join(
+                mlab.savefig(os.path.join(
                     dirpath, "frame-{}.png".format(frame_index)
                 ))
                 progress = 100*frame_index/len(self.frames)
