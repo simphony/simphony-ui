@@ -85,6 +85,7 @@ class Application(HasStrictTraits):
     play_stop_button = Button()
     play_stop_label = Str("Play")
     next_button = Button("Next")
+    last_button = Button("Last")
 
     play_timer = Instance(Timer)
 
@@ -160,6 +161,12 @@ class Application(HasStrictTraits):
                     ),
                     UItem(
                         name="next_button",
+                        enabled_when=(
+                            "current_frame_index < len(frames) "
+                            "and play_timer is None"),
+                    ),
+                    UItem(
+                        name="last_button",
                         enabled_when=(
                             "current_frame_index < len(frames) "
                             "and play_timer is None"),
@@ -300,6 +307,7 @@ class Application(HasStrictTraits):
         self.progress_dialog.update(100)
         if datasets is not None:
             self._append_frame(datasets)
+            self._to_last_frame()
         self.calculation_running = False
 
     def _append_frame(self, datasets):
@@ -366,6 +374,11 @@ class Application(HasStrictTraits):
     def _to_first_frame(self):
         """Goes to the first frame"""
         self.current_frame_index = 0
+
+    @on_trait_change('last_button')
+    def _to_last_frame(self):
+        """Goes to the last frame"""
+        self.current_frame_index = len(self.frames) - 1
 
     @on_trait_change('previous_button')
     def _to_prev_frame(self):
