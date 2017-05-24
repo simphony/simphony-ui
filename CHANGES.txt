@@ -1,6 +1,13 @@
 SimPhoNy UI CHANGELOG
 =====================
 
+Release 0.2.0
+-------------
+
+* Added in progress show of the obtained frames.
+* Added replay movie controls.
+* Added ability to save frames as images.
+
 Release 0.1.0
 -------------
 
