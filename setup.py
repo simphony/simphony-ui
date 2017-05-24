@@ -42,6 +42,7 @@ setup(
     long_description=README_TEXT,
     install_requires=requirements,
     packages=find_packages(),
+    package_data={'': ['tests/fixtures/*']},
     entry_points={
         'gui_scripts': [
             ('openfoam_liggghts_ui = '
