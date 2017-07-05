@@ -77,3 +77,13 @@ The module is structured as following:
   - source -- Sphinx rst source files
   - build -- Documentation build directory, if documentation has been generated
     using the ``make`` script in the ``doc`` directory.
+
+
+EDM packages
+------------
+
+The repository supports generation of EDM packages with the command::
+
+    python edmsetup.py egg
+
+Check the simphony/buildrecipes-common documentation for more information.

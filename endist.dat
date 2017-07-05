@@ -1,0 +1,9 @@
+packages = [
+  'simliggghts 0.1.6',
+  'foam_wrappers 0.2.4',
+  'futures 3.0.3',
+  'pyface 5.1.0',
+  'traitsui 5.1.0',
+  'simphony_mayavi 0.4.4'
+]
+

@@ -1,8 +1,7 @@
 import os
 from setuptools import setup, find_packages
 import textwrap
-
-VERSION = "0.2.0"
+from packageinfo import VERSION, NAME
 
 # Read description
 with open('README.rst', 'r') as readme:
@@ -33,7 +32,7 @@ requirements = [
 ]
 
 setup(
-    name='simphony_ui',
+    name=NAME,
     version=VERSION,
     author='SimPhoNy, EU FP7 Project (Nr. 604005) www.simphony-project.eu',
     description=textwrap.dedent('''
