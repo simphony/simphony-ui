@@ -9,3 +9,5 @@ dist
 mesh
 simphony_ui/mesh
 simphony_ui/version.py
+.devenv
+endist
